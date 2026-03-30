@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <title>Image Resizer & Crop Tool</title>
 
-  <!-- Cropper.js CSS -->
+  <!-- ✅ Cropper.js CSS (THIS IS CRITICAL) -->
   <link
     rel="stylesheet"
-    href="https://unpkg.com/cropperjs/dist/cropper.css"
-  >
+    href="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.css"
+  />
 
   <style>
     body {
@@ -32,3 +32,108 @@
       cursor: pointer;
     }
 
+    .image-container {
+      max-width: 100%;
+      background: #eee;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+
+    img {
+      max-width: 100%;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Image Resizer & Crop Tool</h2>
+
+  <div class="controls">
+    <input type="file" id="fileInput" accept="image/*">
+    <br><br>
+
+    <strong>Presets:</strong>
+    <button onclick="setPreset(250, 400)">
+      Website article (250 × 400)
+    </button>
+    <button onclick="setPreset(580, 1630)">
+      Website header (580 × 1630)
+    </button>
+
+    <br><br>
+
+    <button onclick="downloadImage()">Download image</button>
+  </div>
+
+  <div class="image-container">
+    <img id="image">
+  </div>
+
+  <!-- ✅ Cropper.js JS (THIS IS CRITICAL) -->
+  <script src="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.js"></script>
+
+  <script>
+    const image = document.getElementById("image");
+    const fileInput = document.getElementById("fileInput");
+
+    let cropper = null;
+    let targetWidth = 250;
+    let targetHeight = 400;
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        image.style.display = "block";
+        image.src = reader.result;
+
+        image.onload = () => {
+          if (cropper) cropper.destroy();
+
+          cropper = new Cropper(image, {
+            aspectRatio: targetWidth / targetHeight,
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true
+          });
+        };
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    function setPreset(width, height) {
+      targetWidth = width;
+      targetHeight = height;
+
+      if (cropper) {
+        cropper.setAspectRatio(width / height);
+      }
+    }
+
+    function downloadImage() {
+      if (!cropper) {
+        alert("Please choose an image first.");
+        return;
+      }
+
+      const canvas = cropper.getCroppedCanvas({
+        width: targetWidth,
+        height: targetHeight
+      });
+
+      const link = document.createElement("a");
+      link.download = `image-${targetWidth}x${targetHeight}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+  </script>
+
+</body>
+</html>
+``
