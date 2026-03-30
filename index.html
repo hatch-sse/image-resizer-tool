@@ -133,6 +133,14 @@
       outline-offset:2px;
     }
 
+    .hint{
+      font-size:12.5px;
+      color:var(--muted);
+      line-height:1.35;
+      flex:1;
+      min-width:240px;
+    }
+
     .status{
       margin-left:auto;
       font-size:12.5px;
@@ -245,7 +253,7 @@
     }
 
     /* ===========================
-       Manual batch modal (FIXED)
+       Manual batch modal (NON-BLOCKING)
        =========================== */
 
     /* Backdrop: lighter + DOES NOT block pointer events behind */
@@ -314,7 +322,12 @@
   <div class="wrap">
 
     <h1>SSEN Distribution image resizer</h1>
-    <p class="sub">Resize and crop images to standard web and social dimensions.</p>
+
+    <!-- Tip text restored exactly as requested -->
+    <p class="sub">
+      Upload an image, choose a preset (or custom size), adjust the crop, then export.
+      Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V).
+    </p>
 
     <div class="panel">
 
@@ -350,9 +363,14 @@
         <button class="btn ghost" type="button" id="resetCropBtn">Reset crop</button>
         <button class="btn ghost" type="button" id="resetViewBtn">Reset view</button>
         <button class="btn" type="button" id="copyBtn">Copy image</button>
+
+        <!-- Tip text restored exactly as requested -->
+        <span class="hint">
+          Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.
+        </span>
       </div>
 
-      <!-- Advanced dropdown (collapsed by default; visible in UI) -->
+      <!-- Advanced dropdown (collapsed by default) -->
       <details class="advanced" id="advanced">
         <summary tabindex="0">Advanced</summary>
         <div class="advanced-body">
@@ -707,6 +725,19 @@
       statusEl.textContent = selectedFiles.length > 1 ? `Dropped ${selectedFiles.length} images.` : `Dropped: ${selectedFiles[0].name}`;
     });
 
+    // Paste
+    window.addEventListener("paste", (e) => {
+      const items = (e.clipboardData && e.clipboardData.items) ? Array.from(e.clipboardData.items) : [];
+      const imgItem = items.find(it => it.type && it.type.startsWith("image/"));
+      if (!imgItem) return;
+      const file = imgItem.getAsFile();
+      if (file){
+        selectedFiles = [file];
+        loadFile(file);
+        statusEl.textContent = "Pasted image.";
+      }
+    });
+
     // Undo / resets
     function undo(){
       if (!cropper || history.length < 2) return;
@@ -768,10 +799,6 @@
     async function batchExportFastZip(){
       if (!selectedFiles || selectedFiles.length < 2){
         alert("Select or drop multiple images to batch export.");
-        return;
-      }
-      if (typeof JSZip === "undefined"){
-        alert("Batch library failed to load.");
         return;
       }
 
@@ -843,12 +870,8 @@
       statusEl.textContent = skippedCount ? `Skipped: ${skipped.slice(0,6).join(", ")}${skippedCount>6?"…":""}` : "Batch complete.";
     }
 
-    // Manual batch flow (non-blocking modal, autofocus Add & Next)
+    // Manual batch flow (non-blocking modal + autofocus Add & Next)
     function openManualBatch(files){
-      if (typeof JSZip === "undefined"){
-        alert("Batch library failed to load.");
-        return;
-      }
       manualZip = new JSZip();
       manualZip._seen = new Set();
       manualFiles = files.slice();
@@ -862,9 +885,7 @@
       loadFile(manualFiles[manualIndex]);
 
       // Auto-focus Add & Next for keyboard users
-      setTimeout(() => {
-        try { batchAddNext.focus(); } catch(e) {}
-      }, 0);
+      setTimeout(() => { try { batchAddNext.focus(); } catch(e) {} }, 0);
     }
 
     function closeManualBatch(){
@@ -905,6 +926,16 @@
       }
     }
 
+    function moveManualNext(){
+      if (manualIndex < manualFiles.length - 1){
+        manualIndex++;
+        updateManualBatchUI();
+        loadFile(manualFiles[manualIndex]);
+      } else {
+        statusEl.textContent = "End of manual batch. Finish to download ZIP.";
+      }
+    }
+
     async function manualAddAndNext(){
       await manualAddCurrent();
       moveManualNext();
@@ -915,16 +946,6 @@
       manualSkippedCount++;
       moveManualNext();
       setTimeout(() => { try { batchAddNext.focus(); } catch(e) {} }, 0);
-    }
-
-    function moveManualNext(){
-      if (manualIndex < manualFiles.length - 1){
-        manualIndex++;
-        updateManualBatchUI();
-        loadFile(manualFiles[manualIndex]);
-      } else {
-        statusEl.textContent = "End of manual batch. Finish to download ZIP.";
-      }
     }
 
     function manualBack(){
@@ -972,7 +993,7 @@
     document.getElementById("presetArticle").addEventListener("click", () => setPreset(400, 250));
     document.getElementById("presetHeader").addEventListener("click", () => setPreset(1630, 580));
     document.getElementById("preset916").addEventListener("click", () => setPreset(1080, 1920));
-    document.getElementById("preset54").addEventListener("click", () => setPreset(1080, 1350));
+    document.getElementById("preset54").addEventListener("click", () => setPreset(1080, 1350)); // correct 5:4
     document.getElementById("preset11").addEventListener("click", () => setPreset(1080, 1080));
     document.getElementById("applyCustom").addEventListener("click", applyCustomSize);
 
