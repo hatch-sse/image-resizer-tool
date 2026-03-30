@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SSEN Distribution website image resizer</title>
 
   <!-- Cropper.js CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"
+  />
 
   <style>
     :root {
@@ -16,6 +20,10 @@
       --border: #d0d0d0;
       --text: #1a1a1a;
       --muted: #666;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
@@ -50,7 +58,7 @@
     .controls {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       margin-bottom: 16px;
     }
 
@@ -61,11 +69,22 @@
       align-items: center;
     }
 
+    .label {
+      font-weight: 600;
+    }
+
     input[type="file"] {
       padding: 6px;
       border: 1px solid var(--border);
       border-radius: 6px;
       background: #fff;
+    }
+
+    input[type="number"] {
+      width: 110px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
     }
 
     button {
@@ -108,8 +127,8 @@
     }
 
     #image {
-      max-width: 100%;
       display: block;
+      max-width: 100%;
     }
   </style>
 </head>
@@ -118,19 +137,30 @@
   <div class="app">
     <h1>SSEN Distribution website image resizer</h1>
     <div class="subtitle">
-      Upload an image, choose a preset, adjust the crop, then download.
+      Upload an image, choose a preset or enter a custom size, adjust the crop, then download.
     </div>
 
     <div class="controls">
       <div class="row">
-        <input type="file" id="fileInput" accept="image/*">
+        <input type="file" id="fileInput" accept="image/*" />
         <span class="hint" id="fileNameHint">Choose an image to begin.</span>
       </div>
 
       <div class="row">
-        <strong>Presets:</strong>
+        <span class="label">Presets:</span>
         <button onclick="setPreset(400, 250)">Website article (400 × 250)</button>
         <button onclick="setPreset(1630, 580)">Website header (1630 × 580)</button>
+      </div>
+
+      <!-- ✅ NEW: Custom dimensions -->
+      <div class="row">
+        <span class="label">Custom size:</span>
+        <input type="number" id="customWidth" placeholder="Width (px)" min="1" />
+        <input type="number" id="customHeight" placeholder="Height (px)" min="1" />
+        <button onclick="applyCustomSize()">Apply</button>
+      </div>
+
+      <div class="row">
         <button class="primary" onclick="downloadImage()">Download image</button>
       </div>
 
@@ -140,7 +170,7 @@
     </div>
 
     <div class="image-container">
-      <img id="image" alt="Image to crop">
+      <img id="image" alt="Image to crop" />
     </div>
   </div>
 
@@ -151,6 +181,8 @@
     const image = document.getElementById("image");
     const fileInput = document.getElementById("fileInput");
     const fileNameHint = document.getElementById("fileNameHint");
+    const customWidthInput = document.getElementById("customWidth");
+    const customHeightInput = document.getElementById("customHeight");
 
     let cropper = null;
     let targetWidth = 400;
@@ -161,7 +193,6 @@
       const file = fileInput.files[0];
       if (!file) return;
 
-      // Store original filename (without extension)
       originalFileName = file.name.replace(/\.[^/.]+$/, "");
       fileNameHint.textContent = file.name;
 
@@ -188,39 +219,3 @@
     });
 
     function setPreset(width, height) {
-      targetWidth = width;
-      targetHeight = height;
-
-      if (cropper) {
-        cropper.setAspectRatio(width / height);
-        cropper.reset();
-        cropper.crop();
-      }
-    }
-
-    function downloadImage() {
-      if (!cropper) {
-        alert("Please choose an image first.");
-        return;
-      }
-
-      const canvas = cropper.getCroppedCanvas({
-        width: targetWidth,
-        height: targetHeight
-      });
-
-      canvas.toBlob(blob => {
-        const link = document.createElement("a");
-        const filename = `${originalFileName}_${targetWidth}x${targetHeight}.jpg`;
-
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-
-        URL.revokeObjectURL(link.href);
-      }, "image/jpeg", 0.9);
-    }
-  </script>
-</body>
-</html>
-``
