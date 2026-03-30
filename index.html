@@ -42,6 +42,19 @@
       color:#111;
     }
 
+    /* Title + tip INSIDE the card (per your screenshot) */
+    .app{
+      max-width:1120px;
+      margin:0 auto;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+
+    .appHeader{ margin-bottom:14px; }
+
     h1{
       margin:0 0 6px 0;
       font-size:22px;
@@ -50,24 +63,15 @@
     }
 
     .sub{
-      margin:0 0 16px 0;
+      margin:0;
       font-size:13.5px;
       color:var(--muted);
       line-height:1.4;
       max-width:1120px;
     }
 
-    .app{
-      max-width:1120px;
-      margin:0 auto;
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:14px;
-      box-shadow:var(--shadow);
-    }
-
     .layout{
+      margin-top:16px;
       display:grid;
       grid-template-columns: 1fr 380px;
       gap:14px;
@@ -216,6 +220,7 @@
       font-size:12px;
       color:rgba(0,0,0,0.6);
       line-height:1.35;
+      max-width:420px;
     }
 
     /* RIGHT: Side panel */
@@ -286,6 +291,7 @@
       cursor:pointer;
       transition:background .15s ease, transform .03s ease;
       user-select:none;
+      white-space:nowrap;
     }
     .btn:hover{ background:var(--btn-bg-hover); }
     .btn:active{ transform:translateY(1px); }
@@ -318,20 +324,44 @@
       min-height:18px;
     }
 
+    /* Make Advanced feel like a dropdown BUTTON (your request) */
     details.advanced{
       border:none;
       background:transparent;
       margin-top:4px;
     }
+
     details.advanced > summary{
       list-style:none;
       cursor:pointer;
-      padding:6px 0;
-      font-weight:900;
-      color:var(--blue);
       user-select:none;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+
+      padding:10px 12px;
+      border-radius:10px;
+
+      border:1px solid rgba(0,62,102,0.25);
+      background:rgba(0,62,102,0.06);
+      color:var(--blue);
+      font-weight:900;
     }
     details.advanced > summary::-webkit-details-marker{ display:none; }
+
+    .chev{
+      display:inline-block;
+      transition:transform .15s ease;
+      font-weight:900;
+      opacity:0.9;
+    }
+    details[open] .chev{ transform:rotate(180deg); }
+
+    .advancedInner{
+      padding-top:10px;
+    }
 
     .slider{
       width:100%;
@@ -420,18 +450,28 @@
       justify-content:flex-end;
       border-top:1px solid var(--border);
     }
+
+    /* Footer outside card */
+    .pageFooter{
+      max-width:1120px;
+      margin:10px auto 0 auto;
+      text-align:center;
+      font-size:12px;
+      color:rgba(0,0,0,0.45);
+    }
   </style>
 </head>
 
 <body>
-  <h1>SSEN Distribution image resizer</h1>
-
-  <p class="sub">
-    Upload an image, choose a preset (or custom size), adjust the crop, then export.
-    Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V).
-  </p>
-
   <div class="app">
+    <div class="appHeader">
+      <h1>SSEN Distribution image resizer</h1>
+      <p class="sub">
+        Upload an image, choose a preset (or custom size), adjust the crop, then export.
+        Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V).
+      </p>
+    </div>
+
     <div class="layout">
 
       <!-- LEFT -->
@@ -506,73 +546,76 @@
             Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.
           </div>
 
-          <div class="statusLine" id="statusLine">Choose an image to begin.</div>
+          <!-- Removed default "Choose an image to begin" (starts empty) -->
+          <div class="statusLine" id="statusLine"></div>
         </div>
 
         <details class="advanced section" id="advanced">
-          <summary tabindex="0">Advanced</summary>
+          <summary tabindex="0">
+            <span>Advanced</span>
+            <span class="chev">▾</span>
+          </summary>
 
-          <!-- Export settings -->
-          <div class="row" style="margin-top:6px;">
-            <label class="lbl" for="formatSelect">Format</label>
-            <select id="formatSelect">
-              <option value="jpeg" selected>JPG</option>
-              <option value="webp">WebP</option>
-            </select>
-          </div>
+          <div class="advancedInner">
 
-          <div class="row">
-            <label class="lbl" for="qualitySlider">Quality</label>
-            <input type="range" id="qualitySlider" class="slider" min="60" max="95" value="90" />
-            <span class="pill" id="qualityPill">90%</span>
-          </div>
-
-          <div class="row">
-            <button class="btn ghost" type="button" id="target1mb">&lt; 1MB</button>
-            <button class="btn ghost" type="button" id="target500kb">&lt; 500KB</button>
-            <button class="btn ghost" type="button" id="target250kb">&lt; 250KB</button>
-          </div>
-
-          <!-- Transform moved under Advanced -->
-          <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
-            <h3>Transform</h3>
-
+            <!-- Export settings -->
             <div class="row">
-              <label class="lbl" for="zoomSlider">Zoom</label>
-              <input type="range" id="zoomSlider" class="slider" min="50" max="200" value="100" />
-              <span class="pill" id="zoomPill">100%</span>
+              <label class="lbl" for="formatSelect">Format</label>
+              <select id="formatSelect">
+                <option value="jpeg" selected>JPG</option>
+                <option value="webp">WebP</option>
+              </select>
             </div>
 
             <div class="row">
-              <button class="btn ghost" type="button" id="resetZoomBtn">Reset zoom</button>
+              <label class="lbl" for="qualitySlider">Quality</label>
+              <input type="range" id="qualitySlider" class="slider" min="60" max="95" value="90" />
+              <span class="pill" id="qualityPill">90%</span>
             </div>
 
             <div class="row">
-              <label class="lbl" for="rotSlider">Rotate</label>
-              <input type="range" id="rotSlider" class="slider" min="-15" max="15" step="0.1" value="0" />
-              <span class="pill" id="rotPill">0°</span>
+              <button class="btn ghost" type="button" id="target1mb">&lt; 1MB</button>
+              <button class="btn ghost" type="button" id="target500kb">&lt; 500KB</button>
+              <button class="btn ghost" type="button" id="target250kb">&lt; 250KB</button>
             </div>
 
-            <div class="row">
-              <button class="btn ghost" type="button" id="resetRotBtn">Reset rotation</button>
+            <!-- Transform -->
+            <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
+              <h3>Transform</h3>
+
+              <!-- Zoom row: reset button moved inline with 100% -->
+              <div class="row">
+                <label class="lbl" for="zoomSlider">Zoom</label>
+                <input type="range" id="zoomSlider" class="slider" min="50" max="200" value="100" />
+                <span class="pill" id="zoomPill">100%</span>
+                <button class="btn ghost" type="button" id="resetZoomBtn" title="Reset zoom to 100%">Reset</button>
+              </div>
+
+              <!-- Rotation row: reset button moved inline with 0° -->
+              <div class="row">
+                <label class="lbl" for="rotSlider">Rotate</label>
+                <input type="range" id="rotSlider" class="slider" min="-15" max="15" step="0.1" value="0" />
+                <span class="pill" id="rotPill">0°</span>
+                <button class="btn ghost" type="button" id="resetRotBtn" title="Reset rotation to 0°">Reset</button>
+              </div>
+
+              <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°.</div>
             </div>
 
-            <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°.</div>
-          </div>
+            <!-- Batch export -->
+            <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
+              <h3>Batch export</h3>
+              <div class="row">
+                <button class="btn" type="button" id="batchFastBtn">Batch ZIP (fast)</button>
+                <button class="btn" type="button" id="batchManualBtn">Batch ZIP (manual)</button>
+              </div>
 
-          <!-- Batch export -->
-          <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
-            <h3>Batch export</h3>
-            <div class="row">
-              <button class="btn" type="button" id="batchFastBtn">Batch ZIP (fast)</button>
-              <button class="btn" type="button" id="batchManualBtn">Batch ZIP (manual)</button>
+              <div class="progressWrap" id="batchProgWrap">
+                <progress id="batchProg" value="0" max="100"></progress>
+                <span class="tiny" id="batchProgText"></span>
+              </div>
+              <div class="tiny" id="batchSummary"></div>
             </div>
-
-            <div class="progressWrap" id="batchProgWrap">
-              <progress id="batchProg" value="0" max="100"></progress>
-              <span class="tiny" id="batchProgText"></span>
-            </div>
-            <div class="tiny" id="batchSummary"></div>
           </div>
         </details>
 
@@ -582,6 +625,10 @@
       </div>
 
     </div>
+  </div>
+
+  <div class="pageFooter">
+    SSEN Image Resizer Beta v0.9 — please report bugs to stuart.hatch@sse.com
   </div>
 
   <!-- Manual batch modal -->
@@ -702,8 +749,8 @@
     let estimateTimer = null;
 
     // Transform baselines
-    let baseZoomRatio = 1;    // baseline ratio that maps to 100% on slider
-    let currentZoomRatio = 1; // current ratio
+    let baseZoomRatio = 1;
+    let currentZoomRatio = 1;
     let currentRotation = 0;
 
     // Throttle slider updates
@@ -821,7 +868,7 @@
       else dropZoneUI.classList.add("hidden");
     }
 
-    // ---------- History (crop + view + transform) ----------
+    // ---------- History ----------
     function pushHistory(){
       if (!cropper) return;
       const data = cropper.getData(true);
@@ -858,26 +905,19 @@
       updateTransformUI();
     }
 
-    // ---------- Transform UI + logic ----------
+    // ---------- Transform ----------
     function captureBaseZoomRatio(){
       if (!cropper) return;
       const imgData = cropper.getImageData();
-      // baseline = current fitted view after resets/presets
-      if (imgData && typeof imgData.ratio === "number" && imgData.ratio > 0){
-        baseZoomRatio = imgData.ratio;
-      } else {
-        baseZoomRatio = 1;
-      }
+      baseZoomRatio = (imgData && typeof imgData.ratio === "number" && imgData.ratio > 0) ? imgData.ratio : 1;
       currentZoomRatio = baseZoomRatio;
     }
 
     function updateTransformUI(){
-      // zoom slider is relative to baseline
       const pct = Math.round((currentZoomRatio / baseZoomRatio) * 100);
       zoomSlider.value = clamp(pct, parseInt(zoomSlider.min,10), parseInt(zoomSlider.max,10));
       zoomPill.textContent = `${zoomSlider.value}%`;
 
-      // rotation
       rotSlider.value = clamp(currentRotation, parseFloat(rotSlider.min), parseFloat(rotSlider.max));
       rotPill.textContent = `${Number(rotSlider.value).toFixed(1)}°`;
     }
@@ -885,10 +925,11 @@
     function applyZoomPct(pct){
       if (!cropper) return;
       const desiredRatio = baseZoomRatio * (pct/100);
-      // Use crop box center for a nicer feel
+
       const cb = cropper.getCropBoxData();
       const center = { x: cb.left + cb.width/2, y: cb.top + cb.height/2 };
       cropper.zoomTo(desiredRatio, center);
+
       currentZoomRatio = desiredRatio;
       updateTransformUI();
       scheduleEstimate();
@@ -945,12 +986,11 @@
           captureBaseZoomRatio();
           updateTransformUI();
           pushHistory();
-          setStatus("Ready.");
           scheduleEstimate();
+          // Keep status blank unless meaningful events occur
         },
         cropend(){
           if (!isApplyingUndo){
-            // update ratios from live state
             const imgData = cropper.getImageData();
             if (imgData && typeof imgData.ratio === "number") currentZoomRatio = imgData.ratio;
             const d = cropper.getData(true);
@@ -1261,7 +1301,7 @@
       setStatus("Batch complete.");
     }
 
-    // ---------- Manual batch (interactive) ----------
+    // ---------- Manual batch ----------
     function openManualBatch(){
       if (!selectedFiles || selectedFiles.length < 2){
         alert("Select multiple images first.");
@@ -1373,7 +1413,7 @@
       setStatus("Manual batch complete.");
     }
 
-    // ---------- Wire up UI ----------
+    // ---------- Wire up ----------
     selectImagesBtn.addEventListener("click", () => fileInput.click());
     browseLink.addEventListener("click", () => fileInput.click());
 
@@ -1396,13 +1436,10 @@
     copyBtn.addEventListener("click", copyImage);
     downloadBtn.addEventListener("click", downloadCurrent);
 
-    // Continuous zoom + rotation while dragging (input) with rAF throttle
+    // Zoom continuous while dragging
     zoomSlider.addEventListener("input", () => {
       pendingZoomValue = parseInt(zoomSlider.value, 10);
-      zoomPill.textContent = `${pendingZoomValue}%`;
-
-      if (!zoomRafPending){
-        zoomRafPending = true;
+      zoomPill.textContent =afPending = true;
         requestAnimationFrame(() => {
           zoomRafPending = false;
           applyZoomPct(pendingZoomValue);
@@ -1411,6 +1448,7 @@
       }
     });
 
+    // Rotation continuous while dragging
     rotSlider.addEventListener("input", () => {
       pendingRotValue = parseFloat(rotSlider.value);
       rotPill.textContent = `${pendingRotValue.toFixed(1)}°`;
@@ -1469,13 +1507,16 @@
       }
     });
 
-    // Default state
-    updateDimsP zoomPill.textContent = "100%";
+    // Init
+    updateDimsPill();
+    qualityPill.textContent = `${qualitySlider.value}%`;
+    zoomPill.textContent = "100%";
     rotPill.textContent = "0°";
     clearEstimate();
     setOrigPill();
     showDropUI(true);
     undoBtn.disabled = true;
+    setStatus(""); // ensure no "choose an image to begin"
   </script>
 </body>
 </html>
