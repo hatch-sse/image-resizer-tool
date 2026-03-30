@@ -5,26 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SSEN Distribution website image resizer</title>
 
-  <!-- Cropper.js CSS (pinned) -->
+  <!-- Cropper.js CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
 
   <style>
     :root{
-      /* SSEN Distribution palette (from brand guidelines) */
-      --blue:#003E66;      /* dark blue */
-      --teal:#5B8E9F;      /* supporting blue/teal */
-      --grey:#253746;      /* dark grey */
-      --yellow:#EBAC00;
-      --green:#629C49;
-      --lilac:#A677A6;
-      --white:#FFFFFF;
-
-      /* UI neutrals */
+      --blue:#003E66;
+      --grey:#253746;
       --bg:#f4f6f8;
       --card:#ffffff;
       --border:#d7dde3;
-      --muted:rgba(0,0,0,0.65); /* close to “90% black” feel */
-      --shadow:0 6px 22px rgba(0,0,0,0.08);
+      --muted:rgba(0,0,0,0.65);
     }
 
     *{ box-sizing:border-box; }
@@ -33,9 +24,8 @@
       margin:0;
       padding:24px;
       background:var(--bg);
-      color:#111;
-      /* Museo Sans where available; Arial fallback per guidelines */
       font-family:"Museo Sans", Arial, sans-serif;
+      color:#111;
     }
 
     .wrap{
@@ -44,71 +34,26 @@
       background:var(--card);
       border:1px solid var(--border);
       border-radius:12px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-
-    /* Brand header */
-    .brandbar{
-      padding:18px 22px 14px;
-      background:linear-gradient(180deg, rgba(0,62,102,0.06), rgba(0,62,102,0));
-      border-bottom:1px solid var(--border);
-    }
-
-    .title-row{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:flex-end;
-      gap:12px;
-      justify-content:space-between;
-      margin-top:10px;
+      padding:22px;
     }
 
     h1{
-      margin:0;
+      margin:0 0 6px 0;
       font-size:22px;
-      line-height:1.15;
       color:var(--blue);
-      letter-spacing:0.2px;
     }
 
     .sub{
-      margin:6px 0 0;
-      color:var(--muted);
+      margin-bottom:16px;
       font-size:13.5px;
-      max-width:860px;
+      color:var(--muted);
     }
 
-    /* Horizontal circles (section marker/divider) */
-    .circles{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-top:14px;
-    }
-    .circles .dot{
-      width:12px; height:12px; border-radius:50%;
-    }
-    .circles .line{
-      height:2px;
-      background:rgba(37,55,70,0.25);
-      flex:1;
-      border-radius:999px;
-    }
-
-    /* Main content */
-    .content{
-      padding:18px 22px 22px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:14px;
-    }
-
-    /* Controls */
     .panel{
       border:1px solid var(--border);
       border-radius:10px;
       padding:14px;
+      margin-bottom:14px;
       background:#fff;
     }
 
@@ -117,98 +62,85 @@
       flex-wrap:wrap;
       align-items:center;
       gap:10px;
+      margin-bottom:10px;
     }
 
     .label{
       font-weight:700;
       color:var(--grey);
-      margin-right:6px;
+      min-width:140px;
     }
 
-    input[type="file"]{
+    input[type="file"],
+    input[type="number"]{
       border:1px solid var(--border);
       border-radius:8px;
-      padding:7px;
+      padding:7px 10px;
       background:#fff;
-      max-width:100%;
     }
 
     input[type="number"]{
       width:120px;
-      border:1px solid var(--border);
+    }
+
+    .btn{
+      border:1px solid rgba(0,62,102,0.25);
+      background:rgba(0,62,102,0.08);
+      color:var(--blue);
+      padding:8px 12px;
       border-radius:8px;
-      padding:8px 10px;
-      background:#fff;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .btn:hover{
+      background:rgba(0,62,102,0.14);
+    }
+
+    .btn.primary{
+      background:var(--blue);
+      color:#fff;
+      border-color:var(--blue);
+    }
+
+    .btn.primary:hover{
+      background:#003456;
+    }
+
+    .hint{
+      font-size:12.8px;
+      color:var(--muted);
     }
 
     .status{
       margin-left:auto;
       font-size:12.5px;
       color:var(--muted);
-      white-space:nowrap;
     }
 
-    .btn{
-      border:1px solid rgba(0,62,102,0.25);
-      background:rgba(0,62,102,0.07);
-      color:var(--blue);
-      padding:9px 12px;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;
-      transition:transform .02s ease, background .15s ease;
-    }
-    .btn:hover{ background:rgba(0,62,102,0.11); }
-    .btn:active{ transform:translateY(1px); }
-
-    .btn.primary{
-      background:var(--blue);
-      border-color:var(--blue);
-      color:#fff;
-    }
-    .btn.primary:hover{ background:#003456; }
-
-    .btn.ghost{
-      background:#fff;
-      border-color:var(--border);
-      color:var(--grey);
-    }
-    .btn.ghost:hover{ background:#f8fafc; }
-
-    .hint{
-      margin-top:8px;
-      color:var(--muted);
-      font-size:12.8px;
-    }
-
-    /* Crop area */
     .stage{
       border:1px solid var(--border);
       border-radius:12px;
-      background:#fafafa;
       padding:12px;
+      background:#fafafa;
     }
+
     .stage-head{
       display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
       justify-content:space-between;
+      align-items:center;
       margin-bottom:10px;
-    }
-    .stage-title{
-      font-weight:800;
+      font-size:12.5px;
+      font-weight:700;
       color:var(--grey);
-      font-size:13px;
-      letter-spacing:0.2px;
     }
-    .dims-pill{
-      font-size:12px;
+
+    .pill{
+      background:rgba(0,62,102,0.1);
       color:var(--blue);
-      background:rgba(0,62,102,0.08);
-      border:1px solid rgba(0,62,102,0.18);
       padding:6px 10px;
       border-radius:999px;
+      font-size:12px;
       font-weight:700;
     }
 
@@ -220,106 +152,71 @@
       border-radius:10px;
       overflow:hidden;
     }
+
     #image{
       display:block;
       max-width:100%;
-    }
-
-    /* Make crop UI feel cleaner */
-    .cropper-view-box,
-    .cropper-face{
-      border-radius:6px;
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="brandbar">
 
-      <!-- Connection device (brand header element). Keeps correct colour order. -->
-      <svg width="100%" height="34" viewBox="0 0 1100 34" role="img" aria-label="SSEN connection device">
-        <!-- Main lozenge line (teal) with 135° style cornering via stroke-linejoin round -->
-        <path d="M 14 10 L 260 10 L 310 26 L 640 26" fill="none"
-              stroke="var(--teal)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"></path>
-        <!-- Secondary thin line (20% thickness) ending at yellow -->
-        <path d="M 14 10 L 260 10 L 310 26" fill="none"
-              stroke="var(--grey)" stroke-opacity="0.35"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <h1>SSEN Distribution website image resizer</h1>
+    <div class="sub">
+      Upload an image, choose a preset (or enter a custom size), adjust the crop, then download a JPG named after the original file.
+    </div>
 
-        <!-- Circles in correct order: blue, yellow, green, lilac -->
-        <circle cx="710" cy="26" r="10" fill="var(--blue)"></circle>
-        <circle cx="760" cy="26" r="10" fill="var(--yellow)"></circle>
-        <circle cx="810" cy="26" r="10" fill="var(--green)"></circle>
-        <circle cx="860" cy="26" r="10" fill="var(--lilac)"></circle>
-      </svg>
+    <div class="panel">
+      <div class="row">
+        <input type="file" id="fileInput" accept="image/*" />
+        <div class="status" id="status">Choose an image to begin.</div>
+      </div>
 
-      <div class="title-row">
-        <div>
-          <h1>SSEN Distribution website image resizer</h1>
-          <div class="sub">
-            Upload an image, choose a preset (or enter a custom size), adjust the crop, then download a JPG named after the original file.
-          </div>
+      <!-- Website presets -->
+      <div class="row">
+        <div class="label">Website presets</div>
+        <button class="btn" id="presetArticle">Website article (400 × 250)</button>
+        <button class="btn" id="presetHeader">Website header (1630 × 580)</button>
+      </div>
 
-          <!-- Horizontal circles divider (used as a separator) -->
-          <div class="circles" aria-hidden="true">
-            <span class="dot" style="background:var(--blue)"></span>
-            <span class="dot" style="background:var(--yellow)"></span>
-            <span class="dot" style="background:var(--green)"></span>
-            <span class="dot" style="background:var(--lilac)"></span>
-            <span class="line"></span>
-          </div>
-        </div>
+      <!-- Social presets -->
+      <div class="row">
+        <div class="label">Social media presets</div>
+        <button class="btn" id="preset916">9:16 (Portrait)</button>
+        <button class="btn" id="preset54">5:4 (Instagram)</button>
+        <button class="btn" id="preset11">1:1 (Square)</button>
+      </div>
+
+      <!-- Custom size -->
+      <div class="row">
+        <div class="label">Custom size</div>
+        <input type="number" id="customWidth" placeholder="Width (px)" min="1" />
+        <input type="number" id="customHeight" placeholder="Height (px)" min="1" />
+        <button class="btn" id="applyCustom">Apply</button>
+      </div>
+
+      <div class="row">
+        <button class="btn primary" id="downloadBtn">Download JPG</button>
+        <div class="hint">Tip: drag the image to reposition within the crop area.</div>
       </div>
     </div>
 
-    <div class="content">
-
-      <div class="panel">
-        <div class="row">
-          <input type="file" id="fileInput" accept="image/*" />
-          <div class="status" id="status">Choose an image to begin.</div>
-        </div>
-
-        <div style="height:10px"></div>
-
-        <div class="row">
-          <span class="label">Presets:</span>
-          <button class="btn" type="button" id="presetArticle">Website article (400 × 250)</button>
-          <button class="btn" type="button" id="presetHeader">Website header (1630 × 580)</button>
-          <button class="btn ghost" type="button" id="resetView">Reset view</button>
-          <button class="btn primary" type="button" id="downloadBtn">Download JPG</button>
-        </div>
-
-        <div style="height:10px"></div>
-
-        <div class="row">
-          <span class="label">Custom size:</span>
-          <input type="number" id="customWidth" placeholder="Width (px)" min="1" />
-          <input type="number" id="customHeight" placeholder="Height (px)" min="1" />
-          <button class="btn" type="button" id="applyCustom">Apply</button>
-        </div>
-
-        <div class="hint">
-          Tip: drag the image to reposition within the crop area. Use trackpad/wheel to zoom.
-        </div>
+    <div class="stage">
+      <div class="stage-head">
+        <div>CROP PREVIEW</div>
+        <div class="pill" id="dimsPill">Output: 400 × 250</div>
       </div>
 
-      <div class="stage">
-        <div class="stage-head">
-          <div class="stage-title">CROP PREVIEW</div>
-          <div class="dims-pill" id="dimsPill">Output: 400 × 250</div>
-        </div>
-
-        <div class="image-container">
-          <img id="image" alt="Image to crop" />
-        </div>
+      <div class="image-container">
+        <img id="image" alt="Image to crop" />
       </div>
-
     </div>
+
   </div>
 
-  <!-- Cropper.js JS (pinned) -->
+  <!-- Cropper.js JS -->
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
   <script>
@@ -328,38 +225,20 @@
     const statusEl = document.getElementById("status");
     const dimsPill = document.getElementById("dimsPill");
 
-    const presetArticle = document.getElementById("presetArticle");
-    const presetHeader  = document.getElementById("presetHeader");
-    const resetViewBtn  = document.getElementById("resetView");
-    const downloadBtn   = document.getElementById("downloadBtn");
-
     const customW = document.getElementById("customWidth");
     const customH = document.getElementById("customHeight");
-    const applyCustom = document.getElementById("applyCustom");
 
     let cropper = null;
     let targetWidth = 400;
     let targetHeight = 250;
     let originalBaseName = "image";
 
-    function setDimsPill() {
+    function updateDims() {
       dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`;
     }
 
-    function safeDestroyCropper() {
-      if (cropper) {
-        cropper.destroy();
-        cropper = null;
-      }
-    }
-
     function initCropper() {
-      safeDestroyCropper();
-
-      if (typeof Cropper === "undefined") {
-        statusEl.textContent = "Cropper failed to load (check network).";
-        return;
-      }
+      if (cropper) cropper.destroy();
 
       cropper = new Cropper(image, {
         aspectRatio: targetWidth / targetHeight,
@@ -375,55 +254,16 @@
       statusEl.textContent = "Ready — adjust the crop, then download.";
     }
 
-    function setPreset(width, height) {
-      targetWidth = width;
-      targetHeight = height;
-      setDimsPill();
+    function setPreset(w, h) {
+      targetWidth = w;
+      targetHeight = h;
+      updateDims();
 
       if (cropper) {
-        cropper.setAspectRatio(width / height);
+        cropper.setAspectRatio(w / h);
         cropper.reset();
         cropper.crop();
       }
-    }
-
-    function applyCustomSize() {
-      const w = parseInt(customW.value, 10);
-      const h = parseInt(customH.value, 10);
-
-      if (!w || !h || w <= 0 || h <= 0) {
-        alert("Please enter a valid width and height.");
-        return;
-      }
-      setPreset(w, h);
-    }
-
-    function downloadJpg() {
-      if (!cropper) {
-        alert("Please choose an image first.");
-        return;
-      }
-
-      const canvas = cropper.getCroppedCanvas({
-        width: targetWidth,
-        height: targetHeight
-      });
-
-      // Make filename: originalName_resolution.jpg
-      const filename = `${originalBaseName}_${targetWidth}x${targetHeight}.jpg`;
-
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          alert("Could not create image — please try again.");
-          return;
-        }
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        a.click();
-        URL.revokeObjectURL(url);
-      }, "image/jpeg", 0.9);
     }
 
     fileInput.addEventListener("change", () => {
@@ -434,32 +274,60 @@
       statusEl.textContent = `Loaded: ${file.name}`;
 
       const reader = new FileReader();
-      reader.onload = () => {
-        image.src = reader.result;
-      };
+      reader.onload = () => image.src = reader.result;
       reader.readAsDataURL(file);
     });
 
     image.addEventListener("load", () => {
-      setDimsPill();
+      updateDims();
       initCropper();
     });
 
-    presetArticle.addEventListener("click", () => setPreset(400, 250));
-    presetHeader.addEventListener("click", () => setPreset(1630, 580));
-    applyCustom.addEventListener("click", applyCustomSize);
+    // Website presets
+    document.getElementById("presetArticle").onclick = () => setPreset(400, 250);
+    document.getElementById("presetHeader").onclick = () => setPreset(1630, 580);
 
-    resetViewBtn.addEventListener("click", () => {
-      if (!cropper) return;
-      cropper.reset();
-      cropper.crop();
-      statusEl.textContent = "View reset.";
-    });
+    // Social presets (standard sizes)
+    document.getElementById("preset916").onclick = () => setPreset(1080, 1920);
+    document.getElementById("preset54").onclick = () => setPreset(1080, 864);
+    document.getElementById("preset11").onclick = () => setPreset(1080, 1080);
 
-    downloadBtn.addEventListener("click", downloadJpg);
+    // Custom size
+    document.getElementById("applyCustom").onclick = () => {
+      const w = parseInt(customW.value, 10);
+      const h = parseInt(customH.value, 10);
+      if (!w || !h || w <= 0 || h <= 0) {
+        alert("Please enter a valid width and height.");
+        return;
+      }
+      setPreset(w, h);
+    };
 
-    // Initial pill
-    setDimsPill();
+    // Download
+    document.getElementById("downloadBtn").onclick = () => {
+      if (!cropper) {
+        alert("Please choose an image first.");
+        return;
+      }
+
+      const canvas = cropper.getCroppedCanvas({
+        width: targetWidth,
+        height: targetHeight
+      });
+
+      const filename = `${originalBaseName}_${targetWidth}x${targetHeight}.jpg`;
+
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, "image/jpeg", 0.9);
+    };
+
+    updateDims();
   </script>
 </body>
 </html>
