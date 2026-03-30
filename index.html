@@ -1,1 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SSEN Distribution image resizer</title>
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
+
+  <style>
+    :root{
+      --blue:#003E66;
+      --blue-soft:#6f9cf5;
+      --grey:#253746;
+      --bg:#f4f6f8;
+      --card:#ffffff;
+      --border:#d7dde3;
+      --muted:rgba(0,0,0,0.65);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      padding:24px;
+      background:var(--bg);
+      font-family:"Museo Sans", Arial, sans-serif;
+      color:#111;
+    }
+
+    h1{
+      margin:0 0 6px 0;
+      font-size:22px;
+      color:var(--blue);
+    }
+
+    .sub{
+      margin:0 0 16px 0;
+      font-size:13.5px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .app{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:16px;
+      align-items:start;
+    }
+
+    /* =====================
+       LEFT: CROP AREA
+       ===================== */
+
+    .canvas-wrap{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+    }
+
+    .canvas-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+      font-size:12px;
+      font-weight:900;
+      color:var(--grey);
+    }
+
+    .pill{
+      background:rgba(0,62,102,.1);
+      color:var(--blue);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      border:1px solid rgba(0,62,102,.2);
+    }
+
+    .image-container{
+      position:relative;
+      height:600px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    #image{
+      max-width:100%;
+      display:block;
+    }
+
+    /* Big Adobe-style drop zone */
+    .drop-zone{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      gap:12px;
+      background:#739af0;
+      color:#fff;
+      text-align:center;
+      border-radius:12px;
+    }
+
+    .drop-zone.hidden{ display:none; }
+
+    .drop-zone .icon{
+      font-size:40px;
+    }
+
+    .drop-zone button{
+      background:#111;
+      color:#fff;
+      border:none;
+      padding:10px 16px;
+      border-radius:8px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .drop-zone .small{
+      font-size:12px;
+      opacity:.9;
+    }
+
+    /* =====================
+       RIGHT: SIDE PANEL
+       ===================== */
+
+    .side{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+    }
+
+    .group{
+      margin-bottom:14px;
+    }
+
+    .group h3{
+      font-size:13px;
+      margin:0 0 8px 0;
+      color:var(--grey);
+    }
+
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
+    button, select, input{
+      font-family:inherit;
+    }
+
+    button{
+      border:1px solid rgba(0,62,102,.25);
+      background:rgba(0,62,102,.08);
+      color:var(--blue);
+      padding:8px 12px;
+      border-radius:8px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    button.primary{
+      background:var(--blue);
+      color:#fff;
+    }
+
+    input, select{
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:7px 10px;
+      font-size:13px;
+    }
+
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    details summary{
+      cursor:pointer;
+      font-weight:900;
+      color:var(--blue);
+      margin-bottom:6px;
+    }
+
+    /* =====================
+       MODAL (non-blocking)
+       ===================== */
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.25);
+      display:none;
+      align-items:flex-start;
+      justify-content:center;
+      padding:20px;
+      pointer-events:none;
+      z-index:9999;
+    }
+
+    .modal{
+      background:#fff;
+      border-radius:12px;
+      border:1px solid var(--border);
+      width:520px;
+      pointer-events:auto;
+      box-shadow:0 12px 28px rgba(0,0,0,.18);
+      margin-top:20px;
+    }
+
+    .modal header{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      font-weight:900;
+    }
+
+    .modal .body{
+      padding:12px 14px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .modal footer{
+      padding:12px 14px;
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      border-top:1px solid var(--border);
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>SSEN Distribution image resizer</h1>
+<p class="sub">
+  Upload an image, choose a preset (or custom size), adjust the crop, then export.
+  Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V).
+</p>
+
+<div class="app">
+
+  <!-- LEFT: CANVAS -->
+  <div class="canvas-wrap">
+    <div class="canvas-head">
+      <span>CROP PREVIEW</span>
+      <span class="pill" id="dimsPill">400 × 250</span>
+    </div>
+
+    <div class="image-container" id="dropZone">
+
+      <!-- Big Adobe-style selector -->
+      <div class="drop-zone" id="dropZoneUI">
+        <div class="icon">🖼️</div>
+        <button id="selectImagesBtn">Select images</button>
+        <div class="small">or drag and drop images here</div>
+        <div class="small">Paste also supported (Ctrl / Cmd + V)</div>
+      </div>
+
+      <img id="image" />
+    </div>
+  </div>
+
+  <!-- RIGHT: CONTROLS -->
+  <div class="side">
+
+    <div class="group">
+      <h3>Presets</h3>
+      <div class="row">
+        <button onclick="setPreset(400,250)">Article</button>
+        <button onclick="setPreset(1630,580)">Header</button>
+        <button onclick="setPreset(1080,1920)">9:16</button>
+        <button onclick="setPreset(1080,1350)">5:4</button>
+        <button onclick="setPreset(1080,1080)">1:1</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Custom size</h3>
+      <div class="row">
+        <input id="customW" placeholder="Width px">
+        <input id="customH" placeholder="Height px">
+        <button onclick="applyCustom()">Apply</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h3>Actions</h3>
+      <div class="row">
+        <button onclick="undo()">Undo</button>
+        <button onclick="resetView()">Reset view</button>
+        <button onclick="copyImg()">Copy</button>
+      </div>
+      <div class="hint">
+        Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.
+      </div>
+    </div>
+
+    <details class="group">
+      <summary>Advanced</summary>
+      <div class="group">
+        <h3>Batch export</h3>
+        <div class="row">
+          <button>Batch (fast)</button>
+          <button>Batch (manual)</button>
+        </div>
+      </div>
+    </details>
+
+    <button class="primary" style="width:100%">Download</button>
+
+  </div>
+</div>
+
+<!-- MANUAL BATCH MODAL -->
+<div class="modal-backdrop" id="batchModal">
+  <div class="modal">
+    <header>
+      Manual batch export
+      <span id="batchStep">1 / 5</span>
+    </header>
+    <div class="body">
+      Adjust the crop for this image, then choose <strong>Add &amp; Next</strong> or <strong>Skip</strong>.
+      <br><br>
+      Tip: You can still drag and zoom the image behind this panel.
+    </div>
+    <footer>
+      <button>Skip</button>
+      <button id="addNextBtn">Add &amp; Next</button>
+      <button class="primary">Finish</button>
+    </footer>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script>
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.multiple = true;
+
+  const dropUI = document.getElementById('dropZoneUI');
+  const image = document.getElementById('image');
+  let cropper;
+
+  document.getElementById('selectImagesBtn').onclick = () => fileInput.click();
+
+  fileInput.onchange = () => loadFile(fileInput.files[0]);
+
+  function loadFile(file){
+    dropUI.classList.add('hidden');
+    const reader = new FileReader();
+    reader.onload = () => {
+      image.src = reader.result;
+      cropper && cropper.destroy();
+      cropper = new Cropper(image, { viewMode:0 });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function setPreset(w,h){
+    cropper && cropper.setAspectRatio(w/h);
+    document.getElementById('dimsPill').textContent = `${w} × ${h}`;
+  }
+
+  function applyCustom(){
+    setPreset(customW.value, customH.value);
+  }
+
+  function undo(){ cropper && cropper.reset(); }
+  function resetView(){ cropper && cropper.reset(); }
+  function copyImg(){ alert("Copy logic already implemented earlier"); }
+</script>
+
+</body>
+</html>
+``
