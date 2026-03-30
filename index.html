@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SSEN Distribution image resizer</title>
 
-  https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css
+  <!-- Cropper.js CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
 
   <style>
     :root{
@@ -15,6 +16,14 @@
       --card:#ffffff;
       --border:#d7dde3;
       --muted:rgba(0,0,0,0.65);
+
+      --btn-bg:rgba(0,62,102,0.08);
+      --btn-bd:rgba(0,62,102,0.22);
+      --btn-bg-hover:rgba(0,62,102,0.14);
+
+      --good:#1a7f37;
+      --warn:#b45309;
+      --bad:#b42318;
     }
 
     *{ box-sizing:border-box; }
@@ -41,12 +50,15 @@
       margin:0 0 6px 0;
       font-size:22px;
       color:var(--blue);
+      letter-spacing:0.2px;
     }
 
+    /* Keep this minimal (no “tips” section) */
     .sub{
-      margin-bottom:16px;
+      margin:0 0 16px 0;
       font-size:13.5px;
       color:var(--muted);
+      line-height:1.4;
     }
 
     .panel{
@@ -64,6 +76,7 @@
       gap:10px;
       margin-bottom:10px;
     }
+    .row:last-child{ margin-bottom:0; }
 
     label{
       font-weight:800;
@@ -71,227 +84,1090 @@
       min-width:170px;
     }
 
-    input, select{
+    input[type="file"],
+    input[type="number"],
+    select{
       border:1px solid var(--border);
       border-radius:8px;
       padding:7px 10px;
+      background:#fff;
       font-family:inherit;
+      font-size:13px;
     }
 
+    input[type="number"]{ width:130px; }
+
     .btn{
-      border:1px solid rgba(0,62,102,.25);
-      background:rgba(0,62,102,.08);
+      border:1px solid var(--btn-bd);
+      background:var(--btn-bg);
       color:var(--blue);
       padding:8px 12px;
       border-radius:8px;
       font-weight:800;
       cursor:pointer;
+      transition:background .15s ease, transform .03s ease;
+      user-select:none;
     }
+    .btn:hover{ background:var(--btn-bg-hover); }
+    .btn:active{ transform:translateY(1px); }
 
     .btn.primary{
       background:var(--blue);
       color:#fff;
+      border-color:var(--blue);
     }
+    .btn.primary:hover{ background:#003456; }
 
+    .btn.ghost{
+      background:#fff;
+      border-color:var(--border);
+      color:var(--grey);
+    }
+    .btn.ghost:hover{ background:#f8fafc; }
+
+    /* Keyboard focus */
     .btn:focus-visible,
     input:focus-visible,
-    select:focus-visible{
+    select:focus-visible,
+    summary:focus-visible{
       outline:2px solid var(--blue);
       outline-offset:2px;
     }
 
-    details{
+    .status{
+      margin-left:auto;
+      font-size:12.5px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    .stage{
       border:1px solid var(--border);
-      border-radius:10px;
+      border-radius:12px;
+      padding:12px;
+      background:#fafafa;
     }
 
-    summary{
-      padding:12px;
-      cursor:pointer;
+    .stage-head{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+      font-size:12.5px;
       font-weight:900;
+      color:var(--grey);
+      letter-spacing:0.2px;
     }
 
-    .advanced-body{
-      padding:12px;
-      border-top:1px solid var(--border);
+    .pill{
+      background:rgba(0,62,102,0.10);
+      color:var(--blue);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      border:1px solid rgba(0,62,102,0.18);
     }
+    .pill.good{ color:var(--good); border-color:rgba(26,127,55,0.28); background:rgba(26,127,55,0.08); }
+    .pill.warn{ color:var(--warn); border-color:rgba(180,83,9,0.28); background:rgba(180,83,9,0.08); }
+    .pill.bad{  color:var(--bad);  border-color:rgba(180,35,24,0.28); background:rgba(180,35,24,0.08); }
 
     .image-container{
-      height:620px;
+      width:100%;
+      height:640px;
+      background:#fff;
       border:1px solid var(--border);
       border-radius:10px;
       overflow:hidden;
+      position:relative;
     }
 
     #image{
-      max-width:100%;
       display:block;
+      max-width:100%;
     }
 
-    .status{
-      margin-left:auto;
+    .drop-overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:18px;
+      background:rgba(0,62,102,0.06);
+      border:2px dashed rgba(0,62,102,0.35);
+      border-radius:10px;
+      color:var(--blue);
+      font-weight:900;
+      pointer-events:none;
+    }
+
+    .image-container.dragover .drop-overlay{ display:flex; }
+
+    /* Advanced dropdown: visible but visually neutral (like earlier UI) */
+    details.advanced{
+      border:none;
+      background:transparent;
+      margin-top:6px;
+    }
+
+    details.advanced > summary{
+      list-style:none;
+      cursor:pointer;
+      padding:6px 0;
+      font-weight:900;
+      color:var(--blue);
+      user-select:none;
+    }
+    details.advanced > summary::-webkit-details-marker{ display:none; }
+
+    .advanced-body{
+      padding:6px 0 0 0;
+      border:none;
+    }
+
+    .small{
       font-size:12px;
       color:var(--muted);
     }
 
-    .progress{
-      font-size:12px;
+    .inline{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .slider{
+      width:220px;
+      accent-color:var(--blue);
+    }
+
+    /* Manual batch wizard modal */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      padding:18px;
+    }
+
+    .modal{
+      width:min(980px, 100%);
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      box-shadow:0 18px 60px rgba(0,0,0,0.25);
+      overflow:hidden;
+    }
+
+    .modal-head{
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .modal-title{
+      font-weight:900;
+      color:var(--grey);
+    }
+
+    .modal-progress{
+      font-weight:900;
       color:var(--blue);
-      font-weight:800;
+    }
+
+    .modal-body{
+      padding:14px 16px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+    }
+
+    .modal-actions{
+      padding:14px 16px;
+      border-top:1px solid var(--border);
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:flex-end;
     }
   </style>
 </head>
 
 <body>
-<div class="wrap">
+  <div class="wrap">
 
-<h1>SSEN Distribution image resizer</h1>
-<div class="sub">Resize images for web and social channels. Drag & drop or paste images directly.</div>
+    <h1>SSEN Distribution image resizer</h1>
+    <p class="sub">Resize and crop images to standard web and social dimensions.</p>
 
-<div class="panel">
-  <div class="row">
-    <label for="fileInput">Source image(s)</label>
-    <input id="fileInput" type="file" accept="image/*" multiple />
-    <div class="status" id="status">Choose an image to begin</div>
-  </div>
+    <div class="panel">
 
-  <div class="row">
-    <label>Website presets</label>
-    <button class="btn" onclick="setPreset(400,250)">Article 400×250</button>
-    <button class="btn" onclick="setPreset(1630,580)">Header 1630×580</button>
-  </div>
-
-  <div class="row">
-    <label>Social presets</label>
-    <button class="btn" onclick="setPreset(1080,1920)">9:16</button>
-    <button class="btn" onclick="setPreset(1080,1350)">5:4</button>
-    <button class="btn" onclick="setPreset(1080,1080)">1:1</button>
-  </div>
-
-  <details>
-    <summary>Advanced</summary>
-    <div class="advanced-body">
-
+      <!-- Source -->
       <div class="row">
-        <label>Export format</label>
-        <select id="format">
-          <option value="image/jpeg">JPG</option>
-          <option value="image/webp">WebP</option>
-        </select>
+        <label for="fileInput">Source image(s)</label>
+        <input type="file" id="fileInput" accept="image/*" multiple />
+        <div class="status" id="status">Choose an image to begin.</div>
       </div>
 
+      <!-- Website presets -->
       <div class="row">
-        <label>Batch export</label>
-        <button class="btn" onclick="batchFast()">Batch ZIP (fast)</button>
-        <button class="btn" onclick="batchManual()">Batch ZIP (manual)</button>
-        <span class="progress" id="batchProgress"></span>
+        <label>Website presets</label>
+        <button class="btn" type="button" id="presetArticle">Website article (400 × 250)</button>
+        <button class="btn" type="button" id="presetHeader">Website header (1630 × 580)</button>
       </div>
 
+      <!-- Social presets -->
+      <div class="row">
+        <label>Social media presets</label>
+        <button class="btn" type="button" id="preset916">9:16 (Portrait)</button>
+        <button class="btn" type="button" id="preset54">5:4 (Instagram)</button>
+        <button class="btn" type="button" id="preset11">1:1 (Square)</button>
+      </div>
+
+      <!-- Custom size -->
+      <div class="row">
+        <label for="customWidth">Custom size</label>
+        <input type="number" id="customWidth" placeholder="Width (px)" min="1" />
+        <input type="number" id="customHeight" placeholder="Height (px)" min="1" />
+        <button class="btn" type="button" id="applyCustom">Apply</button>
+      </div>
+
+      <!-- Actions (kept in the same row style as earlier UI) -->
+      <div class="row">
+        <label>Actions</label>
+        <button class="btn ghost" type="button" id="undoBtn">Undo</button>
+        <button class="btn ghost" type="button" id="resetCropBtn">Reset crop</button>
+        <button class="btn ghost" type="button" id="resetViewBtn">Reset view</button>
+        <button class="btn" type="button" id="copyBtn">Copy image</button>
+      </div>
+
+      <!-- Advanced dropdown (visible) -->
+      <details class="advanced" id="advanced" open>
+        <summary tabindex="0">Advanced</summary>
+        <div class="advanced-body">
+
+          <div class="row">
+            <label for="formatSelect">Export settings</label>
+
+            <div class="inline">
+              <label for="formatSelect" class="small" style="min-width:auto;font-weight:900;color:var(--grey)">Format</label>
+              <select id="formatSelect">
+                <option value="jpeg" selected>JPG</option>
+                <option value="webp">WebP</option>
+              </select>
+            </div>
+
+            <div class="inline">
+              <label for="qualitySlider" class="small" style="min-width:auto;font-weight:900;color:var(--grey)">Quality</label>
+              <input class="slider" type="range" id="qualitySlider" min="60" max="95" value="90" />
+              <span class="pill" id="qualityPill">90%</span>
+            </div>
+
+            <div class="inline">
+              <button class="btn ghost" type="button" id="target1mb">&lt; 1MB</button>
+              <button class="btn ghost" type="button" id="target500kb">&lt; 500KB</button>
+              <button class="btn ghost" type="button" id="target250kb">&lt; 250KB</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <label>Batch export</label>
+            <button class="btn" type="button" id="batchZipFastBtn">Batch ZIP (fast)</button>
+            <button class="btn" type="button" id="batchZipManualBtn">Batch ZIP (manual)</button>
+            <span class="small" id="batchProgress" aria-live="polite"></span>
+          </div>
+
+        </div>
+      </details>
+
+      <!-- Download moved BELOW Advanced -->
+      <div class="row" style="margin-top:8px;">
+        <label></label>
+        <button class="btn primary" type="button" id="downloadBtn">Download</button>
+      </div>
     </div>
-  </details>
 
-</div>
+    <!-- Preview stage -->
+    <div class="stage">
+      <div class="stage-head">
+        <div>CROP PREVIEW</div>
+        <div class="inline">
+          <div class="pill" id="dimsPill">Output: 400 × 250</div>
+          <div class="pill" id="estimatePill">Expected size: —</div>
+        </div>
+      </div>
 
-<div class="panel">
-  <div class="row">
-    <label>Actions</label>
-    <button class="btn" onclick="undo()">Undo</button>
-    <button class="btn" onclick="resetView()">Reset view</button>
+      <div class="image-container" id="dropZone">
+        <div class="drop-overlay">Drop an image here</div>
+        <img id="image" alt="Image to crop" />
+      </div>
+    </div>
   </div>
 
-  <div class="row">
-    <label></label>
-    <button class="btn primary" onclick="download()">Download image</button>
-  </div>
-</div>
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
-<div class="image-container">
-  <img id="image" alt="Image preview" />
-</div>
+  <script>
+    // Elements
+    const image = document.getElementById("image");
+    const fileInput = document.getElementById("fileInput");
+    const statusEl = document.getElementById("status");
+    const dimsPill = document.getElementById("dimsPill");
+    const estimatePill = document.getElementById("estimatePill");
+    const batchProgressEl = document.getElementById("batchProgress");
 
-</div>
+    const formatSelect = document.getElementById("formatSelect");
+    const qualitySlider = document.getElementById("qualitySlider");
+    const qualityPill = document.getElementById("qualityPill");
 
-https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.jsscript>
-https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.jsscript>
+    const customW = document.getElementById("customWidth");
+    const customH = document.getElementById("customHeight");
 
-<script>
-let cropper, targetW=400, targetH=250;
-let history=[];
-let files=[];
-let manualIndex=0;
-let manualZip;
+    const undoBtn = document.getElementById("undoBtn");
+    const resetCropBtn = document.getElementById("resetCropBtn");
+    const resetViewBtn = document.getElementById("resetViewBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
 
-function setPreset(w,h){
-  targetW=w; targetH=h;
-  if(cropper){
-    cropper.setAspectRatio(w/h);
-    cropper.reset();
-  }
-}
+    const target1mb = document.getElementById("target1mb");
+    const target500kb = document.getElementById("target500kb");
+    const target250kb = document.getElementById("target250kb");
 
-function loadImage(file){
-  const reader=new FileReader();
-  reader.onerror=()=>alert("File could not be read.");
-  reader.onload=()=>{
-    image.src=reader.result;
-  };
-  reader.readAsDataURL(file);
-}
+    const batchZipFastBtn = document.getElementById("batchZipFastBtn");
+    const batchZipManualBtn = document.getElementById("batchZipManualBtn");
 
-image.onerror=()=>alert("Image could not be loaded.");
+    const dropZone = document.getElementById("dropZone");
 
-fileInput.onchange=()=>{
-  files=[...fileInput.files];
-  if(files.length) loadImage(files[0]);
-};
+    // State
+    let cropper = null;
+    let targetWidth = 400;
+    let targetHeight = 250;
+    let originalBaseName = "image";
 
-image.onload=()=>{
-  if(cropper) cropper.destroy();
-  cropper=new Cropper(image,{aspectRatio:targetW/targetH,viewMode:0});
-};
+    let selectedFiles = [];
 
-function download(){
-  const canvas=cropper.getCroppedCanvas({width:targetW,height:targetH});
-  canvas.toBlob(b=>{
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(b);
-    a.download="image_"+targetW+"x"+targetH+".jpg";
-    a.click();
-  },format.value);
-}
+    // Undo history (store crop + view state)
+    let history = [];
+    const HISTORY_LIMIT = 30;
+    let isApplyingUndo = false;
 
-function batchFast(){
-  const zip=new JSZip();
-  let done=0, skipped=[];
-  files.forEach((f,i)=>{
-    try{
-      zip.file(`${i+1}_${f.name}`, f);
-      done++;
-      batchProgress.textContent=`Exporting ${done}/${files.length}`;
-    }catch{
-      skipped.push(f.name);
+    // Estimate debounce
+    let estimateTimer = null;
+
+    // Manual batch wizard state
+    let manualZip = null;
+    let manualFiles = [];
+    let manualIndex = 0;
+    let manualAddedCount = 0;
+    let manualSkippedCount = 0;
+    let manualFailures = [];
+
+    // Manual batch modal UI
+    let batchModal, batchProgress, batchFileName, batchCancel, batchPrev, batchAddNext, batchSkipNext, batchFinish;
+
+    // ---------- Helpers ----------
+    function updateDims() {
+      dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`;
     }
-  });
-  zip.generateAsync({type:"blob"}).then(b=>{
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(b);
-    a.download="batch.zip";
-    a.click();
-    batchProgress.textContent=`${done} exported, ${skipped.length} skipped`;
-  });
-}
 
-function batchManual(){
-  manualZip=new JSZip();
-  manualIndex=0;
-  loadImage(files[0]);
-  alert("Use Skip or Download per image – simplified demo flow");
-}
+    function updateQualityUI() {
+      qualityPill.textContent = `${qualitySlider.value}%`;
+    }
 
-function undo(){ if(cropper) cropper.reset(); }
-function resetView(){ if(cropper) cropper.reset(); }
-</script>
+    function humanFileSize(bytes) {
+      if (!bytes && bytes !== 0) return "—";
+      const kb = bytes / 1024;
+      if (kb < 1024) return `${Math.round(kb)}KB`;
+      return `${(kb/1024).toFixed(2)}MB`;
+    }
 
+    function setEstimatePill(bytes) {
+      const kb = bytes / 1024;
+      estimatePill.classList.remove("good","warn","bad");
+      if (kb <= 500) estimatePill.classList.add("good");
+      else if (kb <= 1024) estimatePill.classList.add("warn");
+      else estimatePill.classList.add("bad");
+      estimatePill.textContent = `Expected size: ~${humanFileSize(bytes)}`;
+    }
+
+    function getMime() {
+      return formatSelect.value === "webp" ? "image/webp" : "image/jpeg";
+    }
+    function getExt() {
+      return formatSelect.value === "webp" ? "webp" : "jpg";
+    }
+    function getQualityFloat() {
+      return parseInt(qualitySlider.value, 10) / 100;
+    }
+
+    function canvasToBlob(canvas, mime, quality) {
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), mime, quality);
+      });
+    }
+
+    function safeDestroyCropper() {
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+    }
+
+    // Store fuller undo state
+    function pushHistory() {
+      if (!cropper) return;
+      const snap = {
+        data: cropper.getData(true),
+        cropBox: cropper.getCropBoxData(),
+        canvas: cropper.getCanvasData()
+      };
+      history.push(snap);
+      if (history.length > HISTORY_LIMIT) history.shift();
+      undoBtn.disabled = history.length < 2;
+    }
+
+    function restoreSnapshot(snap) {
+      if (!cropper || !snap) return;
+      cropper.setCanvasData(snap.canvas);
+      cropper.setCropBoxData(snap.cropBox);
+      cropper.setData(snap.data);
+    }
+
+    // ---------- Core cropper init ----------
+    function initCropper() {
+      safeDestroyCropper();
+
+      if (typeof Cropper === "undefined") {
+        statusEl.textContent = "Cropper failed to load (check network).";
+        return;
+      }
+
+      cropper = new Cropper(image, {
+        aspectRatio: targetWidth / targetHeight,
+        viewMode: 0,
+        autoCropArea: 0.85,
+        dragMode: "move",
+        background: true,
+        movable: true,
+        zoomable: true,
+        responsive: true,
+        ready() {
+          history = [];
+          pushHistory();
+          statusEl.textContent = "Ready.";
+          scheduleEstimate();
+        },
+        cropend() {
+          if (!isApplyingUndo) {
+            pushHistory();
+            scheduleEstimate();
+          }
+        },
+        zoom() {
+          if (!isApplyingUndo) scheduleEstimate();
+        }
+      });
+    }
+
+    function setPreset(w, h) {
+      targetWidth = w;
+      targetHeight = h;
+      updateDims();
+      if (cropper) {
+        cropper.setAspectRatio(w / h);
+        cropper.reset();
+        cropper.crop();
+        history = [];
+        pushHistory();
+        scheduleEstimate();
+      }
+    }
+
+    function applyCustomSize() {
+      const w = parseInt(customW.value, 10);
+      const h = parseInt(customH.value, 10);
+      if (!w || !h || w <= 0 || h <= 0) {
+        alert("Please enter a valid width and height.");
+        return;
+      }
+      setPreset(w, h);
+    }
+
+    // ---------- Estimation ----------
+    async function getCroppedBlobForEstimate() {
+      if (!cropper) return null;
+      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      return await canvasToBlob(canvas, getMime(), getQualityFloat());
+    }
+
+    function scheduleEstimate() {
+      if (!cropper) return;
+      if (estimateTimer) clearTimeout(estimateTimer);
+      estimateTimer = setTimeout(async () => {
+        const blob = await getCroppedBlobForEstimate();
+        if (blob) setEstimatePill(blob.size);
+      }, 250);
+    }
+
+    async function setQualityForTargetBytes(targetBytes) {
+      if (!cropper) return;
+
+      let lo = 0.60, hi = 0.95;
+      let bestQ = hi;
+      let bestSize = Infinity;
+
+      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      const mime = getMime();
+
+      for (let i = 0; i < 8; i++) {
+        const mid = (lo + hi) / 2;
+        const blob = await canvasToBlob(canvas, mime, mid);
+        const size = blob ? blob.size : Infinity;
+
+        if (Math.abs(size - targetBytes) < Math.abs(bestSize - targetBytes)) {
+          bestSize = size;
+          bestQ = mid;
+        }
+
+        if (size > targetBytes) hi = mid; else lo = mid;
+      }
+
+      const pct = Math.round(bestQ * 100);
+      const clamped = Math.min(95, Math.max(60, pct));
+      qualitySlider.value = clamped;
+      updateQualityUI();
+      setEstimatePill(bestSize);
+      statusEl.textContent = "Quality adjusted (estimate).";
+    }
+
+    // ---------- Download / Copy ----------
+    function makeDownloadName(base) {
+      return `${base}_${targetWidth}x${targetHeight}.${getExt()}`;
+    }
+
+    async function downloadCurrent() {
+      if (!cropper) {
+        alert("Please choose an image first.");
+        return;
+      }
+
+      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
+      if (!blob) {
+        alert("Could not create image.");
+        return;
+      }
+
+      const filename = makeDownloadName(originalBaseName);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      statusEl.textContent = `Downloaded: ${filename}`;
+    }
+
+    async function copyToClipboard() {
+      if (!cropper) {
+        alert("Please choose an image first.");
+        return;
+      }
+
+      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
+      if (!blob) {
+        alert("Could not create image.");
+        return;
+      }
+
+      try {
+        if (!navigator.clipboard || !window.ClipboardItem) {
+          alert("Copy isn’t supported in this browser. Use Download instead.");
+          return;
+        }
+        const item = new ClipboardItem({ [blob.type]: blob });
+        await navigator.clipboard.write([item]);
+        statusEl.textContent = "Copied.";
+      } catch (e) {
+        alert("Could not copy. Use Download instead.");
+      }
+    }
+
+    // ---------- Error-handled file load ----------
+    function loadFile(file) {
+      if (!file) return;
+
+      originalBaseName = file.name.replace(/\.[^/.]+$/, "");
+      statusEl.textContent = `Loaded: ${file.name}`;
+
+      const reader = new FileReader();
+      reader.onerror = () => {
+        statusEl.textContent = `Could not read: ${file.name}`;
+      };
+      reader.onload = () => {
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    image.onerror = () => {
+      statusEl.textContent = "This image couldn’t be loaded (corrupt/unsupported).";
+      safeDestroyCropper();
+    };
+
+    // ---------- Drag & drop ----------
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      const dt = e.dataTransfer;
+      if (!dt || !dt.files || !dt.files.length) return;
+
+      selectedFiles = Array.from(dt.files).filter(f => f.type && f.type.startsWith("image/"));
+      if (!selectedFiles.length) return;
+
+      loadFile(selectedFiles[0]);
+      statusEl.textContent = selectedFiles.length > 1
+        ? `Dropped ${selectedFiles.length} images.`
+        : `Dropped: ${selectedFiles[0].name}`;
+    });
+
+    // Paste from clipboard (image)
+    window.addEventListener("paste", (e) => {
+      const items = (e.clipboardData && e.clipboardData.items) ? Array.from(e.clipboardData.items) : [];
+      const imgItem = items.find(it => it.type && it.type.startsWith("image/"));
+      if (!imgItem) return;
+      const file = imgItem.getAsFile();
+      if (file) {
+        selectedFiles = [file];
+        loadFile(file);
+        statusEl.textContent = "Pasted image.";
+      }
+    });
+
+    // ---------- Undo / reset ----------
+    function undo() {
+      if (!cropper || history.length < 2) return;
+      isApplyingUndo = true;
+      history.pop();
+      const prev = history[history.length - 1];
+      restoreSnapshot(prev);
+      isApplyingUndo = false;
+      scheduleEstimate();
+      undoBtn.disabled = history.length < 2;
+    }
+
+    function resetCrop() {
+      if (!cropper) return;
+      cropper.clear();
+      cropper.crop();
+      cropper.setAspectRatio(targetWidth / targetHeight);
+      cropper.reset();
+      history = [];
+      pushHistory();
+      scheduleEstimate();
+      statusEl.textContent = "Crop reset.";
+    }
+
+    function resetView() {
+      if (!cropper) return;
+      cropper.reset();
+      cropper.crop();
+      history = [];
+      pushHistory();
+      scheduleEstimate();
+      statusEl.textContent = "View reset.";
+    }
+
+    // ---------- ZIP name dedupe ----------
+    function uniqueZipName(seen, name) {
+      if (!seen.has(name)) {
+        seen.add(name);
+        return name;
+      }
+      const dot = name.lastIndexOf(".");
+      const base = dot >= 0 ? name.slice(0, dot) : name;
+      const ext = dot >= 0 ? name.slice(dot) : "";
+      let n = 2;
+      let candidate = `${base}_${n}${ext}`;
+      while (seen.has(candidate)) {
+        n++;
+        candidate = `${base}_${n}${ext}`;
+      }
+      seen.add(candidate);
+      return candidate;
+    }
+
+    // ---------- Batch export (fast) ----------
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onerror = () => reject(new Error("read"));
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(file);
+      });
+    }
+
+    function imageFromDataURL(dataURL) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("decode"));
+        img.src = dataURL;
+      });
+    }
+
+    async function batchExportFastZip() {
+      if (!selectedFiles || selectedFiles.length < 2) {
+        alert("Select or drop multiple images to batch export.");
+        return;
+      }
+      if (typeof JSZip === "undefined") {
+        alert("Batch library failed to load.");
+        return;
+      }
+
+      const zip = new JSZip();
+      const seen = new Set();
+
+      const mime = getMime();
+      const quality = getQualityFloat();
+      const ext = getExt();
+      const targetAR = targetWidth / targetHeight;
+
+      let exported = 0;
+      let skipped = [];
+
+      batchProgressEl.textContent = `Exporting 0 / ${selectedFiles.length}`;
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const base = file.name.replace(/\.[^/.]+$/, "");
+
+        try {
+          const dataURL = await readFileAsDataURL(file);
+          const tmpImg = await imageFromDataURL(dataURL);
+
+          const srcW = tmpImg.naturalWidth;
+          const srcH = tmpImg.naturalHeight;
+          const srcAR = srcW / srcH;
+
+          let cropW, cropH, sx, sy;
+
+          if (srcAR > targetAR) {
+            cropH = srcH;
+            cropW = Math.round(srcH * targetAR);
+            sx = Math.round((srcW - cropW) / 2);
+            sy = 0;
+          } else {
+            cropW = srcW;
+            cropH = Math.round(srcW / targetAR);
+            sx = 0;
+            sy = Math.round((srcH - cropH) / 2);
+          }
+
+          const canv = document.createElement("canvas");
+          canv.width = targetWidth;
+          canv.height = targetHeight;
+          const ctx = canv.getContext("2d");
+          ctx.drawImage(tmpImg, sx, sy, cropW, cropH, 0, 0, targetWidth, targetHeight);
+
+          const blob = await canvasToBlob(canv, mime, quality);
+          if (!blob) throw new Error("blob");
+
+          const filenameRaw = `${base}_${targetWidth}x${targetHeight}.${ext}`;
+          const filename = uniqueZipName(seen, filenameRaw);
+
+          const arrayBuffer = await blob.arrayBuffer();
+          zip.file(filename, arrayBuffer);
+          exported++;
+        } catch (e) {
+          skipped.push(file.name);
+        }
+
+        batchProgressEl.textContent = `Exporting ${i + 1} / ${selectedFiles.length}`;
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `batch_${targetWidth}x${targetHeight}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      const skippedCount = skipped.length;
+      batchProgressEl.textContent = `${exported} exported, ${skippedCount} skipped`;
+      if (skippedCount) {
+        // show list in status to avoid UI clutter
+        statusEl.textContent = `Skipped: ${skipped.slice(0, 6).join(", ")}${skippedCount > 6 ? "…" : ""}`;
+      } else {
+        statusEl.textContent = "Batch complete.";
+      }
+    }
+
+    // ---------- Manual batch wizard (skip supported) ----------
+    function ensureManualModal() {
+      if (batchModal) return;
+
+      const backdrop = document.createElement("div");
+      backdrop.className = "modal-backdrop";
+      backdrop.id = "batchModal";
+
+      backdrop.innerHTML = `
+        <div class="modal" role="dialog" aria-modal="true" aria-label="Manual batch export">
+          <div class="modal-head">
+            <div class="modal-title">Manual batch export</div>
+            <div class="modal-progress" id="batchModalProgress">0 / 0</div>
+          </div>
+          <div class="modal-body">
+            <div class="small" id="batchModalFile">—</div>
+            <div class="small">Adjust crop for this image, then choose Add or Skip.</div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn ghost" id="batchCancel">Cancel</button>
+            <button class="btn ghost" id="batchPrev">Back</button>
+            <button class="btn" id="batchSkipNext">Skip & Next</button>
+            <button class="btn" id="batchAddNext">Add & Next</button>
+            <button class="btn primary" id="batchFinish">Finish & Download ZIP</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(backdrop);
+
+      batchModal = document.getElementById("batchModal");
+      batchProgress = document.getElementById("batchModalProgress");
+      batchFileName = document.getElementById("batchModalFile");
+      batchCancel = document.getElementById("batchCancel");
+      batchPrev = document.getElementById("batchPrev");
+      batchAddNext = document.getElementById("batchAddNext");
+      batchSkipNext = document.getElementById("batchSkipNext");
+      batchFinish = document.getElementById("batchFinish");
+
+      batchCancel.addEventListener("click", closeManualBatch);
+      batchPrev.addEventListener("click", manualBack);
+      batchAddNext.addEventListener("click", manualAddAndNext);
+      batchSkipNext.addEventListener("click", manualSkipAndNext);
+      batchFinish.addEventListener("click", manualFinish);
+    }
+
+    function openManualBatch(files) {
+      ensureManualModal();
+
+      manualZip = new JSZip();
+      manualFiles = files.slice();
+      manualIndex = 0;
+      manualAddedCount = 0;
+      manualSkippedCount = 0;
+      manualFailures = [];
+
+      batchModal.style.display = "flex";
+      updateManualBatchUI();
+
+      loadFile(manualFiles[manualIndex]);
+    }
+
+    function closeManualBatch() {
+      if (batchModal) batchModal.style.display = "none";
+      manualZip = null;
+      manualFiles = [];
+      manualIndex = 0;
+      manualAddedCount = 0;
+      manualSkippedCount = 0;
+      manualFailures = [];
+      batchProgressEl.textContent = "";
+      statusEl.textContent = "Manual batch cancelled.";
+    }
+
+    function updateManualBatchUI() {
+      if (!batchModal) return;
+      batchProgress.textContent = `${manualIndex + 1} / ${manualFiles.length}`;
+      batchFileName.textContent = manualFiles[manualIndex] ? manualFiles[manualIndex].name : "—";
+      batchPrev.disabled = manualIndex <= 0;
+    }
+
+    async function manualAddCurrent() {
+      if (!cropper || !manualZip) return;
+
+      const file = manualFiles[manualIndex];
+      const base = file.name.replace(/\.[^/.]+$/, "");
+      const filenameRaw = `${base}_${targetWidth}x${targetHeight}.${getExt()}`;
+
+      // dedupe within ZIP
+      manualZip._seen = manualZip._seen || new Set();
+      const filename = uniqueZipName(manualZip._seen, filenameRaw);
+
+      try {
+        const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+        const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
+        if (!blob) throw new Error("blob");
+        const arrayBuffer = await blob.arrayBuffer();
+        manualZip.file(filename, arrayBuffer);
+        manualAddedCount++;
+        statusEl.textContent = `Added: ${filename}`;
+      } catch (e) {
+        manualFailures.push(file.name);
+        statusEl.textContent = `Could not export: ${file.name}`;
+      }
+    }
+
+    async function manualAddAndNext() {
+      await manualAddCurrent();
+      moveManualNext();
+    }
+
+    function manualSkipAndNext() {
+      manualSkippedCount++;
+      moveManualNext();
+    }
+
+    function moveManualNext() {
+      if (manualIndex < manualFiles.length - 1) {
+        manualIndex++;
+        updateManualBatchUI();
+        loadFile(manualFiles[manualIndex]);
+      } else {
+        // End reached
+        updateManualBatchUI();
+        statusEl.textContent = "End of manual batch. Finish to download ZIP.";
+      }
+    }
+
+    function manualBack() {
+      if (manualIndex <= 0) return;
+      manualIndex--;
+      updateManualBatchUI();
+      loadFile(manualFiles[manualIndex]);
+    }
+
+    async function manualFinish() {
+      if (!manualZip) return;
+
+      batchProgressEl.textContent = "Building ZIP…";
+
+      const zipBlob = await manualZip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `batch_manual_${targetWidth}x${targetHeight}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      if (batchModal) batchModal.style.display = "none";
+
+      const failCount = manualFailures.length;
+      batchProgressEl.textContent = `${manualAddedCount} added, ${manualSkippedCount} skipped${failCount ? `, ${failCount} failed` : ""}`;
+
+      if (failCount) {
+        statusEl.textContent = `Failed: ${manualFailures.slice(0, 6).join(", ")}${failCount > 6 ? "…" : ""}`;
+      } else {
+        statusEl.textContent = "Manual batch complete.";
+      }
+
+      manualZip = null;
+      manualFiles = [];
+      manualIndex = 0;
+    }
+
+    // ---------- Wire up UI ----------
+    // File selection
+    fileInput.addEventListener("change", () => {
+      selectedFiles = Array.from(fileInput.files || []).filter(f => f.type && f.type.startsWith("image/"));
+      if (!selectedFiles.length) return;
+      loadFile(selectedFiles[0]);
+      if (selectedFiles.length > 1) statusEl.textContent = `Loaded ${selectedFiles.length} images.`;
+    });
+
+    // Image load creates cropper
+    image.addEventListener("load", () => {
+      updateDims();
+      initCropper();
+    });
+
+    // Presets
+    document.getElementById("presetArticle").addEventListener("click", () => setPreset(400, 250));
+    document.getElementById("presetHeader").addEventListener("click", () => setPreset(1630, 580));
+    document.getElementById("preset916").addEventListener("click", () => setPreset(1080, 1920));
+    document.getElementById("preset54").addEventListener("click", () => setPreset(1080, 1350)); // corrected
+    document.getElementById("preset11").addEventListener("click", () => setPreset(1080, 1080));
+
+    document.getElementById("applyCustom").addEventListener("click", applyCustomSize);
+
+    // Actions
+    undoBtn.addEventListener("click", undo);
+    resetCropBtn.addEventListener("click", resetCrop);
+    resetViewBtn.addEventListener("click", resetView);
+    copyBtn.addEventListener("click", copyToClipboard);
+    downloadBtn.addEventListener("click", downloadCurrent);
+
+    // Advanced controls
+    qualitySlider.addEventListener("input", () => {
+      updateQualityUI();
+      scheduleEstimate();
+    });
+
+    formatSelect.addEventListener("change", () => {
+      scheduleEstimate();
+      statusEl.textContent = `Format: ${formatSelect.value.toUpperCase()}`;
+    });
+
+    target1mb.addEventListener("click", () => setQualityForTargetBytes(1024 * 1024));
+    target500kb.addEventListener("click", () => setQualityForTargetBytes(500 * 1024));
+    target250kb.addEventListener("click", () => setQualityForTargetBytes(250 * 1024));
+
+    // Batch buttons
+    batchZipFastBtn.addEventListener("click", batchExportFastZip);
+
+    batchZipManualBtn.addEventListener("click", () => {
+      if (!selectedFiles || selectedFiles.length < 2) {
+        alert("Select or drop multiple images to use manual batch.");
+        return;
+      }
+      openManualBatch(selectedFiles);
+    });
+
+    // Drag overlay behavior
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      const dt = e.dataTransfer;
+      if (!dt || !dt.files || !dt.files.length) return;
+
+      selectedFiles = Array.from(dt.files).filter(f => f.type && f.type.startsWith("image/"));
+      if (!selectedFiles.length) return;
+
+      loadFile(selectedFiles[0]);
+      statusEl.textContent = selectedFiles.length > 1 ? `Dropped ${selectedFiles.length} images.` : `Dropped: ${selectedFiles[0].name}`;
+    });
+
+    // Init UI bits
+    updateDims();
+    updateQualityUI();
+    undoBtn.disabled = true;
+  </script>
 </body>
 </html>
 ``
