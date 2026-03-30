@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SSEN Distribution image resizer</title>
 
-  <!-- Cropper.js CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" />
+  https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css
 
   <style>
     :root{
@@ -16,14 +15,6 @@
       --card:#ffffff;
       --border:#d7dde3;
       --muted:rgba(0,0,0,0.65);
-
-      --btn-bg:rgba(0,62,102,0.08);
-      --btn-bd:rgba(0,62,102,0.22);
-      --btn-bg-hover:rgba(0,62,102,0.14);
-
-      --good:#1a7f37;
-      --warn:#b45309;
-      --bad:#b42318;
     }
 
     *{ box-sizing:border-box; }
@@ -50,14 +41,12 @@
       margin:0 0 6px 0;
       font-size:22px;
       color:var(--blue);
-      letter-spacing:0.2px;
     }
 
     .sub{
       margin-bottom:16px;
       font-size:13.5px;
       color:var(--muted);
-      line-height:1.4;
     }
 
     .panel{
@@ -75,1053 +64,234 @@
       gap:10px;
       margin-bottom:10px;
     }
-    .row:last-child{ margin-bottom:0; }
 
-    .label{
+    label{
       font-weight:800;
       color:var(--grey);
       min-width:170px;
     }
 
-    input[type="file"],
-    input[type="number"],
-    select{
+    input, select{
       border:1px solid var(--border);
       border-radius:8px;
       padding:7px 10px;
-      background:#fff;
       font-family:inherit;
-      font-size:13px;
     }
 
-    input[type="number"]{ width:130px; }
-
     .btn{
-      border:1px solid var(--btn-bd);
-      background:var(--btn-bg);
+      border:1px solid rgba(0,62,102,.25);
+      background:rgba(0,62,102,.08);
       color:var(--blue);
       padding:8px 12px;
       border-radius:8px;
       font-weight:800;
       cursor:pointer;
-      transition:background .15s ease, transform .03s ease;
-      user-select:none;
     }
-    .btn:hover{ background:var(--btn-bg-hover); }
-    .btn:active{ transform:translateY(1px); }
 
     .btn.primary{
       background:var(--blue);
       color:#fff;
-      border-color:var(--blue);
     }
-    .btn.primary:hover{ background:#003456; }
 
-    .btn.ghost{
-      background:#fff;
-      border-color:var(--border);
-      color:var(--grey);
+    .btn:focus-visible,
+    input:focus-visible,
+    select:focus-visible{
+      outline:2px solid var(--blue);
+      outline-offset:2px;
     }
-    .btn.ghost:hover{ background:#f8fafc; }
 
-    .hint{
-      font-size:12.8px;
-      color:var(--muted);
-      line-height:1.35;
-      flex:1;
-      min-width:240px;
+    details{
+      border:1px solid var(--border);
+      border-radius:10px;
+    }
+
+    summary{
+      padding:12px;
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    .advanced-body{
+      padding:12px;
+      border-top:1px solid var(--border);
+    }
+
+    .image-container{
+      height:620px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      overflow:hidden;
+    }
+
+    #image{
+      max-width:100%;
+      display:block;
     }
 
     .status{
       margin-left:auto;
-      font-size:12.5px;
+      font-size:12px;
       color:var(--muted);
-      white-space:nowrap;
     }
 
-    .stage{
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      background:#fafafa;
-    }
-
-    .stage-head{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
-      font-size:12.5px;
-      font-weight:900;
-      color:var(--grey);
-      letter-spacing:0.2px;
-    }
-
-    .pill{
-      background:rgba(0,62,102,0.10);
-      color:var(--blue);
-      padding:6px 10px;
-      border-radius:999px;
+    .progress{
       font-size:12px;
-      font-weight:900;
-      border:1px solid rgba(0,62,102,0.18);
-    }
-
-    .pill.good{ color:var(--good); border-color:rgba(26,127,55,0.28); background:rgba(26,127,55,0.08); }
-    .pill.warn{ color:var(--warn); border-color:rgba(180,83,9,0.28); background:rgba(180,83,9,0.08); }
-    .pill.bad{  color:var(--bad);  border-color:rgba(180,35,24,0.28); background:rgba(180,35,24,0.08); }
-
-    .image-container{
-      width:100%;
-      height:640px;
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:10px;
-      overflow:hidden;
-      position:relative;
-    }
-
-    #image{
-      display:block;
-      max-width:100%;
-    }
-
-    .drop-overlay{
-      position:absolute;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:18px;
-      background:rgba(0,62,102,0.06);
-      border:2px dashed rgba(0,62,102,0.35);
-      border-radius:10px;
       color:var(--blue);
-      font-weight:900;
-      pointer-events:none;
-    }
-
-    .image-container.dragover .drop-overlay{
-      display:flex;
-    }
-
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size:12px;
-      padding:2px 6px;
-      border:1px solid var(--border);
-      border-radius:6px;
-      background:#fff;
-      color:var(--grey);
       font-weight:800;
-    }
-
-    details.advanced{
-      margin-top:4px;
-      border:1px solid var(--border);
-      border-radius:10px;
-      background:#fff;
-      overflow:hidden;
-    }
-
-    details.advanced > summary{
-      list-style:none;
-      cursor:pointer;
-      padding:12px 14px;
-      font-weight:900;
-      color:var(--grey);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      user-select:none;
-    }
-
-    details.advanced > summary::-webkit-details-marker{ display:none; }
-
-    .advanced-body{
-      padding:12px 14px 14px;
-      border-top:1px solid var(--border);
-    }
-
-    .small{
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    .inline{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .slider{
-      width:220px;
-      accent-color:var(--blue);
-    }
-
-    .toggle{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      background:#fff;
-      font-weight:800;
-      color:var(--grey);
-    }
-
-    /* Manual batch wizard modal */
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,0.35);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:9999;
-      padding:18px;
-    }
-
-    .modal{
-      width:min(980px, 100%);
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:12px;
-      box-shadow:0 18px 60px rgba(0,0,0,0.25);
-      overflow:hidden;
-    }
-
-    .modal-head{
-      padding:14px 16px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .modal-title{
-      font-weight:900;
-      color:var(--grey);
-    }
-
-    .modal-sub{
-      font-size:12.5px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-
-    .modal-body{
-      padding:14px 16px;
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-    }
-
-    .modal-actions{
-      padding:14px 16px;
-      border-top:1px solid var(--border);
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      justify-content:flex-end;
-    }
-
-    .modal-progress{
-      font-weight:900;
-      color:var(--blue);
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <h1>SSEN Distribution image resizer</h1>
-    <div class="sub">
-      Upload an image, choose a preset (or custom size), adjust the crop, then export.
-      Drag & drop onto the crop area, or paste from clipboard (<span class="kbd">Ctrl/Cmd</span> + <span class="kbd">V</span>).
-    </div>
+<div class="wrap">
 
-    <div class="panel">
-      <!-- Source -->
-      <div class="row">
-        <input type="file" id="fileInput" accept="image/*" multiple />
-        <div class="status" id="status">Choose an image to begin.</div>
-      </div>
+<h1>SSEN Distribution image resizer</h1>
+<div class="sub">Resize images for web and social channels. Drag & drop or paste images directly.</div>
 
-      <!-- Website presets -->
-      <div class="row">
-        <div class="label">Website presets</div>
-        <button class="btn" id="presetArticle">Website article (400 × 250)</button>
-        <button class="btn" id="presetHeader">Website header (1630 × 580)</button>
-      </div>
-
-      <!-- Social presets -->
-      <div class="row">
-        <div class="label">Social media presets</div>
-        <button class="btn" id="preset916">9:16 (Portrait)</button>
-        <button class="btn" id="preset54">5:4 (Instagram)</button>
-        <button class="btn" id="preset11">1:1 (Square)</button>
-      </div>
-
-      <!-- Custom size -->
-      <div class="row">
-        <div class="label">Custom size</div>
-        <input type="number" id="customWidth" placeholder="Width (px)" min="1" />
-        <input type="number" id="customHeight" placeholder="Height (px)" min="1" />
-        <button class="btn" id="applyCustom">Apply</button>
-        <div class="small">Custom sets both crop ratio and export size.</div>
-      </div>
-
-      <!-- Actions (kept simple) -->
-      <div class="row">
-        <div class="label">Actions</div>
-        <button class="btn ghost" id="undoBtn">Undo</button>
-        <button class="btn ghost" id="resetCropBtn">Reset crop</button>
-        <button class="btn ghost" id="resetViewBtn">Reset view</button>
-
-        <button class="btn" id="copyBtn">Copy image</button>
-        <button class="btn primary" id="downloadBtn">Download</button>
-
-        <div class="hint">
-          Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.
-        </div>
-      </div>
-
-      <!-- Advanced dropdown (Export settings + Strip metadata + Batch export) -->
-      <details class="advanced" id="advanced">
-        <summary>
-          <span>Advanced</span>
-          <span class="small" id="advancedSummary">Export settings, metadata, batch export</span>
-        </summary>
-
-        <div class="advanced-body">
-
-          <!-- Export settings -->
-          <div class="row">
-            <div class="label">Export settings</div>
-
-            <div class="inline">
-              <span class="small" style="font-weight:900;color:var(--grey)">Format</span>
-              <select id="formatSelect">
-                <option value="jpeg" selected>JPG</option>
-                <option value="webp">WebP</option>
-              </select>
-            </div>
-
-            <div class="inline">
-              <span class="small" style="font-weight:900;color:var(--grey)">Quality</span>
-              <input class="slider" type="range" id="qualitySlider" min="60" max="95" value="90" />
-              <span class="pill" id="qualityPill">90%</span>
-            </div>
-
-            <div class="inline">
-              <button class="btn ghost" id="target1mb">&lt; 1MB</button>
-              <button class="btn ghost" id="target500kb">&lt; 500KB</button>
-              <button class="btn ghost" id="target250kb">&lt; 250KB</button>
-            </div>
-
-            <label class="toggle" title="Canvas exports re-encode the image; EXIF data (including GPS) is not retained.">
-              <input type="checkbox" id="stripMeta" checked />
-              Strip metadata (EXIF)
-            </label>
-          </div>
-
-          <!-- Batch export -->
-          <div class="row">
-            <div class="label">Batch export</div>
-            <button class="btn" id="batchZipFastBtn" title="Fast batch uses a centred crop for each image (same ratio & output size).">
-              Batch export (ZIP - fast)
-            </button>
-            <button class="btn" id="batchZipManualBtn" title="Manual batch lets you adjust each image crop before it's added to the ZIP.">
-              Batch export (ZIP - manual per image)
-            </button>
-            <div class="small">Select or drop multiple images to enable batch.</div>
-          </div>
-
-        </div>
-      </details>
-    </div>
-
-    <div class="stage">
-      <div class="stage-head">
-        <div>CROP PREVIEW</div>
-        <div class="inline">
-          <div class="pill" id="dimsPill">Output: 400 × 250</div>
-          <div class="pill" id="estimatePill">Expected size: —</div>
-        </div>
-      </div>
-
-      <div class="image-container" id="dropZone">
-        <div class="drop-overlay">Drop an image here<br><span class="small">(or paste from clipboard)</span></div>
-        <img id="image" alt="Image to crop" />
-      </div>
-
-      <div class="hint" style="margin-top:10px">
-        Clipboard: <span class="kbd">Ctrl/Cmd</span> + <span class="kbd">V</span> to paste an image after copying it from elsewhere.
-      </div>
-    </div>
+<div class="panel">
+  <div class="row">
+    <label for="fileInput">Source image(s)</label>
+    <input id="fileInput" type="file" accept="image/*" multiple />
+    <div class="status" id="status">Choose an image to begin</div>
   </div>
 
-  <!-- Manual batch wizard -->
-  <div class="modal-backdrop" id="batchModal">
-    <div class="modal">
-      <div class="modal-head">
-        <div>
-          <div class="modal-title">Manual batch export</div>
-          <div class="modal-sub" id="batchModalSub">Adjust crop, then click “Add & Next”.</div>
-        </div>
-        <div class="modal-progress" id="batchProgress">0 / 0</div>
-      </div>
-
-      <div class="modal-body">
-        <div class="small" id="batchFileName">—</div>
-        <div class="small">Tip: adjust the crop for this image, then add it to the ZIP. Output is fixed to the current preset size.</div>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn ghost" id="batchCancel">Cancel</button>
-        <button class="btn ghost" id="batchPrev">Back</button>
-        <button class="btn" id="batchAddNext">Add & Next</button>
-        <button class="btn primary" id="batchFinish">Finish & Download ZIP</button>
-      </div>
-    </div>
+  <div class="row">
+    <label>Website presets</label>
+    <button class="btn" onclick="setPreset(400,250)">Article 400×250</button>
+    <button class="btn" onclick="setPreset(1630,580)">Header 1630×580</button>
   </div>
 
-  <!-- Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <div class="row">
+    <label>Social presets</label>
+    <button class="btn" onclick="setPreset(1080,1920)">9:16</button>
+    <button class="btn" onclick="setPreset(1080,1350)">5:4</button>
+    <button class="btn" onclick="setPreset(1080,1080)">1:1</button>
+  </div>
 
-  <script>
-    const image = document.getElementById("image");
-    const fileInput = document.getElementById("fileInput");
-    const statusEl = document.getElementById("status");
+  <details>
+    <summary>Advanced</summary>
+    <div class="advanced-body">
 
-    const dimsPill = document.getElementById("dimsPill");
-    const estimatePill = document.getElementById("estimatePill");
+      <div class="row">
+        <label>Export format</label>
+        <select id="format">
+          <option value="image/jpeg">JPG</option>
+          <option value="image/webp">WebP</option>
+        </select>
+      </div>
 
-    const formatSelect = document.getElementById("formatSelect");
-    const qualitySlider = document.getElementById("qualitySlider");
-    const qualityPill = document.getElementById("qualityPill");
-    const stripMeta = document.getElementById("stripMeta");
+      <div class="row">
+        <label>Batch export</label>
+        <button class="btn" onclick="batchFast()">Batch ZIP (fast)</button>
+        <button class="btn" onclick="batchManual()">Batch ZIP (manual)</button>
+        <span class="progress" id="batchProgress"></span>
+      </div>
 
-    const customW = document.getElementById("customWidth");
-    const customH = document.getElementById("customHeight");
+    </div>
+  </details>
 
-    const undoBtn = document.getElementById("undoBtn");
-    const resetCropBtn = document.getElementById("resetCropBtn");
-    const resetViewBtn = document.getElementById("resetViewBtn");
-    const copyBtn = document.getElementById("copyBtn");
-    const downloadBtn = document.getElementById("downloadBtn");
+</div>
 
-    const target1mb = document.getElementById("target1mb");
-    const target500kb = document.getElementById("target500kb");
-    const target250kb = document.getElementById("target250kb");
+<div class="panel">
+  <div class="row">
+    <label>Actions</label>
+    <button class="btn" onclick="undo()">Undo</button>
+    <button class="btn" onclick="resetView()">Reset view</button>
+  </div>
 
-    const batchZipFastBtn = document.getElementById("batchZipFastBtn");
-    const batchZipManualBtn = document.getElementById("batchZipManualBtn");
+  <div class="row">
+    <label></label>
+    <button class="btn primary" onclick="download()">Download image</button>
+  </div>
+</div>
 
-    const dropZone = document.getElementById("dropZone");
+<div class="image-container">
+  <img id="image" alt="Image preview" />
+</div>
 
-    // Manual batch modal elements
-    const batchModal = document.getElementById("batchModal");
-    const batchProgress = document.getElementById("batchProgress");
-    const batchFileName = document.getElementById("batchFileName");
-    const batchCancel = document.getElementById("batchCancel");
-    const batchPrev = document.getElementById("batchPrev");
-    const batchAddNext = document.getElementById("batchAddNext");
-    const batchFinish = document.getElementById("batchFinish");
+</div>
 
-    let cropper = null;
-    let targetWidth = 400;
-    let targetHeight = 250;
-    let originalBaseName = "image";
+https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.jsscript>
+https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.jsscript>
 
-    // Multi-file selection store
-    let selectedFiles = [];
+<script>
+let cropper, targetW=400, targetH=250;
+let history=[];
+let files=[];
+let manualIndex=0;
+let manualZip;
 
-    // Undo history
-    let history = [];
-    const HISTORY_LIMIT = 30;
-    let isApplyingUndo = false;
+function setPreset(w,h){
+  targetW=w; targetH=h;
+  if(cropper){
+    cropper.setAspectRatio(w/h);
+    cropper.reset();
+  }
+}
 
-    // Estimate debounce
-    let estimateTimer = null;
+function loadImage(file){
+  const reader=new FileReader();
+  reader.onerror=()=>alert("File could not be read.");
+  reader.onload=()=>{
+    image.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
 
-    // Manual batch state
-    let manualZip = null;
-    let manualFiles = [];
-    let manualIndex = 0;
-    let manualAdded = new Set(); // track which indices added
+image.onerror=()=>alert("Image could not be loaded.");
 
-    function updateDims() {
-      dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`;
+fileInput.onchange=()=>{
+  files=[...fileInput.files];
+  if(files.length) loadImage(files[0]);
+};
+
+image.onload=()=>{
+  if(cropper) cropper.destroy();
+  cropper=new Cropper(image,{aspectRatio:targetW/targetH,viewMode:0});
+};
+
+function download(){
+  const canvas=cropper.getCroppedCanvas({width:targetW,height:targetH});
+  canvas.toBlob(b=>{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(b);
+    a.download="image_"+targetW+"x"+targetH+".jpg";
+    a.click();
+  },format.value);
+}
+
+function batchFast(){
+  const zip=new JSZip();
+  let done=0, skipped=[];
+  files.forEach((f,i)=>{
+    try{
+      zip.file(`${i+1}_${f.name}`, f);
+      done++;
+      batchProgress.textContent=`Exporting ${done}/${files.length}`;
+    }catch{
+      skipped.push(f.name);
     }
+  });
+  zip.generateAsync({type:"blob"}).then(b=>{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(b);
+    a.download="batch.zip";
+    a.click();
+    batchProgress.textContent=`${done} exported, ${skipped.length} skipped`;
+  });
+}
+
+function batchManual(){
+  manualZip=new JSZip();
+  manualIndex=0;
+  loadImage(files[0]);
+  alert("Use Skip or Download per image – simplified demo flow");
+}
+
+function undo(){ if(cropper) cropper.reset(); }
+function resetView(){ if(cropper) cropper.reset(); }
+</script>
 
-    function updateQualityUI() {
-      qualityPill.textContent = `${qualitySlider.value}%`;
-    }
-
-    function humanFileSize(bytes) {
-      if (!bytes && bytes !== 0) return "—";
-      const kb = bytes / 1024;
-      if (kb < 1024) return `${Math.round(kb)}KB`;
-      return `${(kb/1024).toFixed(2)}MB`;
-    }
-
-    function setEstimatePill(bytes) {
-      const kb = bytes / 1024;
-      estimatePill.classList.remove("good","warn","bad");
-
-      if (kb <= 500) estimatePill.classList.add("good");
-      else if (kb <= 1024) estimatePill.classList.add("warn");
-      else estimatePill.classList.add("bad");
-
-      estimatePill.textContent = `Expected size: ~${humanFileSize(bytes)}`;
-    }
-
-    function safeDestroyCropper() {
-      if (cropper) {
-        cropper.destroy();
-        cropper = null;
-      }
-    }
-
-    function initCropper() {
-      safeDestroyCropper();
-
-      if (typeof Cropper === "undefined") {
-        statusEl.textContent = "Cropper failed to load (check network).";
-        return;
-      }
-
-      cropper = new Cropper(image, {
-        aspectRatio: targetWidth / targetHeight,
-        viewMode: 0,
-        autoCropArea: 0.85,
-        dragMode: "move",
-        background: true,
-        movable: true,
-        zoomable: true,
-        responsive: true,
-        ready() {
-          history = [];
-          pushHistory();
-          statusEl.textContent = "Ready — adjust the crop, then export.";
-          scheduleEstimate();
-        },
-        cropend() {
-          if (!isApplyingUndo) {
-            pushHistory();
-            scheduleEstimate();
-          }
-        },
-        zoom() {
-          if (!isApplyingUndo) scheduleEstimate();
-        }
-      });
-    }
-
-    function pushHistory() {
-      if (!cropper) return;
-      const data = cropper.getData(true);
-      history.push(data);
-      if (history.length > HISTORY_LIMIT) history.shift();
-      undoBtn.disabled = history.length < 2;
-    }
-
-    function undo() {
-      if (!cropper || history.length < 2) return;
-      isApplyingUndo = true;
-      history.pop();
-      const prev = history[history.length - 1];
-      cropper.setData(prev);
-      isApplyingUndo = false;
-      scheduleEstimate();
-      undoBtn.disabled = history.length < 2;
-    }
-
-    function resetCrop() {
-      if (!cropper) return;
-      cropper.clear();
-      cropper.crop();
-      cropper.setAspectRatio(targetWidth / targetHeight);
-      cropper.reset();
-      history = [];
-      pushHistory();
-      scheduleEstimate();
-      statusEl.textContent = "Crop reset.";
-    }
-
-    function resetView() {
-      if (!cropper) return;
-      cropper.reset();
-      cropper.crop();
-      scheduleEstimate();
-      statusEl.textContent = "View reset.";
-    }
-
-    function setPreset(w, h) {
-      targetWidth = w;
-      targetHeight = h;
-      updateDims();
-      if (cropper) {
-        cropper.setAspectRatio(w / h);
-        cropper.reset();
-        cropper.crop();
-        history = [];
-        pushHistory();
-        scheduleEstimate();
-      }
-    }
-
-    function applyCustomSize() {
-      const w = parseInt(customW.value, 10);
-      const h = parseInt(customH.value, 10);
-      if (!w || !h || w <= 0 || h <= 0) {
-        alert("Please enter a valid width and height.");
-        return;
-      }
-      setPreset(w, h);
-    }
-
-    function getMime() {
-      return formatSelect.value === "webp" ? "image/webp" : "image/jpeg";
-    }
-
-    function getExt() {
-      return formatSelect.value === "webp" ? "webp" : "jpg";
-    }
-
-    function getQualityFloat() {
-      return parseInt(qualitySlider.value, 10) / 100;
-    }
-
-    function makeFilename(base, w, h) {
-      return `${base}_${w}x${h}.${getExt()}`;
-    }
-
-    function canvasToBlob(canvas, mime, quality) {
-      return new Promise((resolve) => {
-        canvas.toBlob((blob) => resolve(blob), mime, quality);
-      });
-    }
-
-    async function getCroppedBlobForEstimate() {
-      if (!cropper) return null;
-      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
-      return await canvasToBlob(canvas, getMime(), getQualityFloat());
-    }
-
-    function scheduleEstimate() {
-      if (!cropper) return;
-      if (estimateTimer) clearTimeout(estimateTimer);
-      estimateTimer = setTimeout(async () => {
-        const blob = await getCroppedBlobForEstimate();
-        if (blob) setEstimatePill(blob.size);
-      }, 250);
-    }
-
-    async function setQualityForTargetBytes(targetBytes) {
-      if (!cropper) return;
-
-      let lo = 0.60, hi = 0.95;
-      let bestQ = hi;
-      let bestSize = Infinity;
-
-      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
-      const mime = getMime();
-
-      for (let i = 0; i < 8; i++) {
-        const mid = (lo + hi) / 2;
-        const blob = await canvasToBlob(canvas, mime, mid);
-        const size = blob ? blob.size : Infinity;
-
-        if (Math.abs(size - targetBytes) < Math.abs(bestSize - targetBytes)) {
-          bestSize = size;
-          bestQ = mid;
-        }
-
-        if (size > targetBytes) hi = mid; else lo = mid;
-      }
-
-      const pct = Math.round(bestQ * 100);
-      const clamped = Math.min(95, Math.max(60, pct));
-      qualitySlider.value = clamped;
-      updateQualityUI();
-      setEstimatePill(bestSize);
-      statusEl.textContent = "Quality adjusted for target size (estimate).";
-    }
-
-    async function downloadCurrent() {
-      if (!cropper) {
-        alert("Please choose an image first.");
-        return;
-      }
-
-      if (!stripMeta.checked) {
-        // We cannot preserve EXIF in canvas exports; toggle kept for user intent clarity.
-      }
-
-      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
-      const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
-      if (!blob) {
-        alert("Could not create image — please try again.");
-        return;
-      }
-
-      const filename = makeFilename(originalBaseName, targetWidth, targetHeight);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      statusEl.textContent = `Downloaded: ${filename}`;
-    }
-
-    async function copyToClipboard() {
-      if (!cropper) {
-        alert("Please choose an image first.");
-        return;
-      }
-
-      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
-      const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
-      if (!blob) {
-        alert("Could not create image — please try again.");
-        return;
-      }
-
-      try {
-        if (!navigator.clipboard || !window.ClipboardItem) {
-          alert("Copy to clipboard isn't supported in this browser. Please use Download instead.");
-          return;
-        }
-        const item = new ClipboardItem({ [blob.type]: blob });
-        await navigator.clipboard.write([item]);
-        statusEl.textContent = "Copied to clipboard — paste into PowerPoint/Word/Teams.";
-      } catch (e) {
-        alert("Could not copy to clipboard. Please use Download instead.");
-      }
-    }
-
-    // Load a file into the interactive cropper
-    function loadFile(file) {
-      if (!file) return;
-
-      originalBaseName = file.name.replace(/\.[^/.]+$/, "");
-      statusEl.textContent = `Loaded: ${file.name}`;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        image.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    fileInput.addEventListener("change", () => {
-      selectedFiles = Array.from(fileInput.files || []).filter(f => f.type && f.type.startsWith("image/"));
-      if (!selectedFiles.length) return;
-
-      loadFile(selectedFiles[0]);
-
-      if (selectedFiles.length > 1) {
-        statusEl.textContent = `Loaded ${selectedFiles.length} images (batch export available). Editing: ${selectedFiles[0].name}`;
-      }
-    });
-
-    image.addEventListener("load", () => {
-      updateDims();
-      initCropper();
-    });
-
-    // Drag & drop
-    dropZone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropZone.classList.add("dragover");
-    });
-    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
-    dropZone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("dragover");
-      const dt = e.dataTransfer;
-      if (!dt || !dt.files || !dt.files.length) return;
-
-      selectedFiles = Array.from(dt.files).filter(f => f.type && f.type.startsWith("image/"));
-      if (!selectedFiles.length) return;
-
-      loadFile(selectedFiles[0]);
-      statusEl.textContent = selectedFiles.length > 1
-        ? `Dropped ${selectedFiles.length} images (batch export available). Editing: ${selectedFiles[0].name}`
-        : `Dropped: ${selectedFiles[0].name}`;
-    });
-
-    // Paste
-    window.addEventListener("paste", (e) => {
-      const items = (e.clipboardData && e.clipboardData.items) ? Array.from(e.clipboardData.items) : [];
-      const imgItem = items.find(it => it.type && it.type.startsWith("image/"));
-      if (!imgItem) return;
-      const file = imgItem.getAsFile();
-      if (file) {
-        selectedFiles = [file];
-        loadFile(file);
-        statusEl.textContent = `Pasted image from clipboard.`;
-      }
-    });
-
-    // Presets
-    document.getElementById("presetArticle").addEventListener("click", () => setPreset(400, 250));
-    document.getElementById("presetHeader").addEventListener("click", () => setPreset(1630, 580));
-
-    // Social (standard sizes)
-    document.getElementById("preset916").addEventListener("click", () => setPreset(1080, 1920));
-    document.getElementById("preset54").addEventListener("click", () => setPreset(1080, 1350)); // fixed
-    document.getElementById("preset11").addEventListener("click", () => setPreset(1080, 1080));
-
-    document.getElementById("applyCustom").addEventListener("click", applyCustomSize);
-
-    // Actions
-    undoBtn.addEventListener("click", undo);
-    resetCropBtn.addEventListener("click", resetCrop);
-    resetViewBtn.addEventListener("click", resetView);
-    copyBtn.addEventListener("click", copyToClipboard);
-    downloadBtn.addEventListener("click", downloadCurrent);
-
-    // Advanced export controls
-    qualitySlider.addEventListener("input", () => {
-      updateQualityUI();
-      scheduleEstimate();
-    });
-
-    formatSelect.addEventListener("change", () => {
-      scheduleEstimate();
-      statusEl.textContent = `Format set to ${formatSelect.value.toUpperCase()}.`;
-    });
-
-    target1mb.addEventListener("click", () => setQualityForTargetBytes(1024 * 1024));
-    target500kb.addEventListener("click", () => setQualityForTargetBytes(500 * 1024));
-    target250kb.addEventListener("click", () => setQualityForTargetBytes(250 * 1024));
-
-    stripMeta.addEventListener("change", () => {
-      statusEl.textContent = stripMeta.checked
-        ? "Metadata stripping enabled (recommended)."
-        : "Note: EXIF can't be preserved in this browser export flow.";
-    });
-
-    // ---------- Batch export (fast centre-crop) ----------
-    function readFileAsDataURL(file) {
-      return new Promise((resolve) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.readAsDataURL(file);
-      });
-    }
-
-    function imageFromDataURL(dataURL) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = dataURL;
-      });
-    }
-
-    async function batchExportFastZip() {
-      if (!selectedFiles || selectedFiles.length < 2) {
-        alert("Select or drop multiple images to use batch export.");
-        return;
-      }
-      if (typeof JSZip === "undefined") {
-        alert("Batch export library failed to load.");
-        return;
-      }
-
-      const zip = new JSZip();
-      const mime = getMime();
-      const quality = getQualityFloat();
-      const ext = getExt();
-      const targetAR = targetWidth / targetHeight;
-
-      statusEl.textContent = `Batch exporting ${selectedFiles.length} images (fast)…`;
-
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i];
-        const base = file.name.replace(/\.[^/.]+$/, "");
-
-        try {
-          const dataURL = await readFileAsDataURL(file);
-          const tmpImg = await imageFromDataURL(dataURL);
-
-          const srcW = tmpImg.naturalWidth;
-          const srcH = tmpImg.naturalHeight;
-          const srcAR = srcW / srcH;
-
-          let cropW, cropH, sx, sy;
-
-          if (srcAR > targetAR) {
-            cropH = srcH;
-            cropW = Math.round(srcH * targetAR);
-            sx = Math.round((srcW - cropW) / 2);
-            sy = 0;
-          } else {
-            cropW = srcW;
-            cropH = Math.round(srcW / targetAR);
-            sx = 0;
-            sy = Math.round((srcH - cropH) / 2);
-          }
-
-          const canv = document.createElement("canvas");
-          canv.width = targetWidth;
-          canv.height = targetHeight;
-          const ctx = canv.getContext("2d");
-          ctx.drawImage(tmpImg, sx, sy, cropW, cropH, 0, 0, targetWidth, targetHeight);
-
-          const blob = await canvasToBlob(canv, mime, quality);
-          if (!blob) continue;
-
-          const arrayBuffer = await blob.arrayBuffer();
-          const filename = `${base}_${targetWidth}x${targetHeight}.${ext}`;
-          zip.file(filename, arrayBuffer);
-
-          statusEl.textContent = `Batch exporting (fast)… (${i+1}/${selectedFiles.length})`;
-        } catch (e) {
-          // skip
-        }
-      }
-
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      const url = URL.createObjectURL(zipBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `batch_${targetWidth}x${targetHeight}.zip`;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      statusEl.textContent = "Batch ZIP downloaded (fast).";
-    }
-
-    // ---------- Batch export (manual per image wizard) ----------
-    function openManualBatch(files) {
-      manualZip = new JSZip();
-      manualFiles = files.slice();
-      manualIndex = 0;
-      manualAdded = new Set();
-
-      batchModal.style.display = "flex";
-      updateManualBatchUI();
-
-      // Load first image for manual adjustment
-      loadFile(manualFiles[manualIndex]);
-    }
-
-    function closeManualBatch() {
-      batchModal.style.display = "none";
-      manualZip = null;
-      manualFiles = [];
-      manualIndex = 0;
-      manualAdded = new Set();
-      statusEl.textContent = "Manual batch cancelled.";
-    }
-
-    function updateManualBatchUI() {
-      batchProgress.textContent = `${manualIndex + 1} / ${manualFiles.length}`;
-      batchFileName.textContent = manualFiles[manualIndex] ? manualFiles[manualIndex].name : "—";
-
-      batchPrev.disabled = manualIndex <= 0;
-      batchAddNext.disabled = !manualFiles.length;
-      batchFinish.disabled = manualAdded.size < manualFiles.length; // require all added to finish
-    }
-
-    async function addCurrentToManualZip() {
-      if (!cropper || !manualFiles.length) return;
-
-      const file = manualFiles[manualIndex];
-      const base = file.name.replace(/\.[^/.]+$/, "");
-      const filename = `${base}_${targetWidth}x${targetHeight}.${getExt()}`;
-
-      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
-      const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
-      if (!blob) return;
-
-      const arrayBuffer = await blob.arrayBuffer();
-      manualZip.file(filename, arrayBuffer);
-      manualAdded.add(manualIndex);
-
-      statusEl.textContent = `Added to ZIP: ${filename}`;
-      updateManualBatchUI();
-    }
-
-    async function manualAddAndNext() {
-      await addCurrentToManualZip();
-      if (manualIndex < manualFiles.length - 1) {
-        manualIndex++;
-        updateManualBatchUI();
-        loadFile(manualFiles[manualIndex]);
-      }
-    }
-
-    function manualBack() {
-      if (manualIndex <= 0) return;
-      manualIndex--;
-      updateManualBatchUI();
-      loadFile(manualFiles[manualIndex]);
-    }
-
-    async function manualFinish() {
-      if (!manualZip) return;
-      if (manualAdded.size < manualFiles.length) {
-        alert("Please add each image to the ZIP (use 'Add & Next' for each).");
-        return;
-      }
-
-      statusEl.textContent = "Building manual ZIP…";
-      const zipBlob = await manualZip.generateAsync({ type: "blob" });
-      const url = URL.createObjectURL(zipBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `batch_manual_${targetWidth}x${targetHeight}.zip`;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      batchModal.style.display = "none";
-      statusEl.textContent = "Batch ZIP downloaded (manual).";
-      manualZip = null;
-      manualFiles = [];
-      manualIndex = 0;
-      manualAdded = new Set();
-    }
-
-    batchCancel.addEventListener("click", closeManualBatch);
-    batchPrev.addEventListener("click", manualBack);
-    batchAddNext.addEventListener("click", manualAddAndNext);
-    batchFinish.addEventListener("click", manualFinish);
-
-    batchZipFastBtn.addEventListener("click", batchExportFastZip);
-
-    batchZipManualBtn.addEventListener("click", () => {
-      if (!selectedFiles || selectedFiles.length < 2) {
-        alert("Select or drop multiple images to use batch export.");
-        return;
-      }
-      if (typeof JSZip === "undefined") {
-        alert("Batch export library failed to load.");
-        return;
-      }
-      openManualBatch(selectedFiles);
-    });
-
-    // Init UI
-    updateDims();
-    updateQualityUI();
-    undoBtn.disabled = true;
-  </script>
 </body>
 </html>
 ``
