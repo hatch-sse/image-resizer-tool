@@ -157,3 +157,70 @@
     let targetHeight = 250;
     let originalFileName = "image";
 
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      // Store original filename (without extension)
+      originalFileName = file.name.replace(/\.[^/.]+$/, "");
+      fileNameHint.textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    image.addEventListener("load", () => {
+      if (cropper) cropper.destroy();
+
+      cropper = new Cropper(image, {
+        aspectRatio: targetWidth / targetHeight,
+        viewMode: 0,
+        autoCropArea: 0.85,
+        dragMode: "move",
+        background: true,
+        movable: true,
+        zoomable: true,
+        responsive: true
+      });
+    });
+
+    function setPreset(width, height) {
+      targetWidth = width;
+      targetHeight = height;
+
+      if (cropper) {
+        cropper.setAspectRatio(width / height);
+        cropper.reset();
+        cropper.crop();
+      }
+    }
+
+    function downloadImage() {
+      if (!cropper) {
+        alert("Please choose an image first.");
+        return;
+      }
+
+      const canvas = cropper.getCroppedCanvas({
+        width: targetWidth,
+        height: targetHeight
+      });
+
+      canvas.toBlob(blob => {
+        const link = document.createElement("a");
+        const filename = `${originalFileName}_${targetWidth}x${targetHeight}.jpg`;
+
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+
+        URL.revokeObjectURL(link.href);
+      }, "image/jpeg", 0.9);
+    }
+  </script>
+</body>
+</html>
+``
