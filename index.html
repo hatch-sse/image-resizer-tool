@@ -33,15 +33,18 @@
     }
 
     .image-container {
-      max-width: 100%;
+      width: 100%;
+      height: 500px;               /* ensures full image visibility */
       background: #eee;
       padding: 10px;
       border: 1px solid #ccc;
+      overflow: hidden;
     }
 
     img {
       max-width: 100%;
-      display: none;
+      max-height: 100%;
+      display: block;
     }
   </style>
 </head>
@@ -56,10 +59,10 @@
 
     <strong>Presets:</strong>
     <button onclick="setPreset(400, 250)">
-      Website article (400 × 250)
+      Website article (400w × 250h)
     </button>
     <button onclick="setPreset(1630, 580)">
-      Website header (1630 × 580)
+      Website header (1630w × 580h)
     </button>
 
     <br><br>
@@ -80,7 +83,7 @@
 
     let cropper = null;
 
-    // Default preset = Website article (400 x 250)
+    // Default preset = Website article (400 × 250)
     let targetWidth = 400;
     let targetHeight = 250;
 
@@ -91,16 +94,20 @@
       const reader = new FileReader();
 
       reader.onload = () => {
-        image.style.display = "block";
         image.src = reader.result;
 
         image.onload = () => {
-          if (cropper) cropper.destroy();
+          if (cropper) {
+            cropper.destroy();
+          }
 
           cropper = new Cropper(image, {
             aspectRatio: targetWidth / targetHeight,
-            viewMode: 1,
-            autoCropArea: 1,
+            viewMode: 0,          // allow full image visibility
+            autoCropArea: 0.9,
+            background: true,
+            movable: true,
+            zoomable: true,
             responsive: true
           });
         };
