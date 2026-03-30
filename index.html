@@ -53,7 +53,6 @@
       letter-spacing:0.2px;
     }
 
-    /* Keep this minimal (no “tips” section) */
     .sub{
       margin:0 0 16px 0;
       font-size:13.5px;
@@ -125,7 +124,7 @@
     }
     .btn.ghost:hover{ background:#f8fafc; }
 
-    /* Keyboard focus */
+    /* Keyboard focus styling */
     .btn:focus-visible,
     input:focus-visible,
     select:focus-visible,
@@ -207,7 +206,7 @@
 
     .image-container.dragover .drop-overlay{ display:flex; }
 
-    /* Advanced dropdown: visible but visually neutral (like earlier UI) */
+    /* Advanced dropdown: visible but visually neutral */
     details.advanced{
       border:none;
       background:transparent;
@@ -226,7 +225,6 @@
 
     .advanced-body{
       padding:6px 0 0 0;
-      border:none;
     }
 
     .small{
@@ -246,25 +244,33 @@
       accent-color:var(--blue);
     }
 
-    /* Manual batch wizard modal */
+    /* ===========================
+       Manual batch modal (FIXED)
+       =========================== */
+
+    /* Backdrop: lighter + DOES NOT block pointer events behind */
     .modal-backdrop{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,0.35);
+      background:rgba(0,0,0,0.25);  /* reduced opacity */
       display:none;
-      align-items:center;
+      align-items:flex-start;
       justify-content:center;
       z-index:9999;
       padding:18px;
+      pointer-events:none;          /* key: allow crop interaction behind */
     }
 
+    /* Modal: pointer events ON, subtle shadow */
     .modal{
       width:min(980px, 100%);
       background:#fff;
       border:1px solid var(--border);
       border-radius:12px;
-      box-shadow:0 18px 60px rgba(0,0,0,0.25);
       overflow:hidden;
+      pointer-events:auto;          /* key: buttons still clickable */
+      margin-top:20px;
+      box-shadow:0 10px 28px rgba(0,0,0,0.18); /* subtle drop shadow */
     }
 
     .modal-head{
@@ -312,21 +318,18 @@
 
     <div class="panel">
 
-      <!-- Source -->
       <div class="row">
         <label for="fileInput">Source image(s)</label>
         <input type="file" id="fileInput" accept="image/*" multiple />
         <div class="status" id="status">Choose an image to begin.</div>
       </div>
 
-      <!-- Website presets -->
       <div class="row">
         <label>Website presets</label>
         <button class="btn" type="button" id="presetArticle">Website article (400 × 250)</button>
         <button class="btn" type="button" id="presetHeader">Website header (1630 × 580)</button>
       </div>
 
-      <!-- Social presets -->
       <div class="row">
         <label>Social media presets</label>
         <button class="btn" type="button" id="preset916">9:16 (Portrait)</button>
@@ -334,7 +337,6 @@
         <button class="btn" type="button" id="preset11">1:1 (Square)</button>
       </div>
 
-      <!-- Custom size -->
       <div class="row">
         <label for="customWidth">Custom size</label>
         <input type="number" id="customWidth" placeholder="Width (px)" min="1" />
@@ -342,7 +344,6 @@
         <button class="btn" type="button" id="applyCustom">Apply</button>
       </div>
 
-      <!-- Actions (kept in the same row style as earlier UI) -->
       <div class="row">
         <label>Actions</label>
         <button class="btn ghost" type="button" id="undoBtn">Undo</button>
@@ -351,7 +352,7 @@
         <button class="btn" type="button" id="copyBtn">Copy image</button>
       </div>
 
-      <!-- Advanced dropdown (visible) -->
+      <!-- Advanced dropdown (collapsed by default; visible in UI) -->
       <details class="advanced" id="advanced">
         <summary tabindex="0">Advanced</summary>
         <div class="advanced-body">
@@ -390,14 +391,12 @@
         </div>
       </details>
 
-      <!-- Download moved BELOW Advanced -->
       <div class="row" style="margin-top:8px;">
         <label></label>
         <button class="btn primary" type="button" id="downloadBtn">Download</button>
       </div>
     </div>
 
-    <!-- Preview stage -->
     <div class="stage">
       <div class="stage-head">
         <div>CROP PREVIEW</div>
@@ -414,12 +413,32 @@
     </div>
   </div>
 
+  <!-- Manual batch wizard modal -->
+  <div class="modal-backdrop" id="batchModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Manual batch export">
+      <div class="modal-head">
+        <div class="modal-title">Manual batch export</div>
+        <div class="modal-progress" id="batchModalProgress">0 / 0</div>
+      </div>
+      <div class="modal-body">
+        <div class="small" id="batchModalFile">—</div>
+        <div class="small">Adjust crop for this image, then choose Add or Skip.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="batchCancel" type="button">Cancel</button>
+        <button class="btn ghost" id="batchPrev" type="button">Back</button>
+        <button class="btn" id="batchSkipNext" type="button">Skip & Next</button>
+        <button class="btn" id="batchAddNext" type="button">Add & Next</button>
+        <button class="btn primary" id="batchFinish" type="button">Finish & Download ZIP</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
   <script>
-    // Elements
     const image = document.getElementById("image");
     const fileInput = document.getElementById("fileInput");
     const statusEl = document.getElementById("status");
@@ -449,23 +468,29 @@
 
     const dropZone = document.getElementById("dropZone");
 
-    // State
+    // Manual batch modal elements
+    const batchModal = document.getElementById("batchModal");
+    const batchModalProgress = document.getElementById("batchModalProgress");
+    const batchModalFile = document.getElementById("batchModalFile");
+    const batchCancel = document.getElementById("batchCancel");
+    const batchPrev = document.getElementById("batchPrev");
+    const batchSkipNext = document.getElementById("batchSkipNext");
+    const batchAddNext = document.getElementById("batchAddNext");
+    const batchFinish = document.getElementById("batchFinish");
+
     let cropper = null;
     let targetWidth = 400;
     let targetHeight = 250;
     let originalBaseName = "image";
-
     let selectedFiles = [];
 
-    // Undo history (store crop + view state)
+    // Undo history (crop + view state)
     let history = [];
     const HISTORY_LIMIT = 30;
     let isApplyingUndo = false;
-
-    // Estimate debounce
     let estimateTimer = null;
 
-    // Manual batch wizard state
+    // Manual batch state
     let manualZip = null;
     let manualFiles = [];
     let manualIndex = 0;
@@ -473,26 +498,16 @@
     let manualSkippedCount = 0;
     let manualFailures = [];
 
-    // Manual batch modal UI
-    let batchModal, batchProgress, batchFileName, batchCancel, batchPrev, batchAddNext, batchSkipNext, batchFinish;
+    function updateDims(){ dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`; }
+    function updateQualityUI(){ qualityPill.textContent = `${qualitySlider.value}%`; }
 
-    // ---------- Helpers ----------
-    function updateDims() {
-      dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`;
-    }
-
-    function updateQualityUI() {
-      qualityPill.textContent = `${qualitySlider.value}%`;
-    }
-
-    function humanFileSize(bytes) {
+    function humanFileSize(bytes){
       if (!bytes && bytes !== 0) return "—";
       const kb = bytes / 1024;
       if (kb < 1024) return `${Math.round(kb)}KB`;
       return `${(kb/1024).toFixed(2)}MB`;
     }
-
-    function setEstimatePill(bytes) {
+    function setEstimatePill(bytes){
       const kb = bytes / 1024;
       estimatePill.classList.remove("good","warn","bad");
       if (kb <= 500) estimatePill.classList.add("good");
@@ -501,31 +516,19 @@
       estimatePill.textContent = `Expected size: ~${humanFileSize(bytes)}`;
     }
 
-    function getMime() {
-      return formatSelect.value === "webp" ? "image/webp" : "image/jpeg";
-    }
-    function getExt() {
-      return formatSelect.value === "webp" ? "webp" : "jpg";
-    }
-    function getQualityFloat() {
-      return parseInt(qualitySlider.value, 10) / 100;
+    function getMime(){ return formatSelect.value === "webp" ? "image/webp" : "image/jpeg"; }
+    function getExt(){ return formatSelect.value === "webp" ? "webp" : "jpg"; }
+    function getQualityFloat(){ return parseInt(qualitySlider.value, 10) / 100; }
+
+    function canvasToBlob(canvas, mime, quality){
+      return new Promise((resolve) => canvas.toBlob(resolve, mime, quality));
     }
 
-    function canvasToBlob(canvas, mime, quality) {
-      return new Promise((resolve) => {
-        canvas.toBlob((blob) => resolve(blob), mime, quality);
-      });
+    function safeDestroyCropper(){
+      if (cropper){ cropper.destroy(); cropper = null; }
     }
 
-    function safeDestroyCropper() {
-      if (cropper) {
-        cropper.destroy();
-        cropper = null;
-      }
-    }
-
-    // Store fuller undo state
-    function pushHistory() {
+    function pushHistory(){
       if (!cropper) return;
       const snap = {
         data: cropper.getData(true),
@@ -537,22 +540,15 @@
       undoBtn.disabled = history.length < 2;
     }
 
-    function restoreSnapshot(snap) {
+    function restoreSnapshot(snap){
       if (!cropper || !snap) return;
       cropper.setCanvasData(snap.canvas);
       cropper.setCropBoxData(snap.cropBox);
       cropper.setData(snap.data);
     }
 
-    // ---------- Core cropper init ----------
-    function initCropper() {
+    function initCropper(){
       safeDestroyCropper();
-
-      if (typeof Cropper === "undefined") {
-        statusEl.textContent = "Cropper failed to load (check network).";
-        return;
-      }
-
       cropper = new Cropper(image, {
         aspectRatio: targetWidth / targetHeight,
         viewMode: 0,
@@ -562,30 +558,29 @@
         movable: true,
         zoomable: true,
         responsive: true,
-        ready() {
+        ready(){
           history = [];
           pushHistory();
           statusEl.textContent = "Ready.";
           scheduleEstimate();
         },
-        cropend() {
-          if (!isApplyingUndo) {
+        cropend(){
+          if (!isApplyingUndo){
             pushHistory();
             scheduleEstimate();
           }
         },
-        zoom() {
+        zoom(){
           if (!isApplyingUndo) scheduleEstimate();
         }
       });
     }
 
-    function setPreset(w, h) {
-      targetWidth = w;
-      targetHeight = h;
+    function setPreset(w,h){
+      targetWidth = w; targetHeight = h;
       updateDims();
-      if (cropper) {
-        cropper.setAspectRatio(w / h);
+      if (cropper){
+        cropper.setAspectRatio(w/h);
         cropper.reset();
         cropper.crop();
         history = [];
@@ -594,24 +589,23 @@
       }
     }
 
-    function applyCustomSize() {
+    function applyCustomSize(){
       const w = parseInt(customW.value, 10);
       const h = parseInt(customH.value, 10);
-      if (!w || !h || w <= 0 || h <= 0) {
+      if (!w || !h || w <= 0 || h <= 0){
         alert("Please enter a valid width and height.");
         return;
       }
-      setPreset(w, h);
+      setPreset(w,h);
     }
 
-    // ---------- Estimation ----------
-    async function getCroppedBlobForEstimate() {
+    async function getCroppedBlobForEstimate(){
       if (!cropper) return null;
       const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
       return await canvasToBlob(canvas, getMime(), getQualityFloat());
     }
 
-    function scheduleEstimate() {
+    function scheduleEstimate(){
       if (!cropper) return;
       if (estimateTimer) clearTimeout(estimateTimer);
       estimateTimer = setTimeout(async () => {
@@ -620,9 +614,8 @@
       }, 250);
     }
 
-    async function setQualityForTargetBytes(targetBytes) {
+    async function setQualityForTargetBytes(targetBytes){
       if (!cropper) return;
-
       let lo = 0.60, hi = 0.95;
       let bestQ = hi;
       let bestSize = Infinity;
@@ -630,45 +623,32 @@
       const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
       const mime = getMime();
 
-      for (let i = 0; i < 8; i++) {
-        const mid = (lo + hi) / 2;
+      for (let i=0;i<8;i++){
+        const mid = (lo+hi)/2;
         const blob = await canvasToBlob(canvas, mime, mid);
         const size = blob ? blob.size : Infinity;
-
-        if (Math.abs(size - targetBytes) < Math.abs(bestSize - targetBytes)) {
-          bestSize = size;
-          bestQ = mid;
+        if (Math.abs(size-targetBytes) < Math.abs(bestSize-targetBytes)){
+          bestSize = size; bestQ = mid;
         }
-
         if (size > targetBytes) hi = mid; else lo = mid;
       }
 
-      const pct = Math.round(bestQ * 100);
-      const clamped = Math.min(95, Math.max(60, pct));
-      qualitySlider.value = clamped;
+      const pct = Math.round(bestQ*100);
+      qualitySlider.value = Math.min(95, Math.max(60, pct));
       updateQualityUI();
       setEstimatePill(bestSize);
       statusEl.textContent = "Quality adjusted (estimate).";
     }
 
-    // ---------- Download / Copy ----------
-    function makeDownloadName(base) {
+    function makeDownloadName(base){
       return `${base}_${targetWidth}x${targetHeight}.${getExt()}`;
     }
 
-    async function downloadCurrent() {
-      if (!cropper) {
-        alert("Please choose an image first.");
-        return;
-      }
-
+    async function downloadCurrent(){
+      if (!cropper){ alert("Please choose an image first."); return; }
       const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
       const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
-      if (!blob) {
-        alert("Could not create image.");
-        return;
-      }
-
+      if (!blob){ alert("Could not create image."); return; }
       const filename = makeDownloadName(originalBaseName);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -676,50 +656,35 @@
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-
       statusEl.textContent = `Downloaded: ${filename}`;
     }
 
-    async function copyToClipboard() {
-      if (!cropper) {
-        alert("Please choose an image first.");
-        return;
-      }
-
+    async function copyToClipboard(){
+      if (!cropper){ alert("Please choose an image first."); return; }
       const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
       const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
-      if (!blob) {
-        alert("Could not create image.");
-        return;
-      }
-
-      try {
-        if (!navigator.clipboard || !window.ClipboardItem) {
+      if (!blob){ alert("Could not create image."); return; }
+      try{
+        if (!navigator.clipboard || !window.ClipboardItem){
           alert("Copy isn’t supported in this browser. Use Download instead.");
           return;
         }
         const item = new ClipboardItem({ [blob.type]: blob });
         await navigator.clipboard.write([item]);
         statusEl.textContent = "Copied.";
-      } catch (e) {
+      }catch(e){
         alert("Could not copy. Use Download instead.");
       }
     }
 
-    // ---------- Error-handled file load ----------
-    function loadFile(file) {
+    function loadFile(file){
       if (!file) return;
-
       originalBaseName = file.name.replace(/\.[^/.]+$/, "");
       statusEl.textContent = `Loaded: ${file.name}`;
 
       const reader = new FileReader();
-      reader.onerror = () => {
-        statusEl.textContent = `Could not read: ${file.name}`;
-      };
-      reader.onload = () => {
-        image.src = reader.result;
-      };
+      reader.onerror = () => { statusEl.textContent = `Could not read: ${file.name}`; };
+      reader.onload = () => { image.src = reader.result; };
       reader.readAsDataURL(file);
     }
 
@@ -728,95 +693,62 @@
       safeDestroyCropper();
     };
 
-    // ---------- Drag & drop ----------
-    dropZone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropZone.classList.add("dragover");
-    });
+    // Drag & drop
+    dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragover"); });
     dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
     dropZone.addEventListener("drop", (e) => {
       e.preventDefault();
       dropZone.classList.remove("dragover");
       const dt = e.dataTransfer;
       if (!dt || !dt.files || !dt.files.length) return;
-
       selectedFiles = Array.from(dt.files).filter(f => f.type && f.type.startsWith("image/"));
       if (!selectedFiles.length) return;
-
       loadFile(selectedFiles[0]);
-      statusEl.textContent = selectedFiles.length > 1
-        ? `Dropped ${selectedFiles.length} images.`
-        : `Dropped: ${selectedFiles[0].name}`;
+      statusEl.textContent = selectedFiles.length > 1 ? `Dropped ${selectedFiles.length} images.` : `Dropped: ${selectedFiles[0].name}`;
     });
 
-    // Paste from clipboard (image)
-    window.addEventListener("paste", (e) => {
-      const items = (e.clipboardData && e.clipboardData.items) ? Array.from(e.clipboardData.items) : [];
-      const imgItem = items.find(it => it.type && it.type.startsWith("image/"));
-      if (!imgItem) return;
-      const file = imgItem.getAsFile();
-      if (file) {
-        selectedFiles = [file];
-        loadFile(file);
-        statusEl.textContent = "Pasted image.";
-      }
-    });
-
-    // ---------- Undo / reset ----------
-    function undo() {
+    // Undo / resets
+    function undo(){
       if (!cropper || history.length < 2) return;
       isApplyingUndo = true;
       history.pop();
-      const prev = history[history.length - 1];
-      restoreSnapshot(prev);
+      restoreSnapshot(history[history.length-1]);
       isApplyingUndo = false;
       scheduleEstimate();
       undoBtn.disabled = history.length < 2;
     }
-
-    function resetCrop() {
+    function resetCrop(){
       if (!cropper) return;
-      cropper.clear();
-      cropper.crop();
-      cropper.setAspectRatio(targetWidth / targetHeight);
+      cropper.clear(); cropper.crop();
+      cropper.setAspectRatio(targetWidth/targetHeight);
       cropper.reset();
-      history = [];
-      pushHistory();
+      history=[]; pushHistory();
       scheduleEstimate();
       statusEl.textContent = "Crop reset.";
     }
-
-    function resetView() {
+    function resetView(){
       if (!cropper) return;
-      cropper.reset();
-      cropper.crop();
-      history = [];
-      pushHistory();
+      cropper.reset(); cropper.crop();
+      history=[]; pushHistory();
       scheduleEstimate();
       statusEl.textContent = "View reset.";
     }
 
-    // ---------- ZIP name dedupe ----------
-    function uniqueZipName(seen, name) {
-      if (!seen.has(name)) {
-        seen.add(name);
-        return name;
-      }
+    // ZIP filename dedupe
+    function uniqueZipName(seen, name){
+      if (!seen.has(name)){ seen.add(name); return name; }
       const dot = name.lastIndexOf(".");
-      const base = dot >= 0 ? name.slice(0, dot) : name;
-      const ext = dot >= 0 ? name.slice(dot) : "";
-      let n = 2;
+      const base = dot>=0 ? name.slice(0,dot) : name;
+      const ext = dot>=0 ? name.slice(dot) : "";
+      let n=2;
       let candidate = `${base}_${n}${ext}`;
-      while (seen.has(candidate)) {
-        n++;
-        candidate = `${base}_${n}${ext}`;
-      }
+      while(seen.has(candidate)){ n++; candidate = `${base}_${n}${ext}`; }
       seen.add(candidate);
       return candidate;
     }
 
-    // ---------- Batch export (fast) ----------
-    function readFileAsDataURL(file) {
+    // Batch fast export
+    function readFileAsDataURL(file){
       return new Promise((resolve, reject) => {
         const r = new FileReader();
         r.onerror = () => reject(new Error("read"));
@@ -824,8 +756,7 @@
         r.readAsDataURL(file);
       });
     }
-
-    function imageFromDataURL(dataURL) {
+    function imageFromDataURL(dataURL){
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => resolve(img);
@@ -834,53 +765,49 @@
       });
     }
 
-    async function batchExportFastZip() {
-      if (!selectedFiles || selectedFiles.length < 2) {
+    async function batchExportFastZip(){
+      if (!selectedFiles || selectedFiles.length < 2){
         alert("Select or drop multiple images to batch export.");
         return;
       }
-      if (typeof JSZip === "undefined") {
+      if (typeof JSZip === "undefined"){
         alert("Batch library failed to load.");
         return;
       }
 
       const zip = new JSZip();
       const seen = new Set();
-
       const mime = getMime();
       const quality = getQualityFloat();
       const ext = getExt();
-      const targetAR = targetWidth / targetHeight;
+      const targetAR = targetWidth/targetHeight;
 
-      let exported = 0;
-      let skipped = [];
-
+      let exported=0;
+      let skipped=[];
       batchProgressEl.textContent = `Exporting 0 / ${selectedFiles.length}`;
 
-      for (let i = 0; i < selectedFiles.length; i++) {
+      for (let i=0;i<selectedFiles.length;i++){
         const file = selectedFiles[i];
         const base = file.name.replace(/\.[^/.]+$/, "");
-
-        try {
+        try{
           const dataURL = await readFileAsDataURL(file);
           const tmpImg = await imageFromDataURL(dataURL);
 
           const srcW = tmpImg.naturalWidth;
           const srcH = tmpImg.naturalHeight;
-          const srcAR = srcW / srcH;
+          const srcAR = srcW/srcH;
 
           let cropW, cropH, sx, sy;
-
-          if (srcAR > targetAR) {
+          if (srcAR > targetAR){
             cropH = srcH;
-            cropW = Math.round(srcH * targetAR);
-            sx = Math.round((srcW - cropW) / 2);
+            cropW = Math.round(srcH*targetAR);
+            sx = Math.round((srcW-cropW)/2);
             sy = 0;
           } else {
             cropW = srcW;
-            cropH = Math.round(srcW / targetAR);
+            cropH = Math.round(srcW/targetAR);
             sx = 0;
-            sy = Math.round((srcH - cropH) / 2);
+            sy = Math.round((srcH-cropH)/2);
           }
 
           const canv = document.createElement("canvas");
@@ -894,18 +821,16 @@
 
           const filenameRaw = `${base}_${targetWidth}x${targetHeight}.${ext}`;
           const filename = uniqueZipName(seen, filenameRaw);
-
           const arrayBuffer = await blob.arrayBuffer();
           zip.file(filename, arrayBuffer);
           exported++;
-        } catch (e) {
+        } catch(e){
           skipped.push(file.name);
         }
-
-        batchProgressEl.textContent = `Exporting ${i + 1} / ${selectedFiles.length}`;
+        batchProgressEl.textContent = `Exporting ${i+1} / ${selectedFiles.length}`;
       }
 
-      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const zipBlob = await zip.generateAsync({ type:"blob" });
       const url = URL.createObjectURL(zipBlob);
       const a = document.createElement("a");
       a.href = url;
@@ -915,64 +840,17 @@
 
       const skippedCount = skipped.length;
       batchProgressEl.textContent = `${exported} exported, ${skippedCount} skipped`;
-      if (skippedCount) {
-        // show list in status to avoid UI clutter
-        statusEl.textContent = `Skipped: ${skipped.slice(0, 6).join(", ")}${skippedCount > 6 ? "…" : ""}`;
-      } else {
-        statusEl.textContent = "Batch complete.";
+      statusEl.textContent = skippedCount ? `Skipped: ${skipped.slice(0,6).join(", ")}${skippedCount>6?"…":""}` : "Batch complete.";
+    }
+
+    // Manual batch flow (non-blocking modal, autofocus Add & Next)
+    function openManualBatch(files){
+      if (typeof JSZip === "undefined"){
+        alert("Batch library failed to load.");
+        return;
       }
-    }
-
-    // ---------- Manual batch wizard (skip supported) ----------
-    function ensureManualModal() {
-      if (batchModal) return;
-
-      const backdrop = document.createElement("div");
-      backdrop.className = "modal-backdrop";
-      backdrop.id = "batchModal";
-
-      backdrop.innerHTML = `
-        <div class="modal" role="dialog" aria-modal="true" aria-label="Manual batch export">
-          <div class="modal-head">
-            <div class="modal-title">Manual batch export</div>
-            <div class="modal-progress" id="batchModalProgress">0 / 0</div>
-          </div>
-          <div class="modal-body">
-            <div class="small" id="batchModalFile">—</div>
-            <div class="small">Adjust crop for this image, then choose Add or Skip.</div>
-          </div>
-          <div class="modal-actions">
-            <button class="btn ghost" id="batchCancel">Cancel</button>
-            <button class="btn ghost" id="batchPrev">Back</button>
-            <button class="btn" id="batchSkipNext">Skip & Next</button>
-            <button class="btn" id="batchAddNext">Add & Next</button>
-            <button class="btn primary" id="batchFinish">Finish & Download ZIP</button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(backdrop);
-
-      batchModal = document.getElementById("batchModal");
-      batchProgress = document.getElementById("batchModalProgress");
-      batchFileName = document.getElementById("batchModalFile");
-      batchCancel = document.getElementById("batchCancel");
-      batchPrev = document.getElementById("batchPrev");
-      batchAddNext = document.getElementById("batchAddNext");
-      batchSkipNext = document.getElementById("batchSkipNext");
-      batchFinish = document.getElementById("batchFinish");
-
-      batchCancel.addEventListener("click", closeManualBatch);
-      batchPrev.addEventListener("click", manualBack);
-      batchAddNext.addEventListener("click", manualAddAndNext);
-      batchSkipNext.addEventListener("click", manualSkipAndNext);
-      batchFinish.addEventListener("click", manualFinish);
-    }
-
-    function openManualBatch(files) {
-      ensureManualModal();
-
       manualZip = new JSZip();
+      manualZip._seen = new Set();
       manualFiles = files.slice();
       manualIndex = 0;
       manualAddedCount = 0;
@@ -981,41 +859,39 @@
 
       batchModal.style.display = "flex";
       updateManualBatchUI();
-
       loadFile(manualFiles[manualIndex]);
+
+      // Auto-focus Add & Next for keyboard users
+      setTimeout(() => {
+        try { batchAddNext.focus(); } catch(e) {}
+      }, 0);
     }
 
-    function closeManualBatch() {
-      if (batchModal) batchModal.style.display = "none";
+    function closeManualBatch(){
+      batchModal.style.display = "none";
       manualZip = null;
       manualFiles = [];
       manualIndex = 0;
       manualAddedCount = 0;
       manualSkippedCount = 0;
       manualFailures = [];
-      batchProgressEl.textContent = "";
       statusEl.textContent = "Manual batch cancelled.";
     }
 
-    function updateManualBatchUI() {
-      if (!batchModal) return;
-      batchProgress.textContent = `${manualIndex + 1} / ${manualFiles.length}`;
-      batchFileName.textContent = manualFiles[manualIndex] ? manualFiles[manualIndex].name : "—";
+    function updateManualBatchUI(){
+      batchModalProgress.textContent = `${manualIndex + 1} / ${manualFiles.length}`;
+      batchModalFile.textContent = manualFiles[manualIndex] ? manualFiles[manualIndex].name : "—";
       batchPrev.disabled = manualIndex <= 0;
     }
 
-    async function manualAddCurrent() {
+    async function manualAddCurrent(){
       if (!cropper || !manualZip) return;
-
       const file = manualFiles[manualIndex];
       const base = file.name.replace(/\.[^/.]+$/, "");
       const filenameRaw = `${base}_${targetWidth}x${targetHeight}.${getExt()}`;
-
-      // dedupe within ZIP
-      manualZip._seen = manualZip._seen || new Set();
       const filename = uniqueZipName(manualZip._seen, filenameRaw);
 
-      try {
+      try{
         const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
         const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
         if (!blob) throw new Error("blob");
@@ -1023,47 +899,47 @@
         manualZip.file(filename, arrayBuffer);
         manualAddedCount++;
         statusEl.textContent = `Added: ${filename}`;
-      } catch (e) {
+      } catch(e){
         manualFailures.push(file.name);
         statusEl.textContent = `Could not export: ${file.name}`;
       }
     }
 
-    async function manualAddAndNext() {
+    async function manualAddAndNext(){
       await manualAddCurrent();
       moveManualNext();
+      setTimeout(() => { try { batchAddNext.focus(); } catch(e) {} }, 0);
     }
 
-    function manualSkipAndNext() {
+    function manualSkipAndNext(){
       manualSkippedCount++;
       moveManualNext();
+      setTimeout(() => { try { batchAddNext.focus(); } catch(e) {} }, 0);
     }
 
-    function moveManualNext() {
-      if (manualIndex < manualFiles.length - 1) {
+    function moveManualNext(){
+      if (manualIndex < manualFiles.length - 1){
         manualIndex++;
         updateManualBatchUI();
         loadFile(manualFiles[manualIndex]);
       } else {
-        // End reached
-        updateManualBatchUI();
         statusEl.textContent = "End of manual batch. Finish to download ZIP.";
       }
     }
 
-    function manualBack() {
+    function manualBack(){
       if (manualIndex <= 0) return;
       manualIndex--;
       updateManualBatchUI();
       loadFile(manualFiles[manualIndex]);
+      setTimeout(() => { try { batchAddNext.focus(); } catch(e) {} }, 0);
     }
 
-    async function manualFinish() {
+    async function manualFinish(){
       if (!manualZip) return;
 
       batchProgressEl.textContent = "Building ZIP…";
-
-      const zipBlob = await manualZip.generateAsync({ type: "blob" });
+      const zipBlob = await manualZip.generateAsync({ type:"blob" });
       const url = URL.createObjectURL(zipBlob);
       const a = document.createElement("a");
       a.href = url;
@@ -1071,24 +947,18 @@
       a.click();
       URL.revokeObjectURL(url);
 
-      if (batchModal) batchModal.style.display = "none";
+      batchModal.style.display = "none";
 
       const failCount = manualFailures.length;
       batchProgressEl.textContent = `${manualAddedCount} added, ${manualSkippedCount} skipped${failCount ? `, ${failCount} failed` : ""}`;
-
-      if (failCount) {
-        statusEl.textContent = `Failed: ${manualFailures.slice(0, 6).join(", ")}${failCount > 6 ? "…" : ""}`;
-      } else {
-        statusEl.textContent = "Manual batch complete.";
-      }
+      statusEl.textContent = failCount ? `Failed: ${manualFailures.slice(0,6).join(", ")}${failCount>6?"…":""}` : "Manual batch complete.";
 
       manualZip = null;
       manualFiles = [];
       manualIndex = 0;
     }
 
-    // ---------- Wire up UI ----------
-    // File selection
+    // Wire up events
     fileInput.addEventListener("change", () => {
       selectedFiles = Array.from(fileInput.files || []).filter(f => f.type && f.type.startsWith("image/"));
       if (!selectedFiles.length) return;
@@ -1096,19 +966,14 @@
       if (selectedFiles.length > 1) statusEl.textContent = `Loaded ${selectedFiles.length} images.`;
     });
 
-    // Image load creates cropper
-    image.addEventListener("load", () => {
-      updateDims();
-      initCropper();
-    });
+    image.addEventListener("load", () => { updateDims(); initCropper(); });
 
     // Presets
     document.getElementById("presetArticle").addEventListener("click", () => setPreset(400, 250));
     document.getElementById("presetHeader").addEventListener("click", () => setPreset(1630, 580));
     document.getElementById("preset916").addEventListener("click", () => setPreset(1080, 1920));
-    document.getElementById("preset54").addEventListener("click", () => setPreset(1080, 1350)); // corrected
+    document.getElementById("preset54").addEventListener("click", () => setPreset(1080, 1350));
     document.getElementById("preset11").addEventListener("click", () => setPreset(1080, 1080));
-
     document.getElementById("applyCustom").addEventListener("click", applyCustomSize);
 
     // Actions
@@ -1118,52 +983,32 @@
     copyBtn.addEventListener("click", copyToClipboard);
     downloadBtn.addEventListener("click", downloadCurrent);
 
-    // Advanced controls
-    qualitySlider.addEventListener("input", () => {
-      updateQualityUI();
-      scheduleEstimate();
-    });
+    // Export controls
+    qualitySlider.addEventListener("input", () => { updateQualityUI(); scheduleEstimate(); });
+    formatSelect.addEventListener("change", () => { scheduleEstimate(); statusEl.textContent = `Format: ${formatSelect.value.toUpperCase()}`; });
 
-    formatSelect.addEventListener("change", () => {
-      scheduleEstimate();
-      statusEl.textContent = `Format: ${formatSelect.value.toUpperCase()}`;
-    });
+    target1mb.addEventListener("click", () => setQualityForTargetBytes(1024*1024));
+    target500kb.addEventListener("click", () => setQualityForTargetBytes(500*1024));
+    target250kb.addEventListener("click", () => setQualityForTargetBytes(250*1024));
 
-    target1mb.addEventListener("click", () => setQualityForTargetBytes(1024 * 1024));
-    target500kb.addEventListener("click", () => setQualityForTargetBytes(500 * 1024));
-    target250kb.addEventListener("click", () => setQualityForTargetBytes(250 * 1024));
-
-    // Batch buttons
+    // Batch
     batchZipFastBtn.addEventListener("click", batchExportFastZip);
-
     batchZipManualBtn.addEventListener("click", () => {
-      if (!selectedFiles || selectedFiles.length < 2) {
+      if (!selectedFiles || selectedFiles.length < 2){
         alert("Select or drop multiple images to use manual batch.");
         return;
       }
       openManualBatch(selectedFiles);
     });
 
-    // Drag overlay behavior
-    dropZone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropZone.classList.add("dragover");
-    });
-    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
-    dropZone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropZone.classList.remove("dragover");
-      const dt = e.dataTransfer;
-      if (!dt || !dt.files || !dt.files.length) return;
+    // Modal buttons
+    batchCancel.addEventListener("click", closeManualBatch);
+    batchPrev.addEventListener("click", manualBack);
+    batchSkipNext.addEventListener("click", manualSkipAndNext);
+    batchAddNext.addEventListener("click", manualAddAndNext);
+    batchFinish.addEventListener("click", manualFinish);
 
-      selectedFiles = Array.from(dt.files).filter(f => f.type && f.type.startsWith("image/"));
-      if (!selectedFiles.length) return;
-
-      loadFile(selectedFiles[0]);
-      statusEl.textContent = selectedFiles.length > 1 ? `Dropped ${selectedFiles.length} images.` : `Dropped: ${selectedFiles[0].name}`;
-    });
-
-    // Init UI bits
+    // Init UI
     updateDims();
     updateQualityUI();
     undoBtn.disabled = true;
