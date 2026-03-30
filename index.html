@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>SSEN Distribution website image resizer</title>
 
-  <!-- Cropper.js CSS -->
+  <!-- ✅ Cropper.js CSS -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.css"
@@ -69,7 +69,6 @@
 
     .preset-label {
       font-weight: 600;
-      margin-right: 8px;
     }
 
     button {
@@ -163,7 +162,7 @@
 
   </div>
 
-  <!-- Cropper.js JS -->
+  <!-- ✅ Cropper.js JS -->
   <script src="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
   <script>
@@ -184,6 +183,7 @@
 
       reader.onload = () => {
         image.src = reader.result;
+        image.style.display = "block"; // ✅ ENSURE IMAGE IS VISIBLE
 
         image.onload = () => {
           if (cropper) {
@@ -199,7 +199,7 @@
             zoomable: true,
             responsive: true,
             ready() {
-              this.cropper.zoomTo(0);
+              this.cropper.zoomTo(0); // ✅ show full image
             }
           });
         };
