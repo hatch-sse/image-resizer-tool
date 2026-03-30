@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.5">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;meta charset="UTF-8" /&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;title&gt;Image Resizer&lt;/title&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  &lt;!-- Cropper.js CSS --&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;link</span></p>
+<p class="p1"><span class="s1">    rel="stylesheet"</span></p>
+<p class="p1"><span class="s1">    href="https://unpkg.com/cropperjs/dist/cropper.css"</span></p>
+<p class="p1"><span class="s1">  /&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  &lt;style&gt;</span></p>
+<p class="p1"><span class="s1">    body {</span></p>
+<p class="p1"><span class="s1">      font-family: Segoe UI, Arial, sans-serif;</span></p>
+<p class="p1"><span class="s1">      margin: 0;</span></p>
+<p class="p1"><span class="s1">      padding: 16px;</span></p>
+<p class="p1"><span class="s1">      background: #f7f7f7;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    h2 {</span></p>
+<p class="p1"><span class="s1">      margin-top: 0;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    .controls {</span></p>
+<p class="p1"><span class="s1">      margin-bottom: 12px;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    button {</span></p>
+<p class="p1"><span class="s1">      margin-right: 8px;</span></p>
+<p class="p1"><span class="s1">      padding: 6px 10px;</span></p>
+<p class="p1"><span class="s1">      cursor: pointer;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    .image-container {</span></p>
+<p class="p1"><span class="s1">      max-width: 100%;</span></p>
+<p class="p1"><span class="s1">      background: #ddd;</span></p>
+<p class="p1"><span class="s1">      margin-bottom: 12px;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    img {</span></p>
+<p class="p1"><span class="s1">      max-width: 100%;</span></p>
+<p class="p1"><span class="s1">      display: block;</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p1"><span class="s1">  &lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;h2&gt;Image Resizer &amp; Crop Tool&lt;/h2&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  &lt;div class="controls"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;input type="file" id="fileInput" accept="image/*" /&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    &lt;br /&gt;&lt;br /&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    &lt;strong&gt;Presets:&lt;/strong&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;button onclick="setPreset(250, 400)"&gt;</span></p>
+<p class="p1"><span class="s1">      Website article (250 × 400)</span></p>
+<p class="p1"><span class="s1">    &lt;/button&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;button onclick="setPreset(580, 1630)"&gt;</span></p>
+<p class="p1"><span class="s1">      Website header (580 × 1630)</span></p>
+<p class="p1"><span class="s1">    &lt;/button&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    &lt;br /&gt;&lt;br /&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    &lt;button onclick="downloadImage()"&gt;Download image&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  &lt;div class="image-container"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;img id="image" /&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  &lt;!-- Cropper.js --&gt;</span></p>
+<p class="p1"><span class="s1">  &lt;script src="https://unpkg.com/cropperjs/dist/cropper.js"&gt;&lt;/script&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">  &lt;script&gt;</span></p>
+<p class="p1"><span class="s1">    const image = document.getElementById("image");</span></p>
+<p class="p1"><span class="s1">    const fileInput = document.getElementById("fileInput");</span></p>
+<p class="p1"><span class="s1">    let cropper;</span></p>
+<p class="p1"><span class="s1">    let targetWidth = 250;</span></p>
+<p class="p1"><span class="s1">    let targetHeight = 400;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    fileInput.addEventListener("change", (e) =&gt; {</span></p>
+<p class="p1"><span class="s1">      const file = e.target.files[0];</span></p>
+<p class="p1"><span class="s1">      if (!file) return;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">      const reader = new FileReader();</span></p>
+<p class="p1"><span class="s1">      reader.onload = () =&gt; {</span></p>
+<p class="p1"><span class="s1">        image.src = reader.result;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">        if (cropper) {</span></p>
+<p class="p1"><span class="s1">          cropper.destroy();</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">        cropper = new Cropper(image, {</span></p>
+<p class="p1"><span class="s1">          aspectRatio: targetWidth / targetHeight,</span></p>
+<p class="p1"><span class="s1">          viewMode: 1,</span></p>
+<p class="p1"><span class="s1">          autoCropArea: 1</span></p>
+<p class="p1"><span class="s1">        });</span></p>
+<p class="p1"><span class="s1">      };</span></p>
+<p class="p1"><span class="s1">      reader.readAsDataURL(file);</span></p>
+<p class="p1"><span class="s1">    });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    function setPreset(width, height) {</span></p>
+<p class="p1"><span class="s1">      targetWidth = width;</span></p>
+<p class="p1"><span class="s1">      targetHeight = height;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">      if (cropper) {</span></p>
+<p class="p1"><span class="s1">        cropper.setAspectRatio(width / height);</span></p>
+<p class="p1"><span class="s1">      }</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    function downloadImage() {</span></p>
+<p class="p1"><span class="s1">      if (!cropper) return;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">      const canvas = cropper.getCroppedCanvas({</span></p>
+<p class="p1"><span class="s1">        width: targetWidth,</span></p>
+<p class="p1"><span class="s1">        height: targetHeight</span></p>
+<p class="p1"><span class="s1">      });</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">      const link = document.createElement("a");</span></p>
+<p class="p1"><span class="s1">      link.download = `image-${targetWidth}x${targetHeight}.png`;</span></p>
+<p class="p1"><span class="s1">      link.href = canvas.toDataURL("image/png");</span></p>
+<p class="p1"><span class="s1">      link.click();</span></p>
+<p class="p1"><span class="s1">    }</span></p>
+<p class="p1"><span class="s1">  &lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
