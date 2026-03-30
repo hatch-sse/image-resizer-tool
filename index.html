@@ -2,136 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Image Resizer & Crop Tool</title>
+  <title>Image Crop Test</title>
 
-  <!-- ✅ Cropper.js CSS (THIS IS CRITICAL) -->
+  <!-- Cropper CSS -->
   <link
     rel="stylesheet"
-    href="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.css"
-  />
+    href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"
+  >
 
   <style>
     body {
-      font-family: Segoe UI, Arial, sans-serif;
-      margin: 0;
-      padding: 16px;
-      background: #f7f7f7;
+      font-family: Arial, sans-serif;
+      padding: 20px;
     }
 
-    h2 {
-      margin-top: 0;
-    }
-
-    .controls {
-      margin-bottom: 16px;
-    }
-
-    button {
-      margin-right: 8px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-
-    .image-container {
+    #image {
       max-width: 100%;
-      background: #eee;
-      padding: 10px;
+      display: none;
       border: 1px solid #ccc;
     }
 
-    img {
-      max-width: 100%;
-      display: none;
+    #status {
+      margin: 10px 0;
+      font-weight: bold;
+      color: green;
     }
   </style>
 </head>
 
 <body>
 
-  <h2>Image Resizer & Crop Tool</h2>
+  <h2>Image Cropper (Debug Version)</h2>
 
-  <div class="controls">
-    <input type="file" id="fileInput" accept="image/*">
-    <br><br>
+  <div id="status">Page loaded ✅</div>
 
-    <strong>Presets:</strong>
-    <button onclick="setPreset(250, 400)">
-      Website article (250 × 400)
-    </button>
-    <button onclick="setPreset(580, 1630)">
-      Website header (580 × 1630)
-    </button>
+  <input type="file" id="fileInput" accept="image/*">
+  <br><br>
 
-    <br><br>
+  <button id="preset1">250 × 400</button>
+  <button id="preset2">580 × 1630</button>
+  <button id="download">Download</button>
 
-    <button onclick="downloadImage()">Download image</button>
-  </div>
+  <br><br>
 
-  <div class="image-container">
-    <img id="image">
-  </div>
+  <img id="image">
 
-  <!-- ✅ Cropper.js JS (THIS IS CRITICAL) -->
-  <script src="https://unpkg.com/cropperjs@1.6.2/dist/cropper.min.js"></script>
+  <!-- Cropper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
 
   <script>
-    const image = document.getElementById("image");
-    const fileInput = document.getElementById("fileInput");
+    window.addEventListener("DOMContentLoaded", () => {
+      const status = document.getElementById("status");
+      const fileInput = document.getElementById("fileInput");
+      const image = document.getElementById("image");
+      const preset1 = document.getElementById("preset1");
+      const preset2 = document.getElementById("preset2");
+      const downloadBtn = document.getElementById("download");
 
-    let cropper = null;
-    let targetWidth = 250;
-    let targetHeight = 400;
+      let cropper = null;
+      let width = 250;
+      let height = 400;
 
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
-      if (!file) return;
+      status.textContent = "JavaScript running ✅";
 
-      const reader = new FileReader();
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        if (!file) return;
 
-      reader.onload = () => {
-        image.style.display = "block";
-        image.src = reader.result;
+        const reader = new FileReader();
+        reader.onload = () => {
+          image.src = reader.result;
+          image.style.display = "block";
 
-        image.onload = () => {
-          if (cropper) cropper.destroy();
+          image.onload = () => {
+            if (cropper) cropper.destroy();
 
-          cropper = new Cropper(image, {
-            aspectRatio: targetWidth / targetHeight,
-            viewMode: 1,
-            autoCropArea: 1,
-            responsive: true
-          });
+            cropper = new Cropper(image, {
+              aspectRatio: width / height,
+              viewMode: 1,
+              autoCropArea: 1
+            });
+
+            status.textContent = "Cropper loaded ✅";
+          };
         };
-      };
 
-      reader.readAsDataURL(file);
-    });
-
-    function setPreset(width, height) {
-      targetWidth = width;
-      targetHeight = height;
-
-      if (cropper) {
-        cropper.setAspectRatio(width / height);
-      }
-    }
-
-    function downloadImage() {
-      if (!cropper) {
-        alert("Please choose an image first.");
-        return;
-      }
-
-      const canvas = cropper.getCroppedCanvas({
-        width: targetWidth,
-        height: targetHeight
+        reader.readAsDataURL(file);
       });
 
-      const link = document.createElement("a");
-      link.download = `image-${targetWidth}x${targetHeight}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    }
+      preset1.onclick = () => {
+        width = 250;
+        height = 400;
+        if (cropper) cropper.setAspectRatio(width / height);
+      };
+
+      preset2.onclick = () => {
+        width = 580;
+        height = 1630;
+        if (cropper) cropper.setAspectRatio(width / height);
+      };
+
+      downloadBtn.onclick = () => {
+        if (!cropper) {
+          alert("Choose an image first");
+          return;
+        }
+
+        const canvas = cropper.getCroppedCanvas({ width, height });
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = `${width}x${height}.png`;
+        link.click();
+      };
+    });
   </script>
 
 </body>
