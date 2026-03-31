@@ -72,6 +72,17 @@
       color:rgba(255,255,255,0.92);
       font-size:12px;
     }
+    body.mac9 .appearanceToggle{
+      top:8px;
+      right:10px;
+      z-index:20;
+      color:#fff;
+    }
+    body.mac9 .appearanceToggle label{
+      color:#fff;
+      font-size:11px;
+      font-weight:700;
+    }
     body.mac9 .appearanceToggle .togglePill{
       border-radius:0;
       background:#d4d0c8;
@@ -80,6 +91,7 @@
       border-right:1px solid #4f4f4f;
       border-bottom:1px solid #4f4f4f;
       backdrop-filter:none;
+      padding:4px 8px;
     }
     body.mac9 .preview,
     body.mac9 .side,
@@ -366,7 +378,7 @@
       <span class="togglePill">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
           <input type="checkbox" id="macToggle"/>
-          Mac OS 9
+          SSEN
         </label>
       </span>
     </div>
@@ -397,7 +409,7 @@
             <div class="dropSub">You can also paste an image (Ctrl/Cmd + V). Multiple selection enables batch export.</div>
             <div class="dropCTA" id="selectImagesBtn">Select images</div>
           </div>
-          <img id="image" alt="Image to crop" />
+          <img id="image" alt="" />
         </div>
       </div>
 
@@ -517,7 +529,7 @@
   </div>
 
   <div class="pageFooter">
-    <div>SSEN Image Resizer Beta v1.0 — HEIC + face detect</div>
+    <div>SSEN Image Resizer Beta v1.2 — HEIC + face detect</div>
     <div>bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
   </div>
 
@@ -772,7 +784,7 @@
       const cb = cropper.getCropBoxData();
       const center = { x: cb.left + cb.width/2, y: cb.top + cb.height/2 };
       cropper.zoomTo(desiredRatio, center);
-      currentZoomRatio = desiredRatio;
+      currentZoomRatio = getActualZoomRatio();
       updateTransformUI();
       scheduleEstimate();
     }
