@@ -7,9 +7,9 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"/>
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@latest/dist/umd/index.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/umd/upscaler.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@latest/dist/umd/index.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/umd/upscaler.min.js"></script>
 
   <link rel="stylesheet" href="./styles.css" />
 </head>
@@ -24,23 +24,23 @@
       </span>
     </div>
 
-    <div class="appHeader">
-      <div class="brandTopRow">
-        <div class="brandLogoWrap">
-          <img class="brandLogo" src="./SSEN_Distribution.png" alt="SSEN Distribution logo" />
-        </div>
-        <div class="brandCopy">
-          <div class="brandEyebrow">
-            <span class="brandChip soft">beta v1.6.2</span>
-          </div>
-          <h1>Image resizer</h1>
-          <p class="sub">
-            Upload an image, choose a preset (or custom size), adjust the crop, then export.
-            Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V).
-          </p>
-        </div>
-      </div>
+<div class="appHeader">
+  <div class="brandTopRow">
+    <div class="brandLogoWrap">
+      <img class="brandLogo" src="./SSEN_Distribution.png" alt="SSEN Distribution logo" />
     </div>
+    <div class="brandCopy">
+      <div class="brandEyebrow">
+        <span class="brandChip soft">beta v1.6.2</span>
+      </div>
+      <h1>Image resizer</h1>
+      <p class="sub">
+        Upload an image, choose a preset (or custom size), adjust the crop, then export.
+        Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V).
+      </p>
+    </div>
+  </div>
+</div>
 
     <div class="layout">
       <div class="preview">
@@ -88,14 +88,14 @@
           <div class="tabPanel active" id="panel-article">
             <p class="helperText">Cropping is enabled for these presets.</p>
             <div class="presetGrid">
-              <button class="presetCard activePreset" type="button" id="presetArticleCard">
+              <button class="presetCard noBadge activePreset" type="button" id="presetArticleCard">
                 <div class="presetText">
                   <div class="presetTitle">Website article</div>
                   <div class="presetSub">400×250px</div>
                 </div>
               </button>
 
-              <button class="presetCard" type="button" id="presetHeaderCard">
+              <button class="presetCard noBadge" type="button" id="presetHeaderCard">
                 <div class="presetText">
                   <div class="presetTitle">Web banner</div>
                   <div class="presetSub">1630×580px</div>
