@@ -28,6 +28,7 @@
     }
 
     *{ box-sizing:border-box; }
+
     body{
       margin:0;
       padding:24px;
@@ -36,12 +37,25 @@
       color:#111;
     }
 
+    .sr-only{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
+
+    /* Mac OS 9 skin */
     body.mac9{
       background:
         linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 100%),
         linear-gradient(rgba(255,255,255,0.12) 0 1px, transparent 1px 100%),
         #bdbdbd;
-      background-size: 3px 3px, 3px 3px, auto;
+      background-size:3px 3px, 3px 3px, auto;
       font-family:"Chicago", "Geneva", Arial, sans-serif;
       color:#000;
     }
@@ -180,6 +194,7 @@
       box-shadow:var(--shadow);
       position:relative;
     }
+
     .appHeader{ margin-bottom:14px; padding-right:170px; }
     h1{ margin:0 0 6px 0; font-size:22px; color:var(--blue); letter-spacing:0.2px; }
     .sub{ margin:0; font-size:13.5px; color:var(--muted); line-height:1.4; }
@@ -246,7 +261,12 @@
     .pill.warn{ color:var(--warn); border-color:rgba(180,83,9,0.28); background:rgba(180,83,9,0.08); }
     .pill.bad{ color:var(--bad); border-color:rgba(180,35,24,0.28); background:rgba(180,35,24,0.08); }
 
-    .stage{ position:relative; height:660px; background:#fff; overflow:hidden; }
+    .stage{
+      position:relative;
+      height:660px;
+      background:#fff;
+      overflow:hidden;
+    }
     #image{ display:block; max-width:100%; }
     .stage.dragover{ outline:2px dashed rgba(0,62,102,0.45); outline-offset:-10px; }
 
@@ -267,19 +287,48 @@
     }
     .dropZoneUI.hidden{ display:none; }
     .dropIcon{
-      width:78px; height:78px; display:flex; align-items:center; justify-content:center;
-      border-radius:18px; background:#e9edf3; border:1px solid #d8dde6; font-size:30px; position:relative;
+      width:78px;
+      height:78px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:18px;
+      background:#e9edf3;
+      border:1px solid #d8dde6;
+      font-size:30px;
+      position:relative;
     }
     .dropIcon::before{
-      content:"+"; position:absolute; top:-10px; left:-10px; width:30px; height:30px; border-radius:999px;
-      background:#e7edff; color:#2b4cff; display:flex; align-items:center; justify-content:center; font-weight:900; border:1px solid #d3dcff;
+      content:"+";
+      position:absolute;
+      top:-10px;
+      left:-10px;
+      width:30px;
+      height:30px;
+      border-radius:999px;
+      background:#e7edff;
+      color:#2b4cff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      border:1px solid #d3dcff;
     }
     .dropHint{ font-size:16px; font-weight:900; color:#111; }
     .dropHint span{ color:var(--blue2); text-decoration:underline; cursor:pointer; }
     .dropSub{ font-size:12px; color:rgba(0,0,0,0.6); line-height:1.35; max-width:420px; }
     .dropCTA{
-      display:inline-flex; align-items:center; gap:10px; padding:10px 16px; border-radius:10px; background:#111; color:#fff;
-      border:1px solid rgba(0,0,0,0.2); font-weight:900; cursor:pointer; user-select:none;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 16px;
+      border-radius:10px;
+      background:#111;
+      color:#fff;
+      border:1px solid rgba(0,0,0,0.2);
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
     }
     .dropCTA:hover{ background:#000; }
 
@@ -292,13 +341,26 @@
     .row:last-child{ margin-bottom:0; }
     label.lbl{ font-size:12px; font-weight:900; color:var(--grey); min-width:92px; }
     input[type="number"], select{
-      border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-size:13px; font-family:inherit; background:#fff;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:13px;
+      font-family:inherit;
+      background:#fff;
     }
     input[type="number"]{ width:120px; }
 
     .btn{
-      border:1px solid var(--btn-bd); background:var(--btn-bg); color:var(--blue); padding:9px 12px; border-radius:10px; font-weight:900;
-      cursor:pointer; transition:background .15s ease, transform .03s ease; user-select:none; white-space:nowrap;
+      border:1px solid var(--btn-bd);
+      background:var(--btn-bg);
+      color:var(--blue);
+      padding:9px 12px;
+      border-radius:10px;
+      font-weight:900;
+      cursor:pointer;
+      transition:background .15s ease, transform .03s ease;
+      user-select:none;
+      white-space:nowrap;
     }
     .btn:hover{ background:var(--btn-bg-hover); }
     .btn:active{ transform:translateY(1px); }
@@ -306,14 +368,31 @@
     .btn.primary:hover{ background:#003456; }
     .btn.ghost{ background:#fff; border-color:var(--border); color:var(--grey); }
     .btn.ghost:hover{ background:#f8fafc; }
+
     .hint{ font-size:12px; color:var(--muted); line-height:1.35; }
-    .statusLine{ font-size:12px; color:var(--muted); line-height:1.35; margin-top:6px; min-height:18px; }
+    .statusLine{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+      margin-top:6px;
+      min-height:18px;
+    }
 
     details.advanced{ border:none; background:transparent; margin-top:4px; }
     details.advanced > summary{
-      list-style:none; cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:10px 12px; border-radius:10px; border:1px solid rgba(0,62,102,0.25); background:rgba(0,62,102,0.06);
-      color:var(--blue); font-weight:900;
+      list-style:none;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(0,62,102,0.25);
+      background:rgba(0,62,102,0.06);
+      color:var(--blue);
+      font-weight:900;
     }
     details.advanced > summary::-webkit-details-marker{ display:none; }
     .chev{ display:inline-block; transition:transform .15s ease; font-weight:900; opacity:0.9; }
@@ -321,6 +400,14 @@
     .advancedInner{ padding-top:10px; }
     .slider{ width:100%; accent-color:var(--blue); }
     .tiny{ font-size:12px; color:var(--muted); }
+    .toggleRow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--grey);
+      font-weight:700;
+    }
 
     .progressWrap{ width:100%; display:none; gap:8px; align-items:center; margin-top:6px; }
     .progressWrap.show{ display:flex; }
@@ -329,26 +416,57 @@
     progress::-webkit-progress-value{ background:var(--blue); }
     progress::-moz-progress-bar{ background:var(--blue); }
 
-    .btn:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible{
-      outline:2px solid var(--blue); outline-offset:2px;
+    .btn:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    summary:focus-visible,
+    .dropCTA:focus-visible,
+    .dropHint span:focus-visible{
+      outline:2px solid var(--blue);
+      outline-offset:2px;
     }
 
     .modal-backdrop{
-      position:fixed; inset:0; background:rgba(0,0,0,0.25); display:none; align-items:flex-start; justify-content:center;
-      padding:18px; pointer-events:none; z-index:9999;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.25);
+      display:none;
+      align-items:flex-start;
+      justify-content:center;
+      padding:18px;
+      pointer-events:none;
+      z-index:9999;
     }
     .modal-backdrop.show{ display:flex; }
     .modal{
-      pointer-events:auto; margin-top:20px; width:min(560px, 100%); background:#fff; border:1px solid var(--border);
-      border-radius:12px; overflow:hidden; box-shadow:0 12px 28px rgba(0,0,0,0.18);
+      pointer-events:auto;
+      margin-top:20px;
+      width:min(560px, 100%);
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 12px 28px rgba(0,0,0,0.18);
     }
     .modal header{
-      padding:12px 14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;
-      gap:10px; font-weight:900; color:var(--grey); font-size:13px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      font-weight:900;
+      color:var(--grey);
+      font-size:13px;
     }
     .modal .body{ padding:12px 14px; font-size:12.8px; color:var(--muted); line-height:1.35; }
     .modal footer{
-      padding:12px 14px; display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; border-top:1px solid var(--border);
+      padding:12px 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:flex-end;
+      border-top:1px solid var(--border);
     }
 
     .pageFooter{
@@ -359,16 +477,15 @@
       color:rgba(0,0,0,0.45);
       line-height:1.45;
     }
-    .pageFooter a{
-      color:var(--blue);
-      text-decoration:underline;
-    }
-    body.mac9 .pageFooter{
-      color:#222;
-      font-family:"Chicago", "Geneva", Arial, sans-serif;
-    }
-    body.mac9 .pageFooter a{
-      color:#0000cc;
+    .pageFooter a{ color:var(--blue); text-decoration:underline; }
+    body.mac9 .pageFooter{ color:#222; font-family:"Chicago","Geneva",Arial,sans-serif; }
+    body.mac9 .pageFooter a{ color:#0000cc; }
+
+    @media (max-width: 980px){
+      .layout{ grid-template-columns:1fr; }
+      .appHeader{ padding-right:0; }
+      .appearanceToggle{ position:static; margin-bottom:10px; }
+      body.mac9 .appHeader{ padding-right:14px; margin-bottom:14px; }
     }
   </style>
 </head>
@@ -377,8 +494,8 @@
     <div class="appearanceToggle">
       <span class="togglePill">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" id="macToggle"/>
-          SSEN
+          <input type="checkbox" id="skinToggle" aria-label="Toggle skin" />
+          <span id="skinToggleLabel">MAC OS9</span>
         </label>
       </span>
     </div>
@@ -405,9 +522,9 @@
         <div class="stage" id="imageStage">
           <div class="dropZoneUI" id="dropZoneUI">
             <div class="dropIcon">🖼️</div>
-            <div class="dropHint">Drag and drop an image or <span id="browseLink">browse</span></div>
+            <div class="dropHint">Drag and drop an image or <span id="browseLink" tabindex="0" role="button" aria-label="Browse for image">browse</span></div>
             <div class="dropSub">You can also paste an image (Ctrl/Cmd + V). Multiple selection enables batch export.</div>
-            <div class="dropCTA" id="selectImagesBtn">Select images</div>
+            <button class="dropCTA" id="selectImagesBtn" type="button">Select images</button>
           </div>
           <img id="image" alt="" />
         </div>
@@ -437,11 +554,11 @@
           <h3>Custom size</h3>
           <div class="row">
             <label class="lbl" for="customW">Width</label>
-            <input type="number" id="customW" min="1" placeholder="px" />
+            <input type="number" id="customW" min="1" placeholder="px" inputmode="numeric" />
           </div>
           <div class="row">
             <label class="lbl" for="customH">Height</label>
-            <input type="number" id="customH" min="1" placeholder="px" />
+            <input type="number" id="customH" min="1" placeholder="px" inputmode="numeric" />
             <button class="btn" type="button" id="applyCustom">Apply</button>
           </div>
         </div>
@@ -459,11 +576,11 @@
           </div>
 
           <div class="hint">Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.</div>
-          <div class="statusLine" id="statusLine"></div>
+          <div class="statusLine" id="statusLine" role="status" aria-live="polite"></div>
         </div>
 
         <details class="advanced section" id="advanced">
-          <summary>
+          <summary aria-label="Advanced options">
             <span>Advanced</span>
             <span class="chev">▾</span>
           </summary>
@@ -489,6 +606,11 @@
               <button class="btn ghost" type="button" id="target250kb">&lt; 250KB</button>
             </div>
 
+            <div class="row toggleRow">
+              <input type="checkbox" id="sharpenToggle" />
+              <label for="sharpenToggle">Sharpen after resize</label>
+            </div>
+
             <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
               <h3>Transform</h3>
               <div class="row">
@@ -503,7 +625,7 @@
                 <span class="pill" id="rotPill">0°</span>
                 <button class="btn ghost" type="button" id="resetRotBtn" title="Reset rotation to 0°">Reset</button>
               </div>
-              <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°. Auto-focus face uses on-device face detection when available and recentres the crop around the most prominent face.</div>
+              <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°. Auto-focus face recentres the crop around the most prominent face when the face detection files can load.</div>
             </div>
 
             <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
@@ -558,11 +680,14 @@
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
   <script>
-    const macToggle = document.getElementById("macToggle");
-    macToggle.addEventListener("change", () => {
-      document.body.classList.toggle("mac9", macToggle.checked);
-    });
+    const SAFE_LIMITS = {
+      maxSingleBytes: 25 * 1024 * 1024,
+      maxSinglePixels: 40000000,
+      maxBatchFiles: 50
+    };
 
+    const skinToggle = document.getElementById("skinToggle");
+    const skinToggleLabel = document.getElementById("skinToggleLabel");
     const imageStage = document.getElementById("imageStage");
     const dropZoneUI = document.getElementById("dropZoneUI");
     const selectImagesBtn = document.getElementById("selectImagesBtn");
@@ -605,6 +730,7 @@
     const target1mb = document.getElementById("target1mb");
     const target500kb = document.getElementById("target500kb");
     const target250kb = document.getElementById("target250kb");
+    const sharpenToggle = document.getElementById("sharpenToggle");
 
     const batchFastBtn = document.getElementById("batchFastBtn");
     const batchManualBtn = document.getElementById("batchManualBtn");
@@ -660,10 +786,33 @@
     let faceDetectorInitPromise = null;
     let heic2anyReadyPromise = null;
 
-    function setStatus(text){ statusLine.textContent = text || ""; }
-    function humanFileSize(bytes){ if (!bytes && bytes !== 0) return "—"; const kb = bytes/1024; return kb < 1024 ? `${Math.round(kb)}KB` : `${(kb/1024).toFixed(2)}MB`; }
-    function updateDimsPill(){ dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`; }
-    function setOrigPill(){ origPill.textContent = (!originalBytes || !originalDims.w) ? "Original: —" : `Original: ${originalDims.w}×${originalDims.h} · ${humanFileSize(originalBytes)}`; }
+    function setStatus(text){
+      statusLine.textContent = text || "";
+    }
+
+    function setSkinUI(){
+      const isMac = document.body.classList.contains("mac9");
+      skinToggle.checked = isMac;
+      skinToggleLabel.textContent = isMac ? "SSEN" : "MAC OS9";
+      skinToggle.setAttribute("aria-label", isMac ? "Switch to SSEN skin" : "Switch to Mac OS9 skin");
+    }
+
+    function humanFileSize(bytes){
+      if (!bytes && bytes !== 0) return "—";
+      const kb = bytes/1024;
+      return kb < 1024 ? `${Math.round(kb)}KB` : `${(kb/1024).toFixed(2)}MB`;
+    }
+
+    function updateDimsPill(){
+      dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`;
+    }
+
+    function setOrigPill(){
+      origPill.textContent = (!originalBytes || !originalDims.w)
+        ? "Original: —"
+        : `Original: ${originalDims.w}×${originalDims.h} · ${humanFileSize(originalBytes)}`;
+    }
+
     function getMime(){ return formatSelect.value === "webp" ? "image/webp" : "image/jpeg"; }
     function getExt(){ return formatSelect.value === "webp" ? "webp" : "jpg"; }
     function getQualityFloat(){ return parseInt(qualitySlider.value,10) / 100; }
@@ -698,9 +847,55 @@
       estimatePill.textContent = `Expected: ~${humanFileSize(bytes)}`;
     }
 
+    function applySharpenToCanvas(canvas){
+      if (!sharpenToggle.checked) return canvas;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return canvas;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      if (!w || !h) return canvas;
+
+      const src = ctx.getImageData(0, 0, w, h);
+      const out = ctx.createImageData(w, h);
+      const s = src.data;
+      const d = out.data;
+
+      const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let r = 0, g = 0, b = 0;
+          const a = s[(y * w + x) * 4 + 3];
+
+          for (let ky = -1; ky <= 1; ky++) {
+            for (let kx = -1; kx <= 1; kx++) {
+              const px = Math.min(w - 1, Math.max(0, x + kx));
+              const py = Math.min(h - 1, Math.max(0, y + ky));
+              const i = (py * w + px) * 4;
+              const k = kernel[(ky + 1) * 3 + (kx + 1)];
+              r += s[i] * k;
+              g += s[i + 1] * k;
+              b += s[i + 2] * k;
+            }
+          }
+
+          const o = (y * w + x) * 4;
+          d[o] = Math.max(0, Math.min(255, r));
+          d[o + 1] = Math.max(0, Math.min(255, g));
+          d[o + 2] = Math.max(0, Math.min(255, b));
+          d[o + 3] = a;
+        }
+      }
+
+      ctx.putImageData(out, 0, 0);
+      return canvas;
+    }
+
     async function getCurrentExportBlob(){
       if (!cropper) return null;
       const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      applySharpenToCanvas(canvas);
       return await canvasToBlob(canvas, getMime(), getQualityFloat());
     }
 
@@ -734,15 +929,14 @@
     function pushHistory(){
       if (!cropper) return;
       const data = cropper.getData(true);
-      const snap = {
+      history.push({
         data,
         cropBox: cropper.getCropBoxData(),
         canvas: cropper.getCanvasData(),
         baseZoomRatio,
         zoomRatio: currentZoomRatio,
         rotate: (typeof data.rotate === "number") ? data.rotate : currentRotation
-      };
-      history.push(snap);
+      });
       if (history.length > HISTORY_LIMIT) history.shift();
       undoBtn.disabled = history.length < 2;
     }
@@ -820,7 +1014,7 @@
     function initCropper(){
       safeDestroyCropper();
       if (typeof Cropper === "undefined"){
-        setStatus("Cropper failed to load (check network).");
+        setStatus("Cropper library could not load. Your network may be blocking the CDN.");
         return;
       }
 
@@ -949,8 +1143,14 @@
       if (!heic2anyReadyPromise){
         heic2anyReadyPromise = loadScript("https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js");
       }
-      await heic2anyReadyPromise;
-      if (!window.heic2any) throw new Error("HEIC converter unavailable");
+      try{
+        await heic2anyReadyPromise;
+      }catch(e){
+        throw new Error("HEIC conversion files could not load. Your network may be blocking the external library.");
+      }
+      if (!window.heic2any){
+        throw new Error("HEIC conversion is unavailable in this browser.");
+      }
     }
 
     async function normaliseIncomingFile(file){
@@ -959,7 +1159,14 @@
 
       setStatus(`Converting HEIC: ${file.name}`);
       await ensureHeic2AnyLoaded();
-      const converted = await window.heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
+
+      let converted;
+      try{
+        converted = await window.heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
+      }catch(e){
+        throw new Error("HEIC conversion failed. The file may be unsupported or the converter may be blocked.");
+      }
+
       const blob = Array.isArray(converted) ? converted[0] : converted;
       const safeName = (file.name || "image.heic").replace(/\.(heic|heif)$/i, ".jpg");
       return new File([blob], safeName, { type: "image/jpeg", lastModified: Date.now() });
@@ -969,17 +1176,34 @@
       if (faceDetector) return faceDetector;
       if (!faceDetectorInitPromise){
         faceDetectorInitPromise = (async () => {
-          const visionModule = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm");
-          const vision = await visionModule.FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-          );
-          faceDetector = await visionModule.FaceDetector.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite"
-            },
-            runningMode: "IMAGE",
-            minDetectionConfidence: 0.35
-          });
+          let visionModule;
+          try{
+            visionModule = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm");
+          }catch(e){
+            throw new Error("Face detection files could not load. Your network may be blocking MediaPipe.");
+          }
+
+          let vision;
+          try{
+            vision = await visionModule.FilesetResolver.forVisionTasks(
+              "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+            );
+          }catch(e){
+            throw new Error("Face detection runtime could not start.");
+          }
+
+          try{
+            faceDetector = await visionModule.FaceDetector.createFromOptions(vision, {
+              baseOptions: {
+                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite"
+              },
+              runningMode: "IMAGE",
+              minDetectionConfidence: 0.35
+            });
+          }catch(e){
+            throw new Error("Face detection model could not be created.");
+          }
+
           return faceDetector;
         })();
       }
@@ -1053,16 +1277,43 @@
         setStatus("Face-focused crop applied.");
       }catch(e){
         console.error(e);
-        setStatus("Face detection couldn't be initialised in this browser/environment.");
+        setStatus(e.message || "Face detection could not start in this browser/environment.");
       }finally{
         autoFaceBtn.disabled = false;
       }
+    }
+
+    async function inspectImageLimits(file){
+      if (file.size > SAFE_LIMITS.maxSingleBytes){
+        throw new Error(`"${file.name}" is larger than ${humanFileSize(SAFE_LIMITS.maxSingleBytes)}. Please resize or compress it first.`);
+      }
+
+      const dataUrl = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onerror = () => reject(new Error("Could not inspect file."));
+        r.onload = () => resolve(r.result);
+        r.readAsDataURL(file);
+      });
+
+      const dims = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ w: img.naturalWidth || 0, h: img.naturalHeight || 0 });
+        img.onerror = () => reject(new Error("Could not inspect image dimensions."));
+        img.src = dataUrl;
+      });
+
+      if ((dims.w * dims.h) > SAFE_LIMITS.maxSinglePixels){
+        throw new Error(`"${file.name}" is extremely large (${dims.w}×${dims.h}). Please use a smaller image to avoid browser issues.`);
+      }
+
+      return dims;
     }
 
     async function loadFile(file){
       if (!file) return;
       try{
         const readyFile = await normaliseIncomingFile(file);
+        await inspectImageLimits(readyFile);
         originalBytes = readyFile.size || 0;
         originalBaseName = (readyFile.name || "image").replace(/\.[^/.]+$/, "");
         setStatus(`Loaded: ${readyFile.name}`);
@@ -1072,7 +1323,7 @@
         reader.readAsDataURL(readyFile);
       }catch(e){
         console.error(e);
-        setStatus(`Could not process: ${file.name}`);
+        setStatus(e.message || `Could not process: ${file.name}`);
       }
     }
 
@@ -1128,6 +1379,7 @@
       let bestQ = hi;
       let bestSize = Infinity;
       const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      applySharpenToCanvas(canvas);
       const mime = getMime();
 
       for (let i=0;i<8;i++){
@@ -1151,29 +1403,47 @@
     async function handleFiles(files){
       const rawFiles = Array.from(files || []);
       if (!rawFiles.length) return;
+
+      if (rawFiles.length > SAFE_LIMITS.maxBatchFiles){
+        setStatus(`Please use ${SAFE_LIMITS.maxBatchFiles} files or fewer at a time.`);
+        return;
+      }
+
       const accepted = rawFiles.filter(f => {
         const type = (f.type || "").toLowerCase();
         return type.startsWith("image/") || isHeicLike(f);
       });
-      if (!accepted.length) return;
+
+      if (!accepted.length){
+        setStatus("No supported image files found.");
+        return;
+      }
 
       selectedFiles = [];
+      const rejected = [];
+
       for (const file of accepted){
         try{
           const ready = await normaliseIncomingFile(file);
+          await inspectImageLimits(ready);
           selectedFiles.push(ready);
         }catch(e){
           console.error(e);
+          rejected.push(`${file.name}: ${e.message}`);
         }
       }
 
       if (!selectedFiles.length){
-        setStatus("No supported image files were ready to load.");
+        setStatus(rejected[0] || "No supported image files were ready to load.");
         return;
       }
 
       await loadFile(selectedFiles[0]);
-      if (selectedFiles.length > 1) setStatus(`Loaded ${selectedFiles.length} images.`);
+      if (selectedFiles.length > 1){
+        setStatus(`Loaded ${selectedFiles.length} images.${rejected.length ? ` ${rejected.length} skipped.` : ""}`);
+      } else if (rejected.length){
+        setStatus(`${rejected.length} file(s) skipped. First issue: ${rejected[0]}`);
+      }
     }
 
     imageStage.addEventListener("dragover", (e) => {
@@ -1269,6 +1539,7 @@
           canv.height = targetHeight;
           const ctx = canv.getContext("2d");
           ctx.drawImage(tmpImg, sx, sy, cropW, cropH, 0, 0, targetWidth, targetHeight);
+          applySharpenToCanvas(canv);
 
           const blob = await canvasToBlob(canv, mime, quality);
           const filename = uniqueZipName(seen, `${base}_${targetWidth}x${targetHeight}.${ext}`);
@@ -1338,6 +1609,7 @@
       const filename = uniqueZipName(manualSeen, `${base}_${targetWidth}x${targetHeight}.${getExt()}`);
       try{
         const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+        applySharpenToCanvas(canvas);
         const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
         manualZip.file(filename, await blob.arrayBuffer());
         manualAdded++;
@@ -1393,8 +1665,20 @@
       setStatus("Manual batch complete.");
     }
 
+    skinToggle.addEventListener("change", () => {
+      document.body.classList.toggle("mac9", skinToggle.checked);
+      setSkinUI();
+    });
+
     selectImagesBtn.addEventListener("click", () => fileInput.click());
     browseLink.addEventListener("click", () => fileInput.click());
+    browseLink.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
     fileInput.addEventListener("change", async () => {
       if (!fileInput.files || !fileInput.files.length) return;
       await handleFiles(fileInput.files);
@@ -1449,6 +1733,8 @@
       scheduleEstimate();
     });
 
+    sharpenToggle.addEventListener("change", scheduleEstimate);
+
     formatSelect.addEventListener("change", () => {
       scheduleEstimate();
       setStatus(`Format: ${formatSelect.value.toUpperCase()}`);
@@ -1466,6 +1752,12 @@
     batchAddNext.addEventListener("click", manualAddAndNext);
     batchFinish.addEventListener("click", manualFinish);
 
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && batchModal.classList.contains("show")) {
+        closeManualBatch();
+      }
+    });
+
     updateDimsPill();
     qualityPill.textContent = `${qualitySlider.value}%`;
     zoomPill.textContent = "100%";
@@ -1474,6 +1766,7 @@
     setOrigPill();
     showDropUI(true);
     undoBtn.disabled = true;
+    setSkinUI();
     setStatus("");
   </script>
 </body>
