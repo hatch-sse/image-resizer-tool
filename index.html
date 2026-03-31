@@ -571,7 +571,7 @@
             <button class="btn ghost" type="button" id="resetViewBtn">Reset view</button>
           </div>
           <div class="row">
-            <button class="btn ghost" type="button" id="autoFaceBtn">Auto-focus face</button>
+            <button class="btn ghost" type="button" id="autoFaceBtn" title="Recentres the crop around the most prominent face when face detection is available.">Auto-focus face</button>
             <button class="btn" type="button" id="copyBtn">Copy image</button>
           </div>
 
@@ -625,14 +625,14 @@
                 <span class="pill" id="rotPill">0°</span>
                 <button class="btn ghost" type="button" id="resetRotBtn" title="Reset rotation to 0°">Reset</button>
               </div>
-              <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°. Auto-focus face recentres the crop around the most prominent face when the face detection files can load.</div>
+              <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°.</div>
             </div>
 
             <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
               <h3>Batch export</h3>
               <div class="row">
-                <button class="btn" type="button" id="batchFastBtn">Batch ZIP (fast)</button>
-                <button class="btn" type="button" id="batchManualBtn">Batch ZIP (manual)</button>
+                <button class="btn" type="button" id="batchFastBtn" title="Exports all selected images in one ZIP using an automatic centred crop for the current output size.">Batch ZIP (fast)</button>
+                <button class="btn" type="button" id="batchManualBtn" title="Lets you review and adjust the crop for each selected image before downloading them together in a ZIP.">Batch ZIP (manual)</button>
               </div>
               <div class="progressWrap" id="batchProgWrap">
                 <progress id="batchProg" value="0" max="100"></progress>
@@ -651,7 +651,7 @@
   </div>
 
   <div class="pageFooter">
-    <div>SSEN Image Resizer Beta v1.2 — HEIC + face detect</div>
+    <div>SSEN Image resizer beta v1.2 — HEIC + face detect</div>
     <div>bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
   </div>
 
