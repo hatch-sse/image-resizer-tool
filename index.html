@@ -313,6 +313,9 @@
             </div>
             <div class="row">
               <button class="btn ghost" type="button" id="autoFaceBtn" title="Recentres the crop around the most prominent face when face detection is available.">Auto-focus face</button>
+              <button class="btn ghost" type="button" id="flipBtn" title="Mirror the current image horizontally.">Flip horizontal</button>
+              <button class="btn ghost" type="button" id="flipVerticalBtn" title="Mirror the current image vertically.">Flip vertical</button>
+              <button class="btn ghost" type="button" id="rotate90Btn" title="Rotate the current image by 90 degrees.">Rotate 90°</button>
               <button class="btn" type="button" id="copyBtn">Copy image</button>
             </div>
             <div class="hint">Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.</div>
@@ -382,11 +385,11 @@
                 </div>
                 <div class="row">
                   <label class="lbl" for="rotSlider">Rotate</label>
-                  <input type="range" id="rotSlider" class="slider" min="-15" max="15" step="0.1" value="0" />
+                  <input type="range" id="rotSlider" class="slider" min="-180" max="180" step="0.1" value="0" />
                   <span class="pill" id="rotPill">0°</span>
                   <button class="btn ghost" type="button" id="resetRotBtn" title="Reset rotation to 0°">Reset</button>
                 </div>
-                <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°.</div>
+                <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is up to ±180°.</div>
               </div>
 
               <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
