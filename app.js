@@ -82,6 +82,8 @@ const fileInput = document.createElement("input");
 fileInput.type = "file";
 fileInput.accept = "image/*,.heic,.heif";
 fileInput.multiple = true;
+fileInput.style.cssText = "position:fixed;opacity:0;pointer-events:none;width:0;height:0;";
+document.body.appendChild(fileInput);
 
 let cropper = null;
 let targetWidth = 400;
@@ -100,6 +102,8 @@ let estimateTimer = null;
 let baseZoomRatio = 1;
 let currentZoomRatio = 1;
 let currentRotation = 0;
+let currentScaleX = 1;
+let currentScaleY = 1;
 let zoomRafPending = false;
 let rotRafPending = false;
 let pendingZoomValue = 100;
@@ -257,6 +261,12 @@ function getQualityFloat(){ return parseInt(qualitySlider.value,10) / 100; }
 function filenameFor(base){ return `${base}_${targetWidth}x${targetHeight}.${getExt()}`; }
 function filenameForAi(base, width, height, scale){ return `${base}_${width}x${height}_AIx${scale}.${getExt()}`; }
 function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+function normalizeRotation(deg){
+  if (!Number.isFinite(deg)) return 0;
+  let value = ((deg % 360) + 360) % 360;
+  if (value > 180) value -= 360;
+  return value;
+}
 function showDropUI(show){ dropZoneUI.classList.toggle("hidden", !show); }
 
 function getActualZoomRatio(){
@@ -300,7 +310,7 @@ function setEstimatePill(bytes){
 }
 
 function applySharpenToCanvas(canvas){
-  if (!sharpenToggle.checked) return canvas;
+  if (!canvas || !sharpenToggle.checked) return canvas;
 
   const pixelCount = canvas.width * canvas.height;
   if (pixelCount > 4000000) {
@@ -372,6 +382,7 @@ function getFullFrameCanvas(width, height){
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
 
   const source = imageEl;
   const srcW = imageData.naturalWidth;
@@ -393,7 +404,14 @@ function getFullFrameCanvas(width, height){
     sy = Math.round((srcH - sh) / 2);
   }
 
-  ctx.drawImage(source, sx, sy, sw, sh, 0, 0, width, height);
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.translate(width / 2, height / 2);
+  ctx.scale(currentScaleX, currentScaleY);
+  ctx.rotate((normalizeRotation(currentRotation) * Math.PI) / 180);
+  ctx.drawImage(source, sx, sy, sw, sh, -width / 2, -height / 2, width, height);
+  ctx.restore();
   return canvas;
 }
 
@@ -453,7 +471,9 @@ function pushHistory(){
     canvas: cropper.getCanvasData(),
     baseZoomRatio,
     zoomRatio: currentZoomRatio,
-    rotate: (typeof data.rotate === "number") ? data.rotate : currentRotation
+    rotate: (typeof data.rotate === "number") ? normalizeRotation(data.rotate) : currentRotation,
+    scaleX: currentScaleX,
+    scaleY: currentScaleY
   });
   if (history.length > HISTORY_LIMIT) history.shift();
   undoBtn.disabled = history.length < 2;
@@ -466,10 +486,20 @@ function restoreSnapshot(snap){
   cropper.setData(snap.data);
   cropRemoved = false;
   baseZoomRatio = snap.baseZoomRatio || baseZoomRatio;
+
+  currentScaleX = typeof snap.scaleX === "number" ? snap.scaleX : 1;
+  currentScaleY = typeof snap.scaleY === "number" ? snap.scaleY : 1;
+  cropper.scaleX(currentScaleX);
+  cropper.scaleY(currentScaleY);
+
   if (typeof snap.rotate === "number"){
-    cropper.rotateTo(snap.rotate);
-    currentRotation = snap.rotate;
+    currentRotation = normalizeRotation(snap.rotate);
+    cropper.rotateTo(currentRotation);
+  } else {
+    currentRotation = 0;
+    cropper.rotateTo(0);
   }
+
   if (typeof snap.zoomRatio === "number"){
     cropper.zoomTo(snap.zoomRatio);
     currentZoomRatio = snap.zoomRatio;
@@ -508,8 +538,8 @@ function applyZoomPct(pct){
 
 function applyRotationDeg(deg){
   if (!cropper) return;
-  cropper.rotateTo(deg);
-  currentRotation = deg;
+  currentRotation = normalizeRotation(deg);
+  cropper.rotateTo(currentRotation);
   updateTransformUI();
   if (!cropRemoved) scheduleEstimate();
   updateHeaderGuideVisibility();
@@ -521,9 +551,8 @@ function toggleFlip(){
     return;
   }
 
-  const imageData = cropper.getImageData() || {};
-  const nextScaleX = imageData.scaleX === -1 ? 1 : -1;
-  cropper.scaleX(nextScaleX);
+  currentScaleX = currentScaleX === -1 ? 1 : -1;
+  cropper.scaleX(currentScaleX);
 
   if (!cropRemoved) {
     pushHistory();
@@ -531,7 +560,7 @@ function toggleFlip(){
   }
 
   updateHeaderGuideVisibility();
-  setStatus(nextScaleX === -1 ? "Image flipped horizontally." : "Horizontal flip removed.");
+  setStatus(currentScaleX === -1 ? "Image flipped horizontally." : "Horizontal flip removed.");
 }
 
 function toggleFlipVertical(){
@@ -540,9 +569,8 @@ function toggleFlipVertical(){
     return;
   }
 
-  const imageData = cropper.getImageData() || {};
-  const nextScaleY = imageData.scaleY === -1 ? 1 : -1;
-  cropper.scaleY(nextScaleY);
+  currentScaleY = currentScaleY === -1 ? 1 : -1;
+  cropper.scaleY(currentScaleY);
 
   if (!cropRemoved) {
     pushHistory();
@@ -550,7 +578,7 @@ function toggleFlipVertical(){
   }
 
   updateHeaderGuideVisibility();
-  setStatus(nextScaleY === -1 ? "Image flipped vertically." : "Vertical flip removed.");
+  setStatus(currentScaleY === -1 ? "Image flipped vertically." : "Vertical flip removed.");
 }
 
 function rotateNinety(){
@@ -559,17 +587,12 @@ function rotateNinety(){
     return;
   }
 
-  const nextRotation = currentRotation + 90;
-  cropper.rotateTo(nextRotation);
-  currentRotation = nextRotation;
-  updateTransformUI();
+  applyRotationDeg(currentRotation + 90);
 
   if (!cropRemoved) {
     pushHistory();
-    scheduleEstimate();
   }
 
-  updateHeaderGuideVisibility();
   setStatus(`Rotated to ${Math.round(currentRotation)}°.`);
 }
 
@@ -586,8 +609,8 @@ function resetZoom(){
 
 function resetRotation(){
   if (!cropper) return;
-  cropper.rotateTo(0);
   currentRotation = 0;
+  cropper.rotateTo(0);
   updateTransformUI();
   if (!cropRemoved) scheduleEstimate();
   updateHeaderGuideVisibility();
@@ -611,10 +634,14 @@ function initCropper(){
     background: true,
     movable: true,
     zoomable: true,
+    rotatable: true,
+    scalable: true,
     responsive: true,
     ready(){
       history = [];
       currentRotation = 0;
+      currentScaleX = 1;
+      currentScaleY = 1;
       cropRemoved = !(cropper && cropper.cropped);
       captureBaseZoomRatio();
       updateTransformUI();
@@ -699,7 +726,11 @@ function setPreset(w, h, group = PRESET_GROUP.STANDARD, cardId = null, tabKey = 
     cropper.crop();
     cropRemoved = false;
     cropper.rotateTo(0);
+    cropper.scaleX(1);
+    cropper.scaleY(1);
     currentRotation = 0;
+    currentScaleX = 1;
+    currentScaleY = 1;
     captureBaseZoomRatio();
     updateTransformUI();
     history = [];
@@ -729,8 +760,12 @@ function resetCrop(){
   cropper.setAspectRatio(targetWidth / targetHeight);
   cropper.crop();
   cropper.reset();
+  cropper.scaleX(1);
+  cropper.scaleY(1);
   cropRemoved = false;
   currentRotation = 0;
+  currentScaleX = 1;
+  currentScaleY = 1;
   captureBaseZoomRatio();
   updateTransformUI();
   history = [];
@@ -754,7 +789,11 @@ function removeCrop(){
 function resetView(){
   if (!cropper) return;
   cropper.reset();
+  cropper.scaleX(1);
+  cropper.scaleY(1);
   currentRotation = 0;
+  currentScaleX = 1;
+  currentScaleY = 1;
   captureBaseZoomRatio();
   updateTransformUI();
   history = [];
@@ -834,35 +873,40 @@ async function ensureFaceDetector(){
   if (faceDetector) return faceDetector;
   if (!faceDetectorInitPromise){
     faceDetectorInitPromise = (async () => {
-      let visionModule;
       try{
-        visionModule = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm");
-      }catch(e){
-        throw new Error("Face detection files could not load. Your network may be blocking MediaPipe.");
-      }
+        let visionModule;
+        try{
+          visionModule = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm");
+        }catch(e){
+          throw new Error("Face detection files could not load. Your network may be blocking MediaPipe.");
+        }
 
-      let vision;
-      try{
-        vision = await visionModule.FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-        );
-      }catch(e){
-        throw new Error("Face detection runtime could not start.");
-      }
+        let vision;
+        try{
+          vision = await visionModule.FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+          );
+        }catch(e){
+          throw new Error("Face detection runtime could not start.");
+        }
 
-      try{
-        faceDetector = await visionModule.FaceDetector.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite"
-          },
-          runningMode: "IMAGE",
-          minDetectionConfidence: 0.35
-        });
-      }catch(e){
-        throw new Error("Face detection model could not be created.");
-      }
+        try{
+          faceDetector = await visionModule.FaceDetector.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite"
+            },
+            runningMode: "IMAGE",
+            minDetectionConfidence: 0.35
+          });
+        }catch(e){
+          throw new Error("Face detection model could not be created.");
+        }
 
-      return faceDetector;
+        return faceDetector;
+      }catch(e){
+        faceDetectorInitPromise = null;
+        throw e;
+      }
     })();
   }
   return await faceDetectorInitPromise;
@@ -925,8 +969,8 @@ async function autoFocusFace(){
       width: cropW,
       height: cropH,
       rotate: currentRotation,
-      scaleX: 1,
-      scaleY: 1
+      scaleX: currentScaleX,
+      scaleY: currentScaleY
     });
     cropper.crop();
     cropRemoved = false;
@@ -1034,6 +1078,7 @@ async function copyImage(){
     setStatus("Please choose an image first.");
     return;
   }
+  setStatus("Copying…");
   const blob = await getCurrentExportBlob();
   if (!blob){
     setStatus("Could not create image.");
@@ -1146,6 +1191,7 @@ async function setQualityForTargetBytes(targetBytes){
     ? getFullFrameCanvas(targetWidth, targetHeight)
     : cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
 
+  if (!canvas) return;
   applySharpenToCanvas(canvas);
   const mime = getMime();
 
@@ -1313,7 +1359,14 @@ async function batchFast(){
       canv.width = targetWidth;
       canv.height = targetHeight;
       const ctx = canv.getContext("2d");
-      ctx.drawImage(tmpImg, sx, sy, cropW, cropH, 0, 0, targetWidth, targetHeight);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.save();
+      ctx.translate(targetWidth / 2, targetHeight / 2);
+      ctx.scale(currentScaleX, currentScaleY);
+      ctx.rotate((normalizeRotation(currentRotation) * Math.PI) / 180);
+      ctx.drawImage(tmpImg, sx, sy, cropW, cropH, -targetWidth / 2, -targetHeight / 2, targetWidth, targetHeight);
+      ctx.restore();
       applySharpenToCanvas(canv);
 
       const blob = await canvasToBlob(canv, mime, quality);
@@ -1328,6 +1381,15 @@ async function batchFast(){
     batchProgText.textContent = `${i+1} / ${selectedFiles.length}`;
   }
 
+  const skippedCount = skipped.length;
+  batchProgWrap.classList.remove("show");
+
+  if (exported === 0){
+    batchSummary.textContent = `No images could be exported.${skippedCount ? ` ${skippedCount} failed.` : ""}`;
+    setStatus("Batch failed — no images exported.");
+    return;
+  }
+
   const zipBlob = await zip.generateAsync({ type:"blob" });
   const url = URL.createObjectURL(zipBlob);
   const a = document.createElement("a");
@@ -1336,7 +1398,6 @@ async function batchFast(){
   a.click();
   URL.revokeObjectURL(url);
 
-  const skippedCount = skipped.length;
   batchSummary.textContent = `${exported} exported, ${skippedCount} skipped${skippedCount ? ` (e.g. ${skipped.slice(0,3).join(", ")}${skippedCount>3?"…":""})` : ""}`;
   setStatus("Batch complete.");
 }
@@ -1408,7 +1469,14 @@ function manualNext(){
   }
 }
 
-async function manualAddAndNext(){ await manualAddCurrent(); manualNext(); }
+async function manualAddAndNext(){
+  await manualAddCurrent();
+  if (manualIndex >= manualFiles.length - 1){
+    setStatus("Last image added. Click Finish & Download ZIP when ready.");
+  } else {
+    manualNext();
+  }
+}
 function manualSkipNext(){ manualSkipped++; manualNext(); }
 
 function manualBack(){
