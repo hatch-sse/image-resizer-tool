@@ -1028,10 +1028,15 @@ async function loadFile(file){
   if (!file) return;
   try{
     const readyFile = await normaliseIncomingFile(file);
-    await inspectImageLimits(readyFile);
-    originalBytes = readyFile.size || 0;
-    originalBaseName = makeSafeBaseName(readyFile);
-    setStatus(`Loaded: ${readyFile.name}`);
+   const inspection = await inspectImageLimits(readyFile);
+originalBytes = readyFile.size || 0;
+originalBaseName = makeSafeBaseName(readyFile);
+
+if (inspection.warning) {
+  setStatus(inspection.warning);
+} else {
+  setStatus(`Loaded: ${readyFile.name}`);
+}
     const reader = new FileReader();
     reader.onerror = () => setStatus(`Could not read: ${readyFile.name}`);
     reader.onload = () => { imageEl.src = reader.result; };
