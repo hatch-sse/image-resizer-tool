@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SSEN Distribution image resizer</title>
+  <title>SSEN Image resizer beta v1.4</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"/>
 
@@ -25,6 +25,9 @@
       --bad:#b42318;
       --drop-bg:#f3f4f6;
       --drop-bd:#d2d6dc;
+      --tab-bg:#f3f5f7;
+      --tab-active:#ffffff;
+      --preset-shadow:0 3px 10px rgba(0,0,0,.04);
     }
 
     *{ box-sizing:border-box; }
@@ -58,6 +61,7 @@
       font-family:"Chicago", "Geneva", Arial, sans-serif;
       color:#000;
     }
+
     body.mac9 .app{
       border-radius:0;
       box-shadow:6px 6px 0 rgba(0,0,0,0.18);
@@ -67,6 +71,7 @@
       border-bottom:2px solid #4f4f4f;
       background:#d4d0c8;
     }
+
     body.mac9 .appHeader{
       position:relative;
       margin:-16px -16px 14px -16px;
@@ -75,27 +80,32 @@
       color:#fff;
       border-bottom:1px solid #4f4f4f;
     }
+
     body.mac9 h1{
       color:#fff;
       font-size:18px;
       letter-spacing:0;
       text-shadow:1px 1px 0 rgba(0,0,0,0.25);
     }
+
     body.mac9 .sub{
       color:rgba(255,255,255,0.92);
       font-size:12px;
     }
+
     body.mac9 .appearanceToggle{
       top:8px;
       right:10px;
       z-index:20;
       color:#fff;
     }
+
     body.mac9 .appearanceToggle label{
       color:#fff;
       font-size:11px;
       font-weight:700;
     }
+
     body.mac9 .appearanceToggle .togglePill{
       border-radius:0;
       background:#d4d0c8;
@@ -106,6 +116,7 @@
       backdrop-filter:none;
       padding:4px 8px;
     }
+
     body.mac9 .preview,
     body.mac9 .side,
     body.mac9 .modal{
@@ -117,23 +128,31 @@
       border-bottom:2px solid #4f4f4f;
       box-shadow:none;
     }
-    body.mac9 .previewHeader{
+
+    body.mac9 .previewHeader,
+    body.mac9 .presetTabs{
       background:#c0c0c0 !important;
       border-bottom:1px solid #808080;
     }
+
     body.mac9 .previewTitle,
     body.mac9 .sideTitle,
     body.mac9 .section h3,
     body.mac9 label.lbl,
     body.mac9 .hint,
     body.mac9 .statusLine,
-    body.mac9 .tiny{
+    body.mac9 .tiny,
+    body.mac9 .helperText,
+    body.mac9 .presetSectionTitle{
       color:#000;
     }
+
     body.mac9 .btn,
     body.mac9 .btn.primary,
     body.mac9 .btn.ghost,
-    body.mac9 details.advanced > summary{
+    body.mac9 details.advanced > summary,
+    body.mac9 .presetTab,
+    body.mac9 .presetCard{
       border-radius:0;
       background:#d4d0c8;
       color:#000;
@@ -143,14 +162,17 @@
       border-bottom:2px solid #4f4f4f;
       box-shadow:none;
     }
+
     body.mac9 .btn:active,
-    body.mac9 details.advanced > summary:active{
+    body.mac9 details.advanced > summary:active,
+    body.mac9 .presetTab:active{
       border-top:2px solid #4f4f4f;
       border-left:2px solid #4f4f4f;
       border-right:2px solid #fff;
       border-bottom:2px solid #fff;
       transform:none;
     }
+
     body.mac9 .pill{
       border-radius:0;
       background:#efefef;
@@ -158,20 +180,24 @@
       color:#000;
       font-weight:700;
     }
+
     body.mac9 input[type="number"],
     body.mac9 select,
     body.mac9 .slider{
       border-radius:0;
     }
+
     body.mac9 .dropZoneUI{
       border-radius:0;
       background:#efefef;
       border:2px dashed #8f8f8f;
     }
+
     body.mac9 .dropIcon{
       border-radius:0;
       background:#d9d9d9;
     }
+
     body.mac9 .dropCTA{
       border-radius:0;
       background:#d4d0c8;
@@ -181,10 +207,27 @@
       border-right:2px solid #4f4f4f;
       border-bottom:2px solid #4f4f4f;
     }
+
     body.mac9 .dropCTA:hover{ background:#d4d0c8; }
 
+    body.mac9 .presetCard{
+      background:#d4d0c8;
+    }
+
+    body.mac9 .ratioBadge{
+      border-radius:0;
+      background:#0a246a;
+      color:#fff;
+    }
+
+    body.mac9 .presetTab.active{
+      background:#efefef;
+      color:#000;
+      font-weight:700;
+    }
+
     .app{
-      max-width:1120px;
+      max-width:1280px;
       margin:0 auto;
       background:var(--card);
       border:1px solid var(--border);
@@ -209,6 +252,7 @@
       color:rgba(0,0,0,0.55);
       user-select:none;
     }
+
     .appearanceToggle .togglePill{
       display:inline-flex;
       align-items:center;
@@ -218,12 +262,13 @@
       border:1px solid rgba(0,0,0,0.10);
       background:rgba(255,255,255,0.7);
     }
+
     .appearanceToggle input{ transform:translateY(1px); }
 
     .layout{
       margin-top:16px;
       display:grid;
-      grid-template-columns:1fr 380px;
+      grid-template-columns:minmax(0,1fr) 480px;
       gap:14px;
       align-items:start;
     }
@@ -234,6 +279,7 @@
       background:#fff;
       overflow:hidden;
     }
+
     .previewHeader{
       padding:10px 12px;
       display:flex;
@@ -244,8 +290,10 @@
       background:linear-gradient(180deg, rgba(0,62,102,0.08), rgba(0,62,102,0.02));
       border-bottom:1px solid var(--border);
     }
+
     .previewTitle{ font-size:12.5px; font-weight:900; color:var(--grey); letter-spacing:0.2px; }
     .pills{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:flex-end; }
+
     .pill{
       background:rgba(0,62,102,0.10);
       color:var(--blue);
@@ -256,6 +304,7 @@
       border:1px solid rgba(0,62,102,0.18);
       white-space:nowrap;
     }
+
     .pill.good{ color:var(--good); border-color:rgba(26,127,55,0.28); background:rgba(26,127,55,0.08); }
     .pill.warn{ color:var(--warn); border-color:rgba(180,83,9,0.28); background:rgba(180,83,9,0.08); }
     .pill.bad{ color:var(--bad); border-color:rgba(180,35,24,0.28); background:rgba(180,35,24,0.08); }
@@ -266,6 +315,7 @@
       background:#fff;
       overflow:hidden;
     }
+
     #image{ display:block; max-width:100%; }
     .stage.dragover{ outline:2px dashed rgba(0,62,102,0.45); outline-offset:-10px; }
 
@@ -284,7 +334,9 @@
       z-index:10;
       border:2px dashed var(--drop-bd);
     }
+
     .dropZoneUI.hidden{ display:none; }
+
     .dropIcon{
       width:78px;
       height:78px;
@@ -297,6 +349,7 @@
       font-size:30px;
       position:relative;
     }
+
     .dropIcon::before{
       content:"+";
       position:absolute;
@@ -313,9 +366,11 @@
       font-weight:900;
       border:1px solid #d3dcff;
     }
+
     .dropHint{ font-size:16px; font-weight:900; color:#111; }
     .dropHint span{ color:var(--blue2); text-decoration:underline; cursor:pointer; }
     .dropSub{ font-size:12px; color:rgba(0,0,0,0.6); line-height:1.35; max-width:420px; }
+
     .dropCTA{
       display:inline-flex;
       align-items:center;
@@ -329,6 +384,7 @@
       cursor:pointer;
       user-select:none;
     }
+
     .dropCTA:hover{ background:#000; }
 
     .headerGuide{
@@ -338,6 +394,7 @@
       display:none;
       overflow:hidden;
     }
+
     .headerGuide.visible{ display:block; }
 
     .headerGuide-nav{
@@ -351,6 +408,7 @@
       box-shadow:0 2px 8px rgba(0,0,0,0.10);
       border:1px solid rgba(0,0,0,0.06);
     }
+
     .headerGuide-panel{
       position:absolute;
       left:14.5%;
@@ -363,6 +421,7 @@
       clip-path:polygon(0 0,100% 0,100% 88%,72% 88%,64% 100%,0 100%);
       box-shadow:0 8px 20px rgba(0,0,0,0.16);
     }
+
     .headerGuide-title{
       font-size:19px;
       line-height:1.3;
@@ -370,6 +429,7 @@
       margin-bottom:18px;
       max-width:92%;
     }
+
     .headerGuide-line{
       height:10px;
       width:88%;
@@ -377,7 +437,9 @@
       border-radius:999px;
       margin-bottom:10px;
     }
+
     .headerGuide-line.short{ width:62%; }
+
     .headerGuide-button{
       margin-top:18px;
       width:128px;
@@ -392,26 +454,173 @@
       font-weight:700;
       color:#fff;
     }
+
     body.mac9 .headerGuide-nav{
       border-radius:0;
       background:rgba(255,255,255,0.88);
     }
+
     body.mac9 .headerGuide-panel{
       clip-path:none;
       border:1px solid rgba(255,255,255,0.25);
     }
+
     body.mac9 .headerGuide-button{
       border-radius:0;
     }
 
-    .side{ border:1px solid var(--border); border-radius:14px; background:#fff; padding:12px; }
+    .side{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .presetTabs{
+      display:flex;
+      border-bottom:1px solid var(--border);
+      background:var(--tab-bg);
+      overflow:auto;
+    }
+
+    .presetTab{
+      border:0;
+      background:transparent;
+      padding:14px 18px;
+      font-size:16px;
+      color:#3d4750;
+      cursor:pointer;
+      border-right:1px solid #d8dde4;
+      white-space:nowrap;
+      font-weight:700;
+      font-family:inherit;
+    }
+
+    .presetTab:last-child{ border-right:none; }
+
+    .presetTab.active{
+      background:var(--tab-active);
+      color:var(--blue);
+    }
+
+    .sideInner{
+      padding:12px;
+    }
+
+    .helperText{
+      margin:0 0 12px 0;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .tabPanel{ display:none; }
+    .tabPanel.active{ display:block; }
+
+    .presetSection{
+      margin-bottom:14px;
+    }
+
+    .presetSectionTitle{
+      margin:0 0 8px 0;
+      font-size:12.5px;
+      font-weight:900;
+      color:var(--grey);
+      letter-spacing:0.15px;
+    }
+
+    .presetGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .presetCard{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      width:100%;
+      text-align:left;
+      background:#fff;
+      border:1px solid #d9dee5;
+      border-radius:12px;
+      padding:12px;
+      box-shadow:var(--preset-shadow);
+      cursor:pointer;
+      font-family:inherit;
+    }
+
+    .presetCard:hover{
+      background:#f8fbfd;
+      border-color:#bfd0df;
+    }
+
+    .presetCard.activePreset{
+      outline:2px solid rgba(0,62,102,0.18);
+      border-color:rgba(0,62,102,0.35);
+      background:rgba(0,62,102,0.04);
+    }
+
+    .ratioBadge{
+      flex:0 0 auto;
+      background:#194f87;
+      color:#fff;
+      border-radius:6px;
+      min-width:50px;
+      text-align:center;
+      font-weight:900;
+      font-size:16px;
+      padding:10px 8px;
+      line-height:1;
+    }
+
+    .presetText{
+      line-height:1.25;
+      min-width:0;
+    }
+
+    .presetTitle{
+      font-size:15px;
+      font-weight:900;
+      color:#27323c;
+      margin-bottom:3px;
+    }
+
+    .presetSub{
+      font-size:13px;
+      color:#4b5660;
+    }
+
     .sideTitle{ font-weight:900; color:var(--grey); margin:2px 0 10px 0; font-size:14px; }
+
     .section{ padding:10px 0; border-top:1px solid var(--border); }
     .section:first-of-type{ border-top:none; padding-top:0; }
-    .section h3{ margin:0 0 8px 0; font-size:12.5px; font-weight:900; color:var(--grey); letter-spacing:0.15px; }
-    .row{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; }
+
+    .section h3{
+      margin:0 0 8px 0;
+      font-size:12.5px;
+      font-weight:900;
+      color:var(--grey);
+      letter-spacing:0.15px;
+    }
+
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px;
+    }
+
     .row:last-child{ margin-bottom:0; }
-    label.lbl{ font-size:12px; font-weight:900; color:var(--grey); min-width:92px; }
+
+    label.lbl{
+      font-size:12px;
+      font-weight:900;
+      color:var(--grey);
+      min-width:92px;
+    }
+
     input[type="number"], select{
       border:1px solid var(--border);
       border-radius:10px;
@@ -420,6 +629,7 @@
       font-family:inherit;
       background:#fff;
     }
+
     input[type="number"]{ width:120px; }
 
     .btn{
@@ -433,7 +643,9 @@
       transition:background .15s ease, transform .03s ease;
       user-select:none;
       white-space:nowrap;
+      font-family:inherit;
     }
+
     .btn:hover{ background:var(--btn-bg-hover); }
     .btn:active{ transform:translateY(1px); }
     .btn.primary{ background:var(--blue); color:#fff; border-color:var(--blue); }
@@ -451,6 +663,7 @@
     }
 
     details.advanced{ border:none; background:transparent; margin-top:4px; }
+
     details.advanced > summary{
       list-style:none;
       cursor:pointer;
@@ -466,12 +679,15 @@
       color:var(--blue);
       font-weight:900;
     }
+
     details.advanced > summary::-webkit-details-marker{ display:none; }
+
     .chev{ display:inline-block; transition:transform .15s ease; font-weight:900; opacity:0.9; }
     details[open] .chev{ transform:rotate(180deg); }
     .advancedInner{ padding-top:10px; }
     .slider{ width:100%; accent-color:var(--blue); }
     .tiny{ font-size:12px; color:var(--muted); }
+
     .toggleRow{
       display:flex;
       align-items:center;
@@ -480,16 +696,19 @@
       color:var(--grey);
       font-weight:700;
     }
+
     .lockNote{
       font-size:12px;
       color:var(--blue);
       font-weight:700;
       display:none;
     }
+
     .lockNote.show{ display:block; }
 
     .progressWrap{ width:100%; display:none; gap:8px; align-items:center; margin-top:6px; }
     .progressWrap.show{ display:flex; }
+
     progress{ width:100%; height:10px; border-radius:999px; overflow:hidden; }
     progress::-webkit-progress-bar{ background:#eef2f6; }
     progress::-webkit-progress-value{ background:var(--blue); }
@@ -500,7 +719,9 @@
     select:focus-visible,
     summary:focus-visible,
     .dropCTA:focus-visible,
-    .dropHint span:focus-visible{
+    .dropHint span:focus-visible,
+    .presetTab:focus-visible,
+    .presetCard:focus-visible{
       outline:2px solid var(--blue);
       outline-offset:2px;
     }
@@ -516,7 +737,9 @@
       pointer-events:none;
       z-index:9999;
     }
+
     .modal-backdrop.show{ display:flex; }
+
     .modal{
       pointer-events:auto;
       margin-top:20px;
@@ -527,6 +750,7 @@
       overflow:hidden;
       box-shadow:0 12px 28px rgba(0,0,0,0.18);
     }
+
     .modal header{
       padding:12px 14px;
       border-bottom:1px solid var(--border);
@@ -538,7 +762,9 @@
       color:var(--grey);
       font-size:13px;
     }
+
     .modal .body{ padding:12px 14px; font-size:12.8px; color:var(--muted); line-height:1.35; }
+
     .modal footer{
       padding:12px 14px;
       display:flex;
@@ -549,22 +775,29 @@
     }
 
     .pageFooter{
-      max-width:1120px;
+      max-width:1280px;
       margin:10px auto 0 auto;
       text-align:center;
       font-size:12px;
       color:rgba(0,0,0,0.45);
       line-height:1.45;
     }
+
     .pageFooter a{ color:var(--blue); text-decoration:underline; }
     body.mac9 .pageFooter{ color:#222; font-family:"Chicago","Geneva",Arial,sans-serif; }
     body.mac9 .pageFooter a{ color:#0000cc; }
 
-    @media (max-width: 980px){
+    @media (max-width: 1100px){
       .layout{ grid-template-columns:1fr; }
       .appHeader{ padding-right:0; }
       .appearanceToggle{ position:static; margin-bottom:10px; }
       body.mac9 .appHeader{ padding-right:14px; margin-bottom:14px; }
+    }
+
+    @media (max-width: 760px){
+      .presetGrid{ grid-template-columns:1fr; }
+      .presetTab{ padding:12px 14px; font-size:14px; }
+      .stage{ height:520px; }
     }
   </style>
 </head>
@@ -622,150 +855,335 @@
       </div>
 
       <div class="side">
-        <div class="sideTitle">Resize image</div>
-
-        <div class="section">
-          <h3>Website presets</h3>
-          <div class="row">
-            <button class="btn" type="button" id="presetArticle">Article 400×250</button>
-            <button class="btn" type="button" id="presetHeader">Header 1630×580</button>
-          </div>
+        <div class="presetTabs">
+          <button class="presetTab active" type="button" data-tab="article">Web article</button>
+          <button class="presetTab" type="button" data-tab="social">Social</button>
+          <button class="presetTab" type="button" data-tab="newsletter">Internal newsletter</button>
+          <button class="presetTab" type="button" data-tab="website">Full website</button>
         </div>
 
-        <div class="section">
-          <h3>Social media presets</h3>
-          <div class="row">
-            <button class="btn" type="button" id="preset916">9:16 (1080×1920)</button>
-            <button class="btn" type="button" id="preset54">5:4 (1080×1350)</button>
-            <button class="btn" type="button" id="preset11">1:1 (1080×1080)</button>
-          </div>
-        </div>
+        <div class="sideInner">
+          <div class="tabPanel active" id="panel-article">
+            <p class="helperText">Cropping is enabled for these presets.</p>
+            <div class="presetGrid">
+              <button class="presetCard activePreset" type="button" id="presetArticleCard">
+                <div class="ratioBadge">8:5</div>
+                <div class="presetText">
+                  <div class="presetTitle">Website article</div>
+                  <div class="presetSub">400×250px</div>
+                </div>
+              </button>
 
-        <div class="section">
-          <h3>Internal newsletter</h3>
-          <div class="row">
-            <button class="btn" type="button" id="presetNewsBanner" title="Axios HQ banner recommendation: 2400×600 PNG.">Banner 2400×600</button>
-            <button class="btn" type="button" id="presetNewsFeatured" title="Axios HQ featured image recommendation: 1000×600 PNG.">Featured 1000×600</button>
-          </div>
-          <div class="row">
-            <button class="btn" type="button" id="presetNewsCollageSide" title="Axios HQ side-by-side collage recommendation: 1:1 ratio. Using 1200×1200 as a practical preset.">Collage 1200×1200</button>
-            <button class="btn" type="button" id="presetNewsCollageGrid" title="Axios HQ 2×2 collage recommendation: 7:4 ratio. Using 1400×800 as a practical preset.">Collage 1400×800</button>
-          </div>
-          <div class="row">
-            <button class="btn" type="button" id="presetNewsInline" title="Axios HQ inline images can be any size. Using 1200×800 as a practical PNG preset.">Inline 1200×800</button>
-          </div>
-        </div>
-
-        <div class="section">
-          <h3>Custom size</h3>
-          <div class="row">
-            <label class="lbl" for="customW">Width</label>
-            <input type="number" id="customW" min="1" placeholder="px" inputmode="numeric" />
-          </div>
-          <div class="row">
-            <label class="lbl" for="customH">Height</label>
-            <input type="number" id="customH" min="1" placeholder="px" inputmode="numeric" />
-            <button class="btn" type="button" id="applyCustom">Apply</button>
-          </div>
-        </div>
-
-        <div class="section">
-          <h3>Actions</h3>
-          <div class="row">
-            <button class="btn ghost" type="button" id="undoBtn">Undo</button>
-            <button class="btn ghost" type="button" id="resetCropBtn">Reset crop</button>
-            <button class="btn ghost" type="button" id="resetViewBtn">Reset view</button>
-          </div>
-          <div class="row">
-            <button class="btn ghost" type="button" id="autoFaceBtn" title="Recentres the crop around the most prominent face when face detection is available.">Auto-focus face</button>
-            <button class="btn" type="button" id="copyBtn">Copy image</button>
+              <button class="presetCard" type="button" id="presetHeaderCard">
+                <div class="ratioBadge">1630</div>
+                <div class="presetText">
+                  <div class="presetTitle">Web banner</div>
+                  <div class="presetSub">1630×580px</div>
+                </div>
+              </button>
+            </div>
           </div>
 
-          <div class="hint">Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.</div>
-          <div class="statusLine" id="statusLine" role="status" aria-live="polite"></div>
-        </div>
+          <div class="tabPanel" id="panel-social">
+            <p class="helperText">Cropping is enabled for these presets.</p>
+            <div class="presetGrid">
+              <button class="presetCard" type="button" id="preset916Card">
+                <div class="ratioBadge">9:16</div>
+                <div class="presetText">
+                  <div class="presetTitle">Portrait</div>
+                  <div class="presetSub">1080×1920px</div>
+                </div>
+              </button>
 
-        <details class="advanced section" id="advanced">
-          <summary aria-label="Advanced options">
-            <span>Advanced</span>
-            <span class="chev">▾</span>
-          </summary>
+              <button class="presetCard" type="button" id="preset54Card">
+                <div class="ratioBadge">5:4</div>
+                <div class="presetText">
+                  <div class="presetTitle">Instagram</div>
+                  <div class="presetSub">1080×1350px</div>
+                </div>
+              </button>
 
-          <div class="advancedInner">
+              <button class="presetCard" type="button" id="preset11Card">
+                <div class="ratioBadge">1:1</div>
+                <div class="presetText">
+                  <div class="presetTitle">Square</div>
+                  <div class="presetSub">1080×1080px</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div class="tabPanel" id="panel-newsletter">
+            <p class="helperText">These presets export as PNG.</p>
+
+            <div class="presetGrid">
+              <button class="presetCard" type="button" id="presetNewsBannerCard">
+                <div class="ratioBadge">4:1</div>
+                <div class="presetText">
+                  <div class="presetTitle">Banner</div>
+                  <div class="presetSub">2400×600px</div>
+                </div>
+              </button>
+
+              <button class="presetCard" type="button" id="presetNewsFeaturedCard">
+                <div class="ratioBadge">5:3</div>
+                <div class="presetText">
+                  <div class="presetTitle">Featured image</div>
+                  <div class="presetSub">1000×600px</div>
+                </div>
+              </button>
+
+              <button class="presetCard" type="button" id="presetNewsCollageSideCard">
+                <div class="ratioBadge">1:1</div>
+                <div class="presetText">
+                  <div class="presetTitle">Collage</div>
+                  <div class="presetSub">1200×1200px</div>
+                </div>
+              </button>
+
+              <button class="presetCard" type="button" id="presetNewsCollageGridCard">
+                <div class="ratioBadge">7:4</div>
+                <div class="presetText">
+                  <div class="presetTitle">Collage</div>
+                  <div class="presetSub">1400×800px</div>
+                </div>
+              </button>
+
+              <button class="presetCard" type="button" id="presetNewsInlineCard">
+                <div class="ratioBadge">3:2</div>
+                <div class="presetText">
+                  <div class="presetTitle">Inline</div>
+                  <div class="presetSub">1200×800px</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div class="tabPanel" id="panel-website">
+            <p class="helperText">Cropping is enabled for these presets.</p>
+
+            <div class="presetSection">
+              <div class="presetSectionTitle">Icon block</div>
+              <div class="presetGrid">
+                <button class="presetCard" type="button" id="presetIconBlockCard">
+                  <div class="ratioBadge">1:1</div>
+                  <div class="presetText">
+                    <div class="presetTitle">1:1 Icon block</div>
+                    <div class="presetSub">200×200px</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="presetSection">
+              <div class="presetSectionTitle">Header banner</div>
+              <div class="presetGrid">
+                <button class="presetCard" type="button" id="presetWebsiteHeaderBannerCard">
+                  <div class="ratioBadge">2:1</div>
+                  <div class="presetText">
+                    <div class="presetTitle">2:1 Header banner</div>
+                    <div class="presetSub">1400×700px</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="presetSection">
+              <div class="presetSectionTitle">Blocks</div>
+              <div class="presetGrid">
+                <button class="presetCard" type="button" id="presetDistributorSearchCard">
+                  <div class="ratioBadge">3:2</div>
+                  <div class="presetText">
+                    <div class="presetTitle">3:2 Distributor search</div>
+                    <div class="presetSub">600×400px</div>
+                  </div>
+                </button>
+
+                <button class="presetCard" type="button" id="presetSupplierSearchCard">
+                  <div class="ratioBadge">3:2</div>
+                  <div class="presetText">
+                    <div class="presetTitle">3:2 Supplier search</div>
+                    <div class="presetSub">600×400px</div>
+                  </div>
+                </button>
+
+                <button class="presetCard" type="button" id="presetFeatureBlockCard">
+                  <div class="ratioBadge">3:2</div>
+                  <div class="presetText">
+                    <div class="presetTitle">3:2 Feature block</div>
+                    <div class="presetSub">600×400px</div>
+                  </div>
+                </button>
+
+                <button class="presetCard" type="button" id="presetPowerTrackCard">
+                  <div class="ratioBadge">3:2</div>
+                  <div class="presetText">
+                    <div class="presetTitle">3:2 Power track</div>
+                    <div class="presetSub">600×400px</div>
+                  </div>
+                </button>
+
+                <button class="presetCard" type="button" id="presetCard360Card">
+                  <div class="ratioBadge">3:2</div>
+                  <div class="presetText">
+                    <div class="presetTitle">3:2 Card</div>
+                    <div class="presetSub">360×240px</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="presetSection">
+              <div class="presetSectionTitle">Author card</div>
+              <div class="presetGrid">
+                <button class="presetCard" type="button" id="presetAuthorCardCard">
+                  <div class="ratioBadge">4:5</div>
+                  <div class="presetText">
+                    <div class="presetTitle">4:5 Author card</div>
+                    <div class="presetSub">120×150px</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="presetSection">
+              <div class="presetSectionTitle">Article card</div>
+              <div class="presetGrid">
+                <button class="presetCard" type="button" id="presetArticleCardWebsite">
+                  <div class="ratioBadge">7:5</div>
+                  <div class="presetText">
+                    <div class="presetTitle">7:5 Article card</div>
+                    <div class="presetSub">280×200px</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="presetSection">
+              <div class="presetSectionTitle">iFrame</div>
+              <div class="presetGrid">
+                <button class="presetCard" type="button" id="presetIframeCard">
+                  <div class="ratioBadge">16:9</div>
+                  <div class="presetText">
+                    <div class="presetTitle">16:9 iFrame</div>
+                    <div class="presetSub">1920×1080px</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Custom size</h3>
             <div class="row">
-              <label class="lbl" for="formatSelect">Format</label>
-              <select id="formatSelect">
-                <option value="jpeg" selected>JPG</option>
-                <option value="webp">WebP</option>
-              </select>
+              <label class="lbl" for="customW">Width</label>
+              <input type="number" id="customW" min="1" placeholder="px" inputmode="numeric" />
             </div>
-            <div class="lockNote" id="formatLockNote">Internal newsletter presets export as PNG.</div>
-
             <div class="row">
-              <label class="lbl" for="qualitySlider">Quality</label>
-              <input type="range" id="qualitySlider" class="slider" min="60" max="95" value="90" />
-              <span class="pill" id="qualityPill">90%</span>
-            </div>
-
-            <div class="row">
-              <button class="btn ghost" type="button" id="target1mb">&lt; 1MB</button>
-              <button class="btn ghost" type="button" id="target500kb">&lt; 500KB</button>
-              <button class="btn ghost" type="button" id="target250kb">&lt; 250KB</button>
-            </div>
-
-            <div class="row toggleRow">
-              <input type="checkbox" id="sharpenToggle" />
-              <label for="sharpenToggle">Sharpen after resize</label>
-            </div>
-
-            <div class="row toggleRow" id="headerGuideRow" style="display:none;">
-              <input type="checkbox" id="headerGuideToggle" />
-              <label for="headerGuideToggle">Show website header overlay</label>
-            </div>
-
-            <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
-              <h3>Transform</h3>
-              <div class="row">
-                <label class="lbl" for="zoomSlider">Zoom</label>
-                <input type="range" id="zoomSlider" class="slider" min="50" max="200" value="100" />
-                <span class="pill" id="zoomPill">100%</span>
-                <button class="btn ghost" type="button" id="resetZoomBtn" title="Reset zoom to 100%">Reset</button>
-              </div>
-              <div class="row">
-                <label class="lbl" for="rotSlider">Rotate</label>
-                <input type="range" id="rotSlider" class="slider" min="-15" max="15" step="0.1" value="0" />
-                <span class="pill" id="rotPill">0°</span>
-                <button class="btn ghost" type="button" id="resetRotBtn" title="Reset rotation to 0°">Reset</button>
-              </div>
-              <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°.</div>
-            </div>
-
-            <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
-              <h3>Batch export</h3>
-              <div class="row">
-                <button class="btn" type="button" id="batchFastBtn" title="Exports all selected images in one ZIP using an automatic centred crop for the current output size.">Batch ZIP (fast)</button>
-                <button class="btn" type="button" id="batchManualBtn" title="Lets you review and adjust the crop for each selected image before downloading them together in a ZIP.">Batch ZIP (manual)</button>
-              </div>
-              <div class="progressWrap" id="batchProgWrap">
-                <progress id="batchProg" value="0" max="100"></progress>
-                <span class="tiny" id="batchProgText"></span>
-              </div>
-              <div class="tiny" id="batchSummary"></div>
+              <label class="lbl" for="customH">Height</label>
+              <input type="number" id="customH" min="1" placeholder="px" inputmode="numeric" />
+              <button class="btn" type="button" id="applyCustom">Apply</button>
             </div>
           </div>
-        </details>
 
-        <div class="section">
-          <button class="btn primary" type="button" id="downloadBtn" style="width:100%;">Download</button>
+          <div class="section">
+            <h3>Actions</h3>
+            <div class="row">
+              <button class="btn ghost" type="button" id="undoBtn">Undo</button>
+              <button class="btn ghost" type="button" id="resetCropBtn">Reset crop</button>
+              <button class="btn ghost" type="button" id="resetViewBtn">Reset view</button>
+            </div>
+            <div class="row">
+              <button class="btn ghost" type="button" id="autoFaceBtn" title="Recentres the crop around the most prominent face when face detection is available.">Auto-focus face</button>
+              <button class="btn" type="button" id="copyBtn">Copy image</button>
+            </div>
+
+            <div class="hint">Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.</div>
+            <div class="statusLine" id="statusLine" role="status" aria-live="polite"></div>
+          </div>
+
+          <details class="advanced section" id="advanced">
+            <summary aria-label="Advanced options">
+              <span>Advanced</span>
+              <span class="chev">▾</span>
+            </summary>
+
+            <div class="advancedInner">
+              <div class="row">
+                <label class="lbl" for="formatSelect">Format</label>
+                <select id="formatSelect">
+                  <option value="jpeg" selected>JPG</option>
+                  <option value="webp">WebP</option>
+                </select>
+              </div>
+              <div class="lockNote" id="formatLockNote">Internal newsletter presets export as PNG.</div>
+
+              <div class="row">
+                <label class="lbl" for="qualitySlider">Quality</label>
+                <input type="range" id="qualitySlider" class="slider" min="60" max="95" value="90" />
+                <span class="pill" id="qualityPill">90%</span>
+              </div>
+
+              <div class="row">
+                <button class="btn ghost" type="button" id="target1mb">&lt; 1MB</button>
+                <button class="btn ghost" type="button" id="target500kb">&lt; 500KB</button>
+                <button class="btn ghost" type="button" id="target250kb">&lt; 250KB</button>
+              </div>
+
+              <div class="row toggleRow">
+                <input type="checkbox" id="sharpenToggle" />
+                <label for="sharpenToggle">Sharpen after resize</label>
+              </div>
+
+              <div class="row toggleRow" id="headerGuideRow" style="display:none;">
+                <input type="checkbox" id="headerGuideToggle" />
+                <label for="headerGuideToggle">Show website header overlay</label>
+              </div>
+
+              <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
+                <h3>Transform</h3>
+                <div class="row">
+                  <label class="lbl" for="zoomSlider">Zoom</label>
+                  <input type="range" id="zoomSlider" class="slider" min="50" max="200" value="100" />
+                  <span class="pill" id="zoomPill">100%</span>
+                  <button class="btn ghost" type="button" id="resetZoomBtn" title="Reset zoom to 100%">Reset</button>
+                </div>
+                <div class="row">
+                  <label class="lbl" for="rotSlider">Rotate</label>
+                  <input type="range" id="rotSlider" class="slider" min="-15" max="15" step="0.1" value="0" />
+                  <span class="pill" id="rotPill">0°</span>
+                  <button class="btn ghost" type="button" id="resetRotBtn" title="Reset rotation to 0°">Reset</button>
+                </div>
+                <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°.</div>
+              </div>
+
+              <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
+                <h3>Batch export</h3>
+                <div class="row">
+                  <button class="btn" type="button" id="batchFastBtn" title="Exports all selected images in one ZIP using an automatic centred crop for the current output size.">Batch ZIP (fast)</button>
+                  <button class="btn" type="button" id="batchManualBtn" title="Lets you review and adjust the crop for each selected image before downloading them together in a ZIP.">Batch ZIP (manual)</button>
+                </div>
+                <div class="progressWrap" id="batchProgWrap">
+                  <progress id="batchProg" value="0" max="100"></progress>
+                  <span class="tiny" id="batchProgText"></span>
+                </div>
+                <div class="tiny" id="batchSummary"></div>
+              </div>
+            </div>
+          </details>
+
+          <div class="section">
+            <button class="btn primary" type="button" id="downloadBtn" style="width:100%;">Download</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="pageFooter">
-    <div>SSEN Image resizer beta v1.3 — HEIC + face detect</div>
-    <div>Changes: header overlay inside crop box, newsletter presets, PNG locked for newsletters</div>
-    <div>bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
+    <div>SSEN Image resizer beta v1.4</div>
+    <div>Changes: Newsletter &amp; Website presets, web banner overlay</div>
+    <div>Bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
   </div>
 
   <div class="modal-backdrop" id="batchModal">
@@ -819,18 +1237,6 @@
     const origPill = document.getElementById("origPill");
     const estimatePill = document.getElementById("estimatePill");
     const statusLine = document.getElementById("statusLine");
-
-    const presetArticle = document.getElementById("presetArticle");
-    const presetHeader  = document.getElementById("presetHeader");
-    const preset916     = document.getElementById("preset916");
-    const preset54      = document.getElementById("preset54");
-    const preset11      = document.getElementById("preset11");
-
-    const presetNewsBanner = document.getElementById("presetNewsBanner");
-    const presetNewsFeatured = document.getElementById("presetNewsFeatured");
-    const presetNewsCollageSide = document.getElementById("presetNewsCollageSide");
-    const presetNewsCollageGrid = document.getElementById("presetNewsCollageGrid");
-    const presetNewsInline = document.getElementById("presetNewsInline");
 
     const customW = document.getElementById("customW");
     const customH = document.getElementById("customH");
@@ -914,6 +1320,10 @@
     let faceDetector = null;
     let faceDetectorInitPromise = null;
     let heic2anyReadyPromise = null;
+
+    const presetCards = document.querySelectorAll(".presetCard");
+    const presetTabs = document.querySelectorAll(".presetTab");
+    const tabPanels = document.querySelectorAll(".tabPanel");
 
     function setStatus(text){
       statusLine.textContent = text || "";
@@ -1277,10 +1687,32 @@
       });
     }
 
-    function setPreset(w,h, group = PRESET_GROUP.STANDARD){
+    function clearActivePresetCards(){
+      presetCards.forEach(card => card.classList.remove("activePreset"));
+    }
+
+    function activatePresetCard(cardId){
+      clearActivePresetCards();
+      const card = document.getElementById(cardId);
+      if (card) card.classList.add("activePreset");
+    }
+
+    function activateTab(tabKey){
+      presetTabs.forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.tab === tabKey);
+      });
+      tabPanels.forEach(panel => {
+        panel.classList.toggle("active", panel.id === `panel-${tabKey}`);
+      });
+    }
+
+    function setPreset(w, h, group = PRESET_GROUP.STANDARD, cardId = null, tabKey = null){
       targetWidth = w;
       targetHeight = h;
       currentPresetGroup = group;
+
+      if (tabKey) activateTab(tabKey);
+      if (cardId) activatePresetCard(cardId);
 
       const header = (w === 1630 && h === 580);
       headerGuideToggle.checked = header;
@@ -1311,7 +1743,8 @@
         alert("Please enter a valid width and height.");
         return;
       }
-      setPreset(w,h, PRESET_GROUP.STANDARD);
+      clearActivePresetCards();
+      setPreset(w,h, PRESET_GROUP.STANDARD, null, null);
     }
 
     function resetCrop(){
@@ -1924,17 +2357,33 @@
       fileInput.value = "";
     });
 
-    presetArticle.addEventListener("click", () => setPreset(400,250, PRESET_GROUP.STANDARD));
-    presetHeader.addEventListener("click", () => setPreset(1630,580, PRESET_GROUP.STANDARD));
-    preset916.addEventListener("click", () => setPreset(1080,1920, PRESET_GROUP.STANDARD));
-    preset54.addEventListener("click", () => setPreset(1080,1350, PRESET_GROUP.STANDARD));
-    preset11.addEventListener("click", () => setPreset(1080,1080, PRESET_GROUP.STANDARD));
+    presetTabs.forEach(tab => {
+      tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+    });
 
-    presetNewsBanner.addEventListener("click", () => setPreset(2400,600, PRESET_GROUP.NEWSLETTER));
-    presetNewsFeatured.addEventListener("click", () => setPreset(1000,600, PRESET_GROUP.NEWSLETTER));
-    presetNewsCollageSide.addEventListener("click", () => setPreset(1200,1200, PRESET_GROUP.NEWSLETTER));
-    presetNewsCollageGrid.addEventListener("click", () => setPreset(1400,800, PRESET_GROUP.NEWSLETTER));
-    presetNewsInline.addEventListener("click", () => setPreset(1200,800, PRESET_GROUP.NEWSLETTER));
+    document.getElementById("presetArticleCard").addEventListener("click", () => setPreset(400,250, PRESET_GROUP.STANDARD, "presetArticleCard", "article"));
+    document.getElementById("presetHeaderCard").addEventListener("click", () => setPreset(1630,580, PRESET_GROUP.STANDARD, "presetHeaderCard", "article"));
+
+    document.getElementById("preset916Card").addEventListener("click", () => setPreset(1080,1920, PRESET_GROUP.STANDARD, "preset916Card", "social"));
+    document.getElementById("preset54Card").addEventListener("click", () => setPreset(1080,1350, PRESET_GROUP.STANDARD, "preset54Card", "social"));
+    document.getElementById("preset11Card").addEventListener("click", () => setPreset(1080,1080, PRESET_GROUP.STANDARD, "preset11Card", "social"));
+
+    document.getElementById("presetNewsBannerCard").addEventListener("click", () => setPreset(2400,600, PRESET_GROUP.NEWSLETTER, "presetNewsBannerCard", "newsletter"));
+    document.getElementById("presetNewsFeaturedCard").addEventListener("click", () => setPreset(1000,600, PRESET_GROUP.NEWSLETTER, "presetNewsFeaturedCard", "newsletter"));
+    document.getElementById("presetNewsCollageSideCard").addEventListener("click", () => setPreset(1200,1200, PRESET_GROUP.NEWSLETTER, "presetNewsCollageSideCard", "newsletter"));
+    document.getElementById("presetNewsCollageGridCard").addEventListener("click", () => setPreset(1400,800, PRESET_GROUP.NEWSLETTER, "presetNewsCollageGridCard", "newsletter"));
+    document.getElementById("presetNewsInlineCard").addEventListener("click", () => setPreset(1200,800, PRESET_GROUP.NEWSLETTER, "presetNewsInlineCard", "newsletter"));
+
+    document.getElementById("presetIconBlockCard").addEventListener("click", () => setPreset(200,200, PRESET_GROUP.STANDARD, "presetIconBlockCard", "website"));
+    document.getElementById("presetWebsiteHeaderBannerCard").addEventListener("click", () => setPreset(1400,700, PRESET_GROUP.STANDARD, "presetWebsiteHeaderBannerCard", "website"));
+    document.getElementById("presetDistributorSearchCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetDistributorSearchCard", "website"));
+    document.getElementById("presetSupplierSearchCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetSupplierSearchCard", "website"));
+    document.getElementById("presetFeatureBlockCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetFeatureBlockCard", "website"));
+    document.getElementById("presetPowerTrackCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetPowerTrackCard", "website"));
+    document.getElementById("presetCard360Card").addEventListener("click", () => setPreset(360,240, PRESET_GROUP.STANDARD, "presetCard360Card", "website"));
+    document.getElementById("presetAuthorCardCard").addEventListener("click", () => setPreset(120,150, PRESET_GROUP.STANDARD, "presetAuthorCardCard", "website"));
+    document.getElementById("presetArticleCardWebsite").addEventListener("click", () => setPreset(280,200, PRESET_GROUP.STANDARD, "presetArticleCardWebsite", "website"));
+    document.getElementById("presetIframeCard").addEventListener("click", () => setPreset(1920,1080, PRESET_GROUP.STANDARD, "presetIframeCard", "website"));
 
     applyCustomBtn.addEventListener("click", applyCustom);
     undoBtn.addEventListener("click", undo);
@@ -2014,6 +2463,8 @@
     showDropUI(true);
     undoBtn.disabled = true;
     setSkinUI();
+    activateTab("article");
+    activatePresetCard("presetArticleCard");
     updateHeaderGuideVisibility();
     setStatus("");
   </script>
