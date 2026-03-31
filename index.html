@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SSEN Image resizer beta v1.4</title>
+  <title>SSEN Image resizer beta v1.6.1</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"/>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@latest/dist/umd/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/umd/upscaler.min.js"></script>
 
   <style>
     :root{
@@ -136,7 +140,6 @@
     }
 
     body.mac9 .previewTitle,
-    body.mac9 .sideTitle,
     body.mac9 .section h3,
     body.mac9 label.lbl,
     body.mac9 .hint,
@@ -209,10 +212,7 @@
     }
 
     body.mac9 .dropCTA:hover{ background:#d4d0c8; }
-
-    body.mac9 .presetCard{
-      background:#d4d0c8;
-    }
+    body.mac9 .presetCard{ background:#d4d0c8; }
 
     body.mac9 .ratioBadge{
       border-radius:0;
@@ -268,7 +268,7 @@
     .layout{
       margin-top:16px;
       display:grid;
-      grid-template-columns:minmax(0,1fr) 480px;
+      grid-template-columns:minmax(0,1fr) 500px;
       gap:14px;
       align-items:start;
     }
@@ -591,8 +591,6 @@
       color:#4b5660;
     }
 
-    .sideTitle{ font-weight:900; color:var(--grey); margin:2px 0 10px 0; font-size:14px; }
-
     .section{ padding:10px 0; border-top:1px solid var(--border); }
     .section:first-of-type{ border-top:none; padding-top:0; }
 
@@ -652,6 +650,8 @@
     .btn.primary:hover{ background:#003456; }
     .btn.ghost{ background:#fff; border-color:var(--border); color:var(--grey); }
     .btn.ghost:hover{ background:#f8fafc; }
+    .btn.ai{ background:#1c6e3e; color:#fff; border-color:#1c6e3e; }
+    .btn.ai:hover{ background:#15572f; }
 
     .hint{ font-size:12px; color:var(--muted); line-height:1.35; }
     .statusLine{
@@ -816,7 +816,7 @@
       <h1>SSEN Distribution image resizer</h1>
       <p class="sub">
         Upload an image, choose a preset (or custom size), adjust the crop, then export.
-        Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V). HEIC uploads are converted in-browser.
+        Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V).
       </p>
     </div>
 
@@ -915,7 +915,6 @@
 
           <div class="tabPanel" id="panel-newsletter">
             <p class="helperText">These presets export as PNG.</p>
-
             <div class="presetGrid">
               <button class="presetCard" type="button" id="presetNewsBannerCard">
                 <div class="ratioBadge">4:1</div>
@@ -978,11 +977,19 @@
             <div class="presetSection">
               <div class="presetSectionTitle">Header banner</div>
               <div class="presetGrid">
-                <button class="presetCard" type="button" id="presetWebsiteHeaderBannerCard">
+                <button class="presetCard" type="button" id="presetWebsiteHeaderBannerDesktopCard">
                   <div class="ratioBadge">2:1</div>
                   <div class="presetText">
                     <div class="presetTitle">2:1 Header banner</div>
-                    <div class="presetSub">1400×700px</div>
+                    <div class="presetSub">1400×700px (desktop)</div>
+                  </div>
+                </button>
+
+                <button class="presetCard" type="button" id="presetWebsiteHeaderBannerMobileCard">
+                  <div class="ratioBadge">2:1</div>
+                  <div class="presetText">
+                    <div class="presetTitle">2:1 Header banner</div>
+                    <div class="presetSub">800×400px (mobile)</div>
                   </div>
                 </button>
               </div>
@@ -1091,13 +1098,13 @@
             <div class="row">
               <button class="btn ghost" type="button" id="undoBtn">Undo</button>
               <button class="btn ghost" type="button" id="resetCropBtn">Reset crop</button>
+              <button class="btn ghost" type="button" id="removeCropBtn">Remove crop</button>
               <button class="btn ghost" type="button" id="resetViewBtn">Reset view</button>
             </div>
             <div class="row">
               <button class="btn ghost" type="button" id="autoFaceBtn" title="Recentres the crop around the most prominent face when face detection is available.">Auto-focus face</button>
               <button class="btn" type="button" id="copyBtn">Copy image</button>
             </div>
-
             <div class="hint">Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.</div>
             <div class="statusLine" id="statusLine" role="status" aria-live="polite"></div>
           </div>
@@ -1141,6 +1148,21 @@
               </div>
 
               <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
+                <h3>AI upscale</h3>
+                <div class="row">
+                  <label class="lbl" for="aiScaleSelect">Scale</label>
+                  <select id="aiScaleSelect">
+                    <option value="2" selected>2x</option>
+                    <option value="4">4x (two 2x passes)</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <button class="btn ai" type="button" id="aiDownloadBtn">AI upscale + download</button>
+                </div>
+                <div class="tiny">Experimental. 2x uses the default UpscalerJS model. 4x runs two 2x passes, so it can be noticeably slower.</div>
+              </div>
+
+              <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
                 <h3>Transform</h3>
                 <div class="row">
                   <label class="lbl" for="zoomSlider">Zoom</label>
@@ -1181,8 +1203,8 @@
   </div>
 
   <div class="pageFooter">
-    <div>SSEN Image resizer beta v1.4</div>
-    <div>Changes: Newsletter &amp; Website presets, web banner overlay</div>
+    <div>SSEN Image resizer beta v1.6.1</div>
+    <div>Changes: AI upscale added</div>
     <div>Bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
   </div>
 
@@ -1214,7 +1236,9 @@
     const SAFE_LIMITS = {
       maxSingleBytes: 25 * 1024 * 1024,
       maxSinglePixels: 40000000,
-      maxBatchFiles: 50
+      maxBatchFiles: 50,
+      maxAiPixels2x: 3000000,
+      maxAiPixels4x: 1500000
     };
 
     const PRESET_GROUP = {
@@ -1228,7 +1252,7 @@
     const dropZoneUI = document.getElementById("dropZoneUI");
     const selectImagesBtn = document.getElementById("selectImagesBtn");
     const browseLink = document.getElementById("browseLink");
-    const imgEl = document.getElementById("image");
+    const imageEl = document.getElementById("image");
     const headerGuide = document.getElementById("headerGuide");
     const headerGuideToggle = document.getElementById("headerGuideToggle");
     const headerGuideRow = document.getElementById("headerGuideRow");
@@ -1253,6 +1277,7 @@
 
     const undoBtn = document.getElementById("undoBtn");
     const resetCropBtn = document.getElementById("resetCropBtn");
+    const removeCropBtn = document.getElementById("removeCropBtn");
     const resetViewBtn = document.getElementById("resetViewBtn");
     const copyBtn = document.getElementById("copyBtn");
     const downloadBtn = document.getElementById("downloadBtn");
@@ -1265,6 +1290,9 @@
     const target500kb = document.getElementById("target500kb");
     const target250kb = document.getElementById("target250kb");
     const sharpenToggle = document.getElementById("sharpenToggle");
+
+    const aiScaleSelect = document.getElementById("aiScaleSelect");
+    const aiDownloadBtn = document.getElementById("aiDownloadBtn");
 
     const batchFastBtn = document.getElementById("batchFastBtn");
     const batchManualBtn = document.getElementById("batchManualBtn");
@@ -1320,6 +1348,9 @@
     let faceDetector = null;
     let faceDetectorInitPromise = null;
     let heic2anyReadyPromise = null;
+    let upscaler = null;
+
+    let cropRemoved = false;
 
     const presetCards = document.querySelectorAll(".presetCard");
     const presetTabs = document.querySelectorAll(".presetTab");
@@ -1356,7 +1387,7 @@
     }
 
     function updateHeaderGuidePosition(){
-      if (!cropper) return;
+      if (!cropper || cropRemoved || !cropper.cropped) return;
 
       const cropBox = cropper.getCropBoxData();
       if (!cropBox) return;
@@ -1396,18 +1427,16 @@
       const showRow = isHeaderPreset();
       headerGuideRow.style.display = showRow ? "flex" : "none";
 
-      const shouldShow = showRow && headerGuideToggle.checked;
+      const shouldShow = showRow && headerGuideToggle.checked && !cropRemoved && cropper && cropper.cropped;
       headerGuide.classList.toggle("visible", shouldShow);
 
-      if (shouldShow) {
-        updateHeaderGuidePosition();
-      }
+      if (shouldShow) updateHeaderGuidePosition();
     }
 
     function humanFileSize(bytes){
       if (!bytes && bytes !== 0) return "—";
-      const kb = bytes/1024;
-      return kb < 1024 ? `${Math.round(kb)}KB` : `${(kb/1024).toFixed(2)}MB`;
+      const kb = bytes / 1024;
+      return kb < 1024 ? `${kb < 100 ? kb.toFixed(1) : Math.round(kb)}KB` : `${(kb / 1024).toFixed(2)}MB`;
     }
 
     function updateDimsPill(){
@@ -1434,6 +1463,7 @@
 
     function getQualityFloat(){ return parseInt(qualitySlider.value,10) / 100; }
     function filenameFor(base){ return `${base}_${targetWidth}x${targetHeight}.${getExt()}`; }
+    function filenameForAi(base, width, height, scale){ return `${base}_${width}x${height}_AIx${scale}.${getExt()}`; }
     function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
     function showDropUI(show){ dropZoneUI.classList.toggle("hidden", !show); }
 
@@ -1454,6 +1484,15 @@
       });
     }
 
+    function dataUrlToImage(dataUrl){
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("Could not decode AI output."));
+        img.src = dataUrl;
+      });
+    }
+
     function clearEstimate(){
       estimatePill.textContent = "Expected: —";
       estimatePill.classList.remove("good","warn","bad");
@@ -1470,6 +1509,13 @@
 
     function applySharpenToCanvas(canvas){
       if (!sharpenToggle.checked) return canvas;
+
+      const pixelCount = canvas.width * canvas.height;
+      if (pixelCount > 4000000) {
+        setStatus("Sharpen skipped on very large image to keep things responsive.");
+        return canvas;
+      }
+
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) return canvas;
 
@@ -1510,15 +1556,77 @@
       return canvas;
     }
 
+    async function ensureUpscaler(){
+      if (upscaler) return upscaler;
+
+      if (typeof window.Upscaler === "undefined" || typeof window.DefaultUpscalerJSModel === "undefined") {
+        throw new Error("AI upscale libraries did not load. Your network may be blocking the CDN files.");
+      }
+
+      upscaler = new window.Upscaler({
+        model: window.DefaultUpscalerJSModel
+      });
+
+      return upscaler;
+    }
+
+    function getFullFrameCanvas(width, height){
+      if (!cropper) return null;
+
+      const imageData = cropper.getImageData();
+      if (!imageData || !imageData.naturalWidth || !imageData.naturalHeight) return null;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+
+      const source = imageEl;
+      const srcW = imageData.naturalWidth;
+      const srcH = imageData.naturalHeight;
+      const targetAR = width / height;
+      const srcAR = srcW / srcH;
+
+      let sx, sy, sw, sh;
+
+      if (srcAR > targetAR){
+        sh = srcH;
+        sw = Math.round(srcH * targetAR);
+        sx = Math.round((srcW - sw) / 2);
+        sy = 0;
+      } else {
+        sw = srcW;
+        sh = Math.round(srcW / targetAR);
+        sx = 0;
+        sy = Math.round((srcH - sh) / 2);
+      }
+
+      ctx.drawImage(source, sx, sy, sw, sh, 0, 0, width, height);
+      return canvas;
+    }
+
     async function getCurrentExportBlob(){
       if (!cropper) return null;
-      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+
+      let canvas;
+
+      if (cropRemoved || !cropper.cropped) {
+        canvas = getFullFrameCanvas(targetWidth, targetHeight);
+      } else {
+        canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      }
+
+      if (!canvas) return null;
+
       applySharpenToCanvas(canvas);
       return await canvasToBlob(canvas, getMime(), getQualityFloat());
     }
 
     function scheduleEstimate(){
-      if (!cropper) return;
+      if (!cropper || cropRemoved || !cropper.cropped) {
+        clearEstimate();
+        return;
+      }
       if (estimateTimer) clearTimeout(estimateTimer);
       estimateTimer = setTimeout(async () => {
         try{
@@ -1545,7 +1653,7 @@
     }
 
     function pushHistory(){
-      if (!cropper) return;
+      if (!cropper || !cropper.cropped || cropRemoved) return;
       const data = cropper.getData(true);
       history.push({
         data,
@@ -1564,6 +1672,7 @@
       cropper.setCanvasData(snap.canvas);
       cropper.setCropBoxData(snap.cropBox);
       cropper.setData(snap.data);
+      cropRemoved = false;
       baseZoomRatio = snap.baseZoomRatio || baseZoomRatio;
       if (typeof snap.rotate === "number"){
         cropper.rotateTo(snap.rotate);
@@ -1595,11 +1704,13 @@
       if (!cropper) return;
       const desiredRatio = baseZoomRatio * (pct/100);
       const cb = cropper.getCropBoxData();
-      const center = { x: cb.left + cb.width/2, y: cb.top + cb.height/2 };
+      const center = cb && cropper.cropped
+        ? { x: cb.left + cb.width/2, y: cb.top + cb.height/2 }
+        : undefined;
       cropper.zoomTo(desiredRatio, center);
       currentZoomRatio = getActualZoomRatio();
       updateTransformUI();
-      scheduleEstimate();
+      if (!cropRemoved) scheduleEstimate();
       updateHeaderGuideVisibility();
     }
 
@@ -1608,7 +1719,7 @@
       cropper.rotateTo(deg);
       currentRotation = deg;
       updateTransformUI();
-      scheduleEstimate();
+      if (!cropRemoved) scheduleEstimate();
       updateHeaderGuideVisibility();
     }
 
@@ -1617,10 +1728,10 @@
       cropper.zoomTo(baseZoomRatio);
       currentZoomRatio = baseZoomRatio;
       updateTransformUI();
-      scheduleEstimate();
+      if (!cropRemoved) scheduleEstimate();
       updateHeaderGuideVisibility();
       setStatus("Zoom reset.");
-      pushHistory();
+      if (!cropRemoved) pushHistory();
     }
 
     function resetRotation(){
@@ -1628,10 +1739,10 @@
       cropper.rotateTo(0);
       currentRotation = 0;
       updateTransformUI();
-      scheduleEstimate();
+      if (!cropRemoved) scheduleEstimate();
       updateHeaderGuideVisibility();
       setStatus("Rotation reset.");
-      pushHistory();
+      if (!cropRemoved) pushHistory();
     }
 
     function initCropper(){
@@ -1641,9 +1752,10 @@
         return;
       }
 
-      cropper = new Cropper(imgEl, {
+      cropper = new Cropper(imageEl, {
         aspectRatio: targetWidth / targetHeight,
         viewMode: 0,
+        autoCrop: false,
         autoCropArea: 0.85,
         dragMode: "move",
         background: true,
@@ -1653,11 +1765,13 @@
         ready(){
           history = [];
           currentRotation = 0;
+          cropRemoved = true;
           captureBaseZoomRatio();
           updateTransformUI();
-          pushHistory();
-          scheduleEstimate();
+          undoBtn.disabled = true;
+          clearEstimate();
           updateHeaderGuideVisibility();
+          setStatus("Image loaded. No crop applied.");
         },
         crop(){
           updateHeaderGuideVisibility();
@@ -1666,7 +1780,8 @@
           updateHeaderGuideVisibility();
         },
         cropend(){
-          if (!isApplyingUndo){
+          if (!isApplyingUndo && cropper && cropper.cropped){
+            cropRemoved = false;
             currentZoomRatio = getActualZoomRatio();
             const d = cropper.getData(true);
             if (d && typeof d.rotate === "number") currentRotation = d.rotate;
@@ -1680,7 +1795,7 @@
           if (!isApplyingUndo){
             currentZoomRatio = getActualZoomRatio();
             updateTransformUI();
-            scheduleEstimate();
+            if (!cropRemoved) scheduleEstimate();
           }
           updateHeaderGuideVisibility();
         }
@@ -1719,12 +1834,12 @@
 
       updateDimsPill();
       updateFormatLockUI();
-      updateHeaderGuideVisibility();
 
       if (cropper){
-        cropper.setAspectRatio(w/h);
+        cropper.setAspectRatio(w / h);
         cropper.reset();
         cropper.crop();
+        cropRemoved = false;
         cropper.rotateTo(0);
         currentRotation = 0;
         captureBaseZoomRatio();
@@ -1732,27 +1847,31 @@
         history = [];
         pushHistory();
         scheduleEstimate();
-        updateHeaderGuideVisibility();
       }
+
+      updateHeaderGuideVisibility();
     }
 
     function applyCustom(){
       const w = parseInt(customW.value, 10);
       const h = parseInt(customH.value, 10);
-      if (!w || !h || w <= 0 || h <= 0){
-        alert("Please enter a valid width and height.");
+
+      if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0){
+        setStatus("Please enter a valid width and height.");
         return;
       }
+
       clearActivePresetCards();
-      setPreset(w,h, PRESET_GROUP.STANDARD, null, null);
+      setPreset(w, h, PRESET_GROUP.STANDARD, null, null);
     }
 
     function resetCrop(){
       if (!cropper) return;
-      cropper.reset();
+      cropper.clear();
       cropper.setAspectRatio(targetWidth / targetHeight);
       cropper.crop();
-      cropper.rotateTo(0);
+      cropper.reset();
+      cropRemoved = false;
       currentRotation = 0;
       captureBaseZoomRatio();
       updateTransformUI();
@@ -1763,16 +1882,31 @@
       setStatus("Crop reset.");
     }
 
+    function removeCrop(){
+      if (!cropper) return;
+      cropper.clear();
+      cropRemoved = true;
+      history = [];
+      undoBtn.disabled = true;
+      clearEstimate();
+      updateHeaderGuideVisibility();
+      setStatus("Crop removed.");
+    }
+
     function resetView(){
       if (!cropper) return;
       cropper.reset();
-      cropper.crop();
       currentRotation = 0;
       captureBaseZoomRatio();
       updateTransformUI();
       history = [];
-      pushHistory();
-      scheduleEstimate();
+      if (!cropRemoved && cropper.cropped){
+        pushHistory();
+        scheduleEstimate();
+      } else {
+        undoBtn.disabled = true;
+        clearEstimate();
+      }
       updateHeaderGuideVisibility();
       setStatus("View reset.");
     }
@@ -1889,8 +2023,8 @@
     }
 
     async function autoFocusFace(){
-      if (!cropper || !imgEl.src){
-        alert("Please choose an image first.");
+      if (!cropper || !imageEl.src){
+        setStatus("Please choose an image first.");
         return;
       }
 
@@ -1898,15 +2032,15 @@
         setStatus("Detecting face…");
         autoFaceBtn.disabled = true;
         const detector = await ensureFaceDetector();
-        const result = await detector.detect(imgEl);
+        const result = await detector.detect(imageEl);
         const best = pickBestDetection(result && result.detections ? result.detections : []);
         if (!best || !best.boundingBox){
           setStatus("No face found in this image.");
           return;
         }
 
-        const imgW = imgEl.naturalWidth || 0;
-        const imgH = imgEl.naturalHeight || 0;
+        const imgW = imageEl.naturalWidth || 0;
+        const imgH = imageEl.naturalHeight || 0;
         const box = best.boundingBox;
         const cx = (box.originX || 0) + (box.width || 0) / 2;
         const cy = (box.originY || 0) + (box.height || 0) / 2;
@@ -1937,6 +2071,7 @@
           scaleY: 1
         });
         cropper.crop();
+        cropRemoved = false;
         currentZoomRatio = getActualZoomRatio();
         pushHistory();
         scheduleEstimate();
@@ -1976,17 +2111,22 @@
       return dims;
     }
 
+    function makeSafeBaseName(file){
+      const raw = String((file && file.name) || "image");
+      return raw.replace(/\.[^/.]+$/, "") || "image";
+    }
+
     async function loadFile(file){
       if (!file) return;
       try{
         const readyFile = await normaliseIncomingFile(file);
         await inspectImageLimits(readyFile);
         originalBytes = readyFile.size || 0;
-        originalBaseName = (readyFile.name || "image").replace(/\.[^/.]+$/, "");
+        originalBaseName = makeSafeBaseName(readyFile);
         setStatus(`Loaded: ${readyFile.name}`);
         const reader = new FileReader();
         reader.onerror = () => setStatus(`Could not read: ${readyFile.name}`);
-        reader.onload = () => { imgEl.src = reader.result; };
+        reader.onload = () => { imageEl.src = reader.result; };
         reader.readAsDataURL(readyFile);
       }catch(e){
         console.error(e);
@@ -1994,7 +2134,7 @@
       }
     }
 
-    imgEl.onerror = () => {
+    imageEl.onerror = () => {
       setStatus("This image couldn’t be loaded (corrupt/unsupported).");
       safeDestroyCropper();
       showDropUI(true);
@@ -2003,9 +2143,9 @@
       updateHeaderGuideVisibility();
     };
 
-    imgEl.onload = () => {
+    imageEl.onload = () => {
       showDropUI(false);
-      originalDims = { w: imgEl.naturalWidth || 0, h: imgEl.naturalHeight || 0 };
+      originalDims = { w: imageEl.naturalWidth || 0, h: imageEl.naturalHeight || 0 };
       setOrigPill();
       updateDimsPill();
       initCropper();
@@ -2013,9 +2153,15 @@
     };
 
     async function downloadCurrent(){
-      if (!cropper){ alert("Please choose an image first."); return; }
+      if (!cropper){
+        setStatus("Please choose an image first.");
+        return;
+      }
       const blob = await getCurrentExportBlob();
-      if (!blob){ alert("Could not create image."); return; }
+      if (!blob){
+        setStatus("Could not create image.");
+        return;
+      }
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -2026,19 +2172,109 @@
     }
 
     async function copyImage(){
-      if (!cropper){ alert("Please choose an image first."); return; }
+      if (!cropper){
+        setStatus("Please choose an image first.");
+        return;
+      }
       const blob = await getCurrentExportBlob();
-      if (!blob){ alert("Could not create image."); return; }
+      if (!blob){
+        setStatus("Could not create image.");
+        return;
+      }
       try{
         if (!navigator.clipboard || !window.ClipboardItem){
-          alert("Copy isn’t supported in this browser. Use Download instead.");
+          setStatus("Copy isn’t supported in this browser. Use Download instead.");
           return;
         }
         const item = new ClipboardItem({ [blob.type]: blob });
         await navigator.clipboard.write([item]);
         setStatus("Copied.");
       }catch(e){
-        alert("Could not copy. Use Download instead.");
+        setStatus("Could not copy. Use Download instead.");
+      }
+    }
+
+    async function upscaleCanvas2x(inputCanvas){
+      const engine = await ensureUpscaler();
+      const result = await engine.upscale(inputCanvas);
+      if (typeof result === "string") {
+        const img = await dataUrlToImage(result);
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+        return canvas;
+      }
+      if (result instanceof HTMLCanvasElement) {
+        return result;
+      }
+      if (result instanceof HTMLImageElement) {
+        const canvas = document.createElement("canvas");
+        canvas.width = result.naturalWidth || result.width;
+        canvas.height = result.naturalHeight || result.height;
+        canvas.getContext("2d").drawImage(result, 0, 0);
+        return canvas;
+      }
+      throw new Error("Unsupported AI upscale result.");
+    }
+
+    async function aiUpscaleAndDownload(){
+      if (!cropper){
+        setStatus("Please choose an image first.");
+        return;
+      }
+
+      const scale = parseInt(aiScaleSelect.value, 10) || 2;
+
+      let baseCanvas;
+      if (cropRemoved || !cropper.cropped) {
+        baseCanvas = getFullFrameCanvas(targetWidth, targetHeight);
+      } else {
+        baseCanvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      }
+
+      if (!baseCanvas){
+        setStatus("Could not create image.");
+        return;
+      }
+
+      applySharpenToCanvas(baseCanvas);
+
+      const basePixels = baseCanvas.width * baseCanvas.height;
+      const limit = scale === 4 ? SAFE_LIMITS.maxAiPixels4x : SAFE_LIMITS.maxAiPixels2x;
+      if (basePixels > limit){
+        setStatus(`AI upscale cancelled. ${scale}x is too heavy for this image size in-browser.`);
+        return;
+      }
+
+      try{
+        aiDownloadBtn.disabled = true;
+        setStatus(`Running AI upscale (${scale}x)…`);
+
+        let outputCanvas = await upscaleCanvas2x(baseCanvas);
+
+        if (scale === 4){
+          setStatus("Running AI upscale (4x)… second pass");
+          outputCanvas = await upscaleCanvas2x(outputCanvas);
+        }
+
+        const blob = await canvasToBlob(outputCanvas, getMime(), getQualityFloat());
+        const finalWidth = outputCanvas.width;
+        const finalHeight = outputCanvas.height;
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filenameForAi(originalBaseName, finalWidth, finalHeight, scale);
+        a.click();
+        URL.revokeObjectURL(url);
+
+        setStatus(`AI upscale complete: ${finalWidth}×${finalHeight}`);
+      }catch(e){
+        console.error(e);
+        setStatus(e.message || "AI upscale failed.");
+      }finally{
+        aiDownloadBtn.disabled = false;
       }
     }
 
@@ -2048,7 +2284,10 @@
       let lo = 0.60, hi = 0.95;
       let bestQ = hi;
       let bestSize = Infinity;
-      const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+      const canvas = cropRemoved || !cropper.cropped
+        ? getFullFrameCanvas(targetWidth, targetHeight)
+        : cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+
       applySharpenToCanvas(canvas);
       const mime = getMime();
 
@@ -2080,7 +2319,7 @@
       }
 
       const accepted = rawFiles.filter(f => {
-        const type = (f.type || "").toLowerCase();
+        const type = String(f.type || "").trim().toLowerCase();
         return type.startsWith("image/") || isHeicLike(f);
       });
 
@@ -2134,10 +2373,18 @@
       const items = (e.clipboardData && e.clipboardData.items) ? Array.from(e.clipboardData.items) : [];
       const imgItem = items.find(it => it.type && it.type.startsWith("image/"));
       if (!imgItem) return;
-      const file = imgItem.getAsFile();
-      if (file){
-        selectedFiles = [file];
-        await loadFile(file);
+
+      const pastedFile = imgItem.getAsFile();
+      if (pastedFile){
+        const safeType = pastedFile.type || "image/png";
+        const extension = safeType.includes("png") ? "png" : safeType.includes("webp") ? "webp" : "jpg";
+        const namedFile = new File([pastedFile], `pasted-image.${extension}`, {
+          type: safeType,
+          lastModified: Date.now()
+        });
+
+        selectedFiles = [namedFile];
+        await loadFile(namedFile);
         setStatus("Pasted image.");
       }
     });
@@ -2162,7 +2409,7 @@
 
     async function batchFast(){
       if (!selectedFiles || selectedFiles.length < 2){
-        alert("Select multiple images first.");
+        setStatus("Select multiple images first.");
         return;
       }
 
@@ -2177,31 +2424,31 @@
       const mime = getMime();
       const quality = getQualityFloat();
       const ext = getExt();
-      const targetAR = targetWidth/targetHeight;
+      const targetAR = targetWidth / targetHeight;
       let exported = 0;
       const skipped = [];
 
       for (let i=0;i<selectedFiles.length;i++){
         const file = selectedFiles[i];
-        const base = file.name.replace(/\.[^/.]+$/, "");
+        const base = makeSafeBaseName(file);
         try{
           const dataURL = await readFileAsDataURL(file);
           const tmpImg = await imageFromDataURL(dataURL);
           const srcW = tmpImg.naturalWidth;
           const srcH = tmpImg.naturalHeight;
-          const srcAR = srcW/srcH;
+          const srcAR = srcW / srcH;
 
           let cropW, cropH, sx, sy;
           if (srcAR > targetAR){
             cropH = srcH;
-            cropW = Math.round(srcH*targetAR);
-            sx = Math.round((srcW-cropW)/2);
+            cropW = Math.round(srcH * targetAR);
+            sx = Math.round((srcW - cropW) / 2);
             sy = 0;
           } else {
             cropW = srcW;
-            cropH = Math.round(srcW/targetAR);
+            cropH = Math.round(srcW / targetAR);
             sx = 0;
-            sy = Math.round((srcH-cropH)/2);
+            sy = Math.round((srcH - cropH) / 2);
           }
 
           const canv = document.createElement("canvas");
@@ -2216,7 +2463,7 @@
           zip.file(filename, await blob.arrayBuffer());
           exported++;
         }catch(err){
-          skipped.push(file.name);
+          skipped.push(file.name || `image-${i+1}`);
         }
 
         batchProg.value = i+1;
@@ -2238,7 +2485,7 @@
 
     function openManualBatch(){
       if (!selectedFiles || selectedFiles.length < 2){
-        alert("Select multiple images first.");
+        setStatus("Select multiple images first.");
         return;
       }
       manualZip = new JSZip();
@@ -2268,25 +2515,27 @@
 
     function updateManualUI(){
       batchStep.textContent = `${manualIndex+1} / ${manualFiles.length}`;
-      batchFileName.textContent = manualFiles[manualIndex] ? manualFiles[manualIndex].name : "—";
+      batchFileName.textContent = manualFiles[manualIndex] ? (manualFiles[manualIndex].name || `image-${manualIndex+1}`) : "—";
       batchPrev.disabled = manualIndex <= 0;
     }
 
     async function manualAddCurrent(){
       if (!cropper || !manualZip) return;
       const file = manualFiles[manualIndex];
-      const base = file.name.replace(/\.[^/.]+$/, "");
+      const base = makeSafeBaseName(file);
       const filename = uniqueZipName(manualSeen, `${base}_${targetWidth}x${targetHeight}.${getExt()}`);
       try{
-        const canvas = cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
+        const canvas = cropRemoved || !cropper.cropped
+          ? getFullFrameCanvas(targetWidth, targetHeight)
+          : cropper.getCroppedCanvas({ width: targetWidth, height: targetHeight });
         applySharpenToCanvas(canvas);
         const blob = await canvasToBlob(canvas, getMime(), getQualityFloat());
         manualZip.file(filename, await blob.arrayBuffer());
         manualAdded++;
         setStatus(`Added: ${filename}`);
       }catch(e){
-        manualFailed.push(file.name);
-        setStatus(`Could not export: ${file.name}`);
+        manualFailed.push(file.name || `image-${manualIndex+1}`);
+        setStatus(`Could not export: ${file.name || `image-${manualIndex+1}`}`);
       }
     }
 
@@ -2375,7 +2624,8 @@
     document.getElementById("presetNewsInlineCard").addEventListener("click", () => setPreset(1200,800, PRESET_GROUP.NEWSLETTER, "presetNewsInlineCard", "newsletter"));
 
     document.getElementById("presetIconBlockCard").addEventListener("click", () => setPreset(200,200, PRESET_GROUP.STANDARD, "presetIconBlockCard", "website"));
-    document.getElementById("presetWebsiteHeaderBannerCard").addEventListener("click", () => setPreset(1400,700, PRESET_GROUP.STANDARD, "presetWebsiteHeaderBannerCard", "website"));
+    document.getElementById("presetWebsiteHeaderBannerDesktopCard").addEventListener("click", () => setPreset(1400,700, PRESET_GROUP.STANDARD, "presetWebsiteHeaderBannerDesktopCard", "website"));
+    document.getElementById("presetWebsiteHeaderBannerMobileCard").addEventListener("click", () => setPreset(800,400, PRESET_GROUP.STANDARD, "presetWebsiteHeaderBannerMobileCard", "website"));
     document.getElementById("presetDistributorSearchCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetDistributorSearchCard", "website"));
     document.getElementById("presetSupplierSearchCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetSupplierSearchCard", "website"));
     document.getElementById("presetFeatureBlockCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetFeatureBlockCard", "website"));
@@ -2388,10 +2638,12 @@
     applyCustomBtn.addEventListener("click", applyCustom);
     undoBtn.addEventListener("click", undo);
     resetCropBtn.addEventListener("click", resetCrop);
+    removeCropBtn.addEventListener("click", removeCrop);
     resetViewBtn.addEventListener("click", resetView);
     copyBtn.addEventListener("click", copyImage);
     downloadBtn.addEventListener("click", downloadCurrent);
     autoFaceBtn.addEventListener("click", autoFocusFace);
+    aiDownloadBtn.addEventListener("click", aiUpscaleAndDownload);
 
     zoomSlider.addEventListener("input", () => {
       pendingZoomValue = parseInt(zoomSlider.value, 10);
@@ -2401,7 +2653,7 @@
         requestAnimationFrame(() => {
           zoomRafPending = false;
           applyZoomPct(pendingZoomValue);
-          pushHistory();
+          if (!cropRemoved) pushHistory();
         });
       }
     });
@@ -2414,7 +2666,7 @@
         requestAnimationFrame(() => {
           rotRafPending = false;
           applyRotationDeg(pendingRotValue);
-          pushHistory();
+          if (!cropRemoved) pushHistory();
         });
       }
     });
