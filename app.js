@@ -39,6 +39,9 @@ const rotSlider = document.getElementById("rotSlider");
 const rotPill = document.getElementById("rotPill");
 const resetRotBtn = document.getElementById("resetRotBtn");
 const autoFaceBtn = document.getElementById("autoFaceBtn");
+const flipBtn = document.getElementById("flipBtn");
+const flipVerticalBtn = document.getElementById("flipVerticalBtn");
+const rotate90Btn = document.getElementById("rotate90Btn");
 
 const undoBtn = document.getElementById("undoBtn");
 const resetCropBtn = document.getElementById("resetCropBtn");
@@ -510,6 +513,64 @@ function applyRotationDeg(deg){
   updateTransformUI();
   if (!cropRemoved) scheduleEstimate();
   updateHeaderGuideVisibility();
+}
+
+function toggleFlip(){
+  if (!cropper){
+    setStatus("Please choose an image first.");
+    return;
+  }
+
+  const imageData = cropper.getImageData() || {};
+  const nextScaleX = imageData.scaleX === -1 ? 1 : -1;
+  cropper.scaleX(nextScaleX);
+
+  if (!cropRemoved) {
+    pushHistory();
+    scheduleEstimate();
+  }
+
+  updateHeaderGuideVisibility();
+  setStatus(nextScaleX === -1 ? "Image flipped horizontally." : "Horizontal flip removed.");
+}
+
+function toggleFlipVertical(){
+  if (!cropper){
+    setStatus("Please choose an image first.");
+    return;
+  }
+
+  const imageData = cropper.getImageData() || {};
+  const nextScaleY = imageData.scaleY === -1 ? 1 : -1;
+  cropper.scaleY(nextScaleY);
+
+  if (!cropRemoved) {
+    pushHistory();
+    scheduleEstimate();
+  }
+
+  updateHeaderGuideVisibility();
+  setStatus(nextScaleY === -1 ? "Image flipped vertically." : "Vertical flip removed.");
+}
+
+function rotateNinety(){
+  if (!cropper){
+    setStatus("Please choose an image first.");
+    return;
+  }
+
+  const nextRotation = currentRotation + 90;
+  cropper.rotateTo(nextRotation);
+  currentRotation = nextRotation;
+  updateTransformUI();
+
+  if (!cropRemoved) {
+    pushHistory();
+    scheduleEstimate();
+  }
+
+  updateHeaderGuideVisibility();
+  setStatus(`Rotated to ${Math.round(currentRotation)}°.`);
 }
 
 function resetZoom(){
@@ -1421,6 +1482,9 @@ resetViewBtn.addEventListener("click", resetView);
 copyBtn.addEventListener("click", copyImage);
 downloadBtn.addEventListener("click", downloadCurrent);
 autoFaceBtn.addEventListener("click", autoFocusFace);
+if (flipBtn) flipBtn.addEventListener("click", toggleFlip);
+if (flipVerticalBtn) flipVerticalBtn.addEventListener("click", toggleFlipVertical);
+if (rotate90Btn) rotate90Btn.addEventListener("click", rotateNinety);
 aiDownloadBtn.addEventListener("click", aiUpscaleAndDownload);
 
 zoomSlider.addEventListener("input", () => {
