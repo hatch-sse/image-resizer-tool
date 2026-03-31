@@ -504,21 +504,21 @@
     }
 
     .sideInner{
-      padding:12px;
+      padding:14px;
     }
 
     .helperText{
-      margin:0 0 12px 0;
+      margin:0 0 14px 0;
       font-size:13px;
       color:var(--muted);
-      line-height:1.4;
+      line-height:1.45;
     }
 
     .tabPanel{ display:none; }
     .tabPanel.active{ display:block; }
 
     .presetSection{
-      margin-bottom:14px;
+      margin-bottom:16px;
     }
 
     .presetSectionTitle{
@@ -591,7 +591,7 @@
       color:#4b5660;
     }
 
-    .section{ padding:10px 0; border-top:1px solid var(--border); }
+    .section{ padding:12px 0; border-top:1px solid var(--border); }
     .section:first-of-type{ border-top:none; padding-top:0; }
 
     .section h3{
@@ -606,8 +606,8 @@
       display:flex;
       flex-wrap:wrap;
       align-items:center;
-      gap:8px;
-      margin-bottom:8px;
+      gap:10px;
+      margin-bottom:10px;
     }
 
     .row:last-child{ margin-bottom:0; }
@@ -867,7 +867,6 @@
             <p class="helperText">Cropping is enabled for these presets.</p>
             <div class="presetGrid">
               <button class="presetCard activePreset" type="button" id="presetArticleCard">
-                <div class="ratioBadge">8:5</div>
                 <div class="presetText">
                   <div class="presetTitle">Website article</div>
                   <div class="presetSub">400×250px</div>
@@ -875,7 +874,6 @@
               </button>
 
               <button class="presetCard" type="button" id="presetHeaderCard">
-                <div class="ratioBadge">1630</div>
                 <div class="presetText">
                   <div class="presetTitle">Web banner</div>
                   <div class="presetSub">1630×580px</div>
@@ -1182,9 +1180,10 @@
               <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
                 <h3>Batch export</h3>
                 <div class="row">
-                  <button class="btn" type="button" id="batchFastBtn" title="Exports all selected images in one ZIP using an automatic centred crop for the current output size.">Batch ZIP (fast)</button>
-                  <button class="btn" type="button" id="batchManualBtn" title="Lets you review and adjust the crop for each selected image before downloading them together in a ZIP.">Batch ZIP (manual)</button>
+                  <button class="btn" type="button" id="batchFastBtn" title="Exports all selected images in one ZIP using an automatic centred crop for the current output size.">Batch ZIP (auto-crop)</button>
+                  <button class="btn" type="button" id="batchManualBtn" title="Lets you review and adjust the crop for each selected image before downloading them together in a ZIP.">Batch ZIP (review each)</button>
                 </div>
+                <div class="tiny">Auto-crop exports straight away; review mode lets you adjust each image before zipping.</div>
                 <div class="progressWrap" id="batchProgWrap">
                   <progress id="batchProg" value="0" max="100"></progress>
                   <span class="tiny" id="batchProgText"></span>
@@ -1355,6 +1354,30 @@
     const presetCards = document.querySelectorAll(".presetCard");
     const presetTabs = document.querySelectorAll(".presetTab");
     const tabPanels = document.querySelectorAll(".tabPanel");
+
+    const PRESET_DEFINITIONS = [
+      { id: "presetArticleCard", w: 400, h: 250, group: PRESET_GROUP.STANDARD, tab: "article" },
+      { id: "presetHeaderCard", w: 1630, h: 580, group: PRESET_GROUP.STANDARD, tab: "article" },
+      { id: "preset916Card", w: 1080, h: 1920, group: PRESET_GROUP.STANDARD, tab: "social" },
+      { id: "preset54Card", w: 1080, h: 1350, group: PRESET_GROUP.STANDARD, tab: "social" },
+      { id: "preset11Card", w: 1080, h: 1080, group: PRESET_GROUP.STANDARD, tab: "social" },
+      { id: "presetNewsBannerCard", w: 2400, h: 600, group: PRESET_GROUP.NEWSLETTER, tab: "newsletter" },
+      { id: "presetNewsFeaturedCard", w: 1000, h: 600, group: PRESET_GROUP.NEWSLETTER, tab: "newsletter" },
+      { id: "presetNewsCollageSideCard", w: 1200, h: 1200, group: PRESET_GROUP.NEWSLETTER, tab: "newsletter" },
+      { id: "presetNewsCollageGridCard", w: 1400, h: 800, group: PRESET_GROUP.NEWSLETTER, tab: "newsletter" },
+      { id: "presetNewsInlineCard", w: 1200, h: 800, group: PRESET_GROUP.NEWSLETTER, tab: "newsletter" },
+      { id: "presetIconBlockCard", w: 200, h: 200, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetWebsiteHeaderBannerDesktopCard", w: 1400, h: 700, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetWebsiteHeaderBannerMobileCard", w: 800, h: 400, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetDistributorSearchCard", w: 600, h: 400, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetSupplierSearchCard", w: 600, h: 400, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetFeatureBlockCard", w: 600, h: 400, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetPowerTrackCard", w: 600, h: 400, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetCard360Card", w: 360, h: 240, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetAuthorCardCard", w: 120, h: 150, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetArticleCardWebsite", w: 280, h: 200, group: PRESET_GROUP.STANDARD, tab: "website" },
+      { id: "presetIframeCard", w: 1920, h: 1080, group: PRESET_GROUP.STANDARD, tab: "website" }
+    ];
 
     function setStatus(text){
       statusLine.textContent = text || "";
@@ -1755,7 +1778,7 @@
       cropper = new Cropper(imageEl, {
         aspectRatio: targetWidth / targetHeight,
         viewMode: 0,
-        autoCrop: false,
+        autoCrop: true,
         autoCropArea: 0.85,
         dragMode: "move",
         background: true,
@@ -1765,13 +1788,21 @@
         ready(){
           history = [];
           currentRotation = 0;
-          cropRemoved = true;
+          cropRemoved = !(cropper && cropper.cropped);
           captureBaseZoomRatio();
           updateTransformUI();
           undoBtn.disabled = true;
-          clearEstimate();
+
+          if (!cropRemoved && cropper && cropper.cropped){
+            pushHistory();
+            scheduleEstimate();
+            setStatus("Image loaded. Crop ready.");
+          } else {
+            clearEstimate();
+            setStatus("Image loaded.");
+          }
+
           updateHeaderGuideVisibility();
-          setStatus("Image loaded. No crop applied.");
         },
         crop(){
           updateHeaderGuideVisibility();
@@ -2610,30 +2641,11 @@
       tab.addEventListener("click", () => activateTab(tab.dataset.tab));
     });
 
-    document.getElementById("presetArticleCard").addEventListener("click", () => setPreset(400,250, PRESET_GROUP.STANDARD, "presetArticleCard", "article"));
-    document.getElementById("presetHeaderCard").addEventListener("click", () => setPreset(1630,580, PRESET_GROUP.STANDARD, "presetHeaderCard", "article"));
-
-    document.getElementById("preset916Card").addEventListener("click", () => setPreset(1080,1920, PRESET_GROUP.STANDARD, "preset916Card", "social"));
-    document.getElementById("preset54Card").addEventListener("click", () => setPreset(1080,1350, PRESET_GROUP.STANDARD, "preset54Card", "social"));
-    document.getElementById("preset11Card").addEventListener("click", () => setPreset(1080,1080, PRESET_GROUP.STANDARD, "preset11Card", "social"));
-
-    document.getElementById("presetNewsBannerCard").addEventListener("click", () => setPreset(2400,600, PRESET_GROUP.NEWSLETTER, "presetNewsBannerCard", "newsletter"));
-    document.getElementById("presetNewsFeaturedCard").addEventListener("click", () => setPreset(1000,600, PRESET_GROUP.NEWSLETTER, "presetNewsFeaturedCard", "newsletter"));
-    document.getElementById("presetNewsCollageSideCard").addEventListener("click", () => setPreset(1200,1200, PRESET_GROUP.NEWSLETTER, "presetNewsCollageSideCard", "newsletter"));
-    document.getElementById("presetNewsCollageGridCard").addEventListener("click", () => setPreset(1400,800, PRESET_GROUP.NEWSLETTER, "presetNewsCollageGridCard", "newsletter"));
-    document.getElementById("presetNewsInlineCard").addEventListener("click", () => setPreset(1200,800, PRESET_GROUP.NEWSLETTER, "presetNewsInlineCard", "newsletter"));
-
-    document.getElementById("presetIconBlockCard").addEventListener("click", () => setPreset(200,200, PRESET_GROUP.STANDARD, "presetIconBlockCard", "website"));
-    document.getElementById("presetWebsiteHeaderBannerDesktopCard").addEventListener("click", () => setPreset(1400,700, PRESET_GROUP.STANDARD, "presetWebsiteHeaderBannerDesktopCard", "website"));
-    document.getElementById("presetWebsiteHeaderBannerMobileCard").addEventListener("click", () => setPreset(800,400, PRESET_GROUP.STANDARD, "presetWebsiteHeaderBannerMobileCard", "website"));
-    document.getElementById("presetDistributorSearchCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetDistributorSearchCard", "website"));
-    document.getElementById("presetSupplierSearchCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetSupplierSearchCard", "website"));
-    document.getElementById("presetFeatureBlockCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetFeatureBlockCard", "website"));
-    document.getElementById("presetPowerTrackCard").addEventListener("click", () => setPreset(600,400, PRESET_GROUP.STANDARD, "presetPowerTrackCard", "website"));
-    document.getElementById("presetCard360Card").addEventListener("click", () => setPreset(360,240, PRESET_GROUP.STANDARD, "presetCard360Card", "website"));
-    document.getElementById("presetAuthorCardCard").addEventListener("click", () => setPreset(120,150, PRESET_GROUP.STANDARD, "presetAuthorCardCard", "website"));
-    document.getElementById("presetArticleCardWebsite").addEventListener("click", () => setPreset(280,200, PRESET_GROUP.STANDARD, "presetArticleCardWebsite", "website"));
-    document.getElementById("presetIframeCard").addEventListener("click", () => setPreset(1920,1080, PRESET_GROUP.STANDARD, "presetIframeCard", "website"));
+    PRESET_DEFINITIONS.forEach(({ id, w, h, group, tab }) => {
+      const presetEl = document.getElementById(id);
+      if (!presetEl) return;
+      presetEl.addEventListener("click", () => setPreset(w, h, group, id, tab));
+    });
 
     applyCustomBtn.addEventListener("click", applyCustom);
     undoBtn.addEventListener("click", undo);
