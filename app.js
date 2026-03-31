@@ -1001,16 +1001,22 @@ async function inspectImageLimits(file){
 
   const dims = await new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve({ w: img.naturalWidth || 0, h: img.naturalHeight || 0 });
+    img.onload = () => resolve({
+      w: img.naturalWidth || 0,
+      h: img.naturalHeight || 0
+    });
     img.onerror = () => reject(new Error("Could not inspect image dimensions."));
     img.src = dataUrl;
   });
 
-  if ((dims.w * dims.h) > SAFE_LIMITS.maxSinglePixels){
-    throw new Error(`"${file.name}" is extremely large (${dims.w}×${dims.h}). Please use a smaller image to avoid browser issues.`);
-  }
+  const isVeryLarge = (dims.w * dims.h) > SAFE_LIMITS.maxSinglePixels;
 
-  return dims;
+  return {
+    dims,
+    warning: isVeryLarge
+      ? `Loaded with warning: "${file.name}" is very large (${dims.w}×${dims.h}) and may be slow in the browser.`
+      : ""
+  };
 }
 
 function makeSafeBaseName(file){
