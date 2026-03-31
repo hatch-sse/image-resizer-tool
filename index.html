@@ -1,3 +1,15 @@
+I’ve built the update so that:
+	•	the website header overlay sits inside the crop box and moves/scales with it
+	•	selecting Header 1630×580 automatically shows the overlay controls and turns the overlay on
+	•	there’s a new Internal newsletter preset group based on Axios HQ’s guidance:
+	•	Banner: 2400×600 PNG
+	•	Featured image: 1000×600 PNG
+	•	Collage: Axios gives ratio guidance rather than fixed pixels, so I used practical working presets of 1200×1200 for side-by-side and 1400×800 for 2×2 grid
+	•	Inline: Axios says inline images can be any ratio/dimension, so I used a practical default of 1200×800 as a working preset
+	•	newsletter presets force PNG export
+	•	PNG is not available for any other preset
+	•	the footer is updated to v1.3 and includes simplified changes  ￼
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,7 +61,6 @@
       border:0;
     }
 
-    /* Mac OS 9 skin */
     body.mac9{
       background:
         linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 100%),
@@ -332,6 +343,79 @@
     }
     .dropCTA:hover{ background:#000; }
 
+    .headerGuide{
+      position:absolute;
+      z-index:14;
+      pointer-events:none;
+      display:none;
+      overflow:hidden;
+    }
+    .headerGuide.visible{ display:block; }
+
+    .headerGuide-nav{
+      position:absolute;
+      left:14.5%;
+      top:9.5%;
+      width:58%;
+      height:17%;
+      background:rgba(255,255,255,0.92);
+      border-radius:4px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.10);
+      border:1px solid rgba(0,0,0,0.06);
+    }
+    .headerGuide-panel{
+      position:absolute;
+      left:14.5%;
+      top:32%;
+      width:31%;
+      min-height:37%;
+      background:rgba(23,45,68,0.86);
+      color:#fff;
+      padding:24px 26px 22px;
+      clip-path:polygon(0 0,100% 0,100% 88%,72% 88%,64% 100%,0 100%);
+      box-shadow:0 8px 20px rgba(0,0,0,0.16);
+    }
+    .headerGuide-title{
+      font-size:19px;
+      line-height:1.3;
+      font-weight:700;
+      margin-bottom:18px;
+      max-width:92%;
+    }
+    .headerGuide-line{
+      height:10px;
+      width:88%;
+      background:rgba(255,255,255,0.22);
+      border-radius:999px;
+      margin-bottom:10px;
+    }
+    .headerGuide-line.short{ width:62%; }
+    .headerGuide-button{
+      margin-top:18px;
+      width:128px;
+      height:36px;
+      border-radius:3px;
+      background:rgba(255,255,255,0.14);
+      border:1px solid rgba(255,255,255,0.28);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-weight:700;
+      color:#fff;
+    }
+    body.mac9 .headerGuide-nav{
+      border-radius:0;
+      background:rgba(255,255,255,0.88);
+    }
+    body.mac9 .headerGuide-panel{
+      clip-path:none;
+      border:1px solid rgba(255,255,255,0.25);
+    }
+    body.mac9 .headerGuide-button{
+      border-radius:0;
+    }
+
     .side{ border:1px solid var(--border); border-radius:14px; background:#fff; padding:12px; }
     .sideTitle{ font-weight:900; color:var(--grey); margin:2px 0 10px 0; font-size:14px; }
     .section{ padding:10px 0; border-top:1px solid var(--border); }
@@ -408,6 +492,13 @@
       color:var(--grey);
       font-weight:700;
     }
+    .lockNote{
+      font-size:12px;
+      color:var(--blue);
+      font-weight:700;
+      display:none;
+    }
+    .lockNote.show{ display:block; }
 
     .progressWrap{ width:100%; display:none; gap:8px; align-items:center; margin-top:6px; }
     .progressWrap.show{ display:flex; }
@@ -526,7 +617,19 @@
             <div class="dropSub">You can also paste an image (Ctrl/Cmd + V). Multiple selection enables batch export.</div>
             <button class="dropCTA" id="selectImagesBtn" type="button">Select images</button>
           </div>
+
           <img id="image" alt="" />
+
+          <div class="headerGuide" id="headerGuide" aria-hidden="true">
+            <div class="headerGuide-nav"></div>
+            <div class="headerGuide-panel">
+              <div class="headerGuide-title">Lorem ipsum dolor sit amet, consectetur adipiscing elit</div>
+              <div class="headerGuide-line short"></div>
+              <div class="headerGuide-line"></div>
+              <div class="headerGuide-line"></div>
+              <div class="headerGuide-button">Button area</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -547,6 +650,21 @@
             <button class="btn" type="button" id="preset916">9:16 (1080×1920)</button>
             <button class="btn" type="button" id="preset54">5:4 (1080×1350)</button>
             <button class="btn" type="button" id="preset11">1:1 (1080×1080)</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Internal newsletter</h3>
+          <div class="row">
+            <button class="btn" type="button" id="presetNewsBanner" title="Axios HQ banner recommendation: 2400×600 PNG.">Banner 2400×600</button>
+            <button class="btn" type="button" id="presetNewsFeatured" title="Axios HQ featured image recommendation: 1000×600 PNG.">Featured 1000×600</button>
+          </div>
+          <div class="row">
+            <button class="btn" type="button" id="presetNewsCollageSide" title="Axios HQ side-by-side collage recommendation: 1:1 ratio. Using 1200×1200 as a practical preset.">Collage 1200×1200</button>
+            <button class="btn" type="button" id="presetNewsCollageGrid" title="Axios HQ 2×2 collage recommendation: 7:4 ratio. Using 1400×800 as a practical preset.">Collage 1400×800</button>
+          </div>
+          <div class="row">
+            <button class="btn" type="button" id="presetNewsInline" title="Axios HQ inline images can be any size. Using 1200×800 as a practical PNG preset.">Inline 1200×800</button>
           </div>
         </div>
 
@@ -593,6 +711,7 @@
                 <option value="webp">WebP</option>
               </select>
             </div>
+            <div class="lockNote" id="formatLockNote">Internal newsletter presets export as PNG.</div>
 
             <div class="row">
               <label class="lbl" for="qualitySlider">Quality</label>
@@ -609,6 +728,11 @@
             <div class="row toggleRow">
               <input type="checkbox" id="sharpenToggle" />
               <label for="sharpenToggle">Sharpen after resize</label>
+            </div>
+
+            <div class="row toggleRow" id="headerGuideRow" style="display:none;">
+              <input type="checkbox" id="headerGuideToggle" />
+              <label for="headerGuideToggle">Show website header overlay</label>
             </div>
 
             <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
@@ -651,7 +775,8 @@
   </div>
 
   <div class="pageFooter">
-    <div>SSEN Image resizer beta v1.2 — HEIC + face detect</div>
+    <div>SSEN Image resizer beta v1.3 — HEIC + face detect</div>
+    <div>Changes: header overlay inside crop box, newsletter presets, PNG locked for newsletters</div>
     <div>bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
   </div>
 
@@ -686,6 +811,11 @@
       maxBatchFiles: 50
     };
 
+    const PRESET_GROUP = {
+      STANDARD: "standard",
+      NEWSLETTER: "newsletter"
+    };
+
     const skinToggle = document.getElementById("skinToggle");
     const skinToggleLabel = document.getElementById("skinToggleLabel");
     const imageStage = document.getElementById("imageStage");
@@ -693,6 +823,9 @@
     const selectImagesBtn = document.getElementById("selectImagesBtn");
     const browseLink = document.getElementById("browseLink");
     const imgEl = document.getElementById("image");
+    const headerGuide = document.getElementById("headerGuide");
+    const headerGuideToggle = document.getElementById("headerGuideToggle");
+    const headerGuideRow = document.getElementById("headerGuideRow");
 
     const dimsPill = document.getElementById("dimsPill");
     const origPill = document.getElementById("origPill");
@@ -704,6 +837,12 @@
     const preset916     = document.getElementById("preset916");
     const preset54      = document.getElementById("preset54");
     const preset11      = document.getElementById("preset11");
+
+    const presetNewsBanner = document.getElementById("presetNewsBanner");
+    const presetNewsFeatured = document.getElementById("presetNewsFeatured");
+    const presetNewsCollageSide = document.getElementById("presetNewsCollageSide");
+    const presetNewsCollageGrid = document.getElementById("presetNewsCollageGrid");
+    const presetNewsInline = document.getElementById("presetNewsInline");
 
     const customW = document.getElementById("customW");
     const customH = document.getElementById("customH");
@@ -725,6 +864,7 @@
     const downloadBtn = document.getElementById("downloadBtn");
 
     const formatSelect = document.getElementById("formatSelect");
+    const formatLockNote = document.getElementById("formatLockNote");
     const qualitySlider = document.getElementById("qualitySlider");
     const qualityPill = document.getElementById("qualityPill");
     const target1mb = document.getElementById("target1mb");
@@ -760,6 +900,7 @@
     let originalBaseName = "image";
     let originalBytes = 0;
     let originalDims = { w: 0, h: 0 };
+    let currentPresetGroup = PRESET_GROUP.STANDARD;
 
     let history = [];
     const HISTORY_LIMIT = 40;
@@ -797,6 +938,74 @@
       skinToggle.setAttribute("aria-label", isMac ? "Switch to SSEN skin" : "Switch to Mac OS9 skin");
     }
 
+    function isHeaderPreset(){
+      return targetWidth === 1630 && targetHeight === 580;
+    }
+
+    function updateFormatLockUI(){
+      const locked = currentPresetGroup === PRESET_GROUP.NEWSLETTER;
+      formatSelect.disabled = locked;
+      formatLockNote.classList.toggle("show", locked);
+      qualitySlider.disabled = locked;
+      target1mb.disabled = locked;
+      target500kb.disabled = locked;
+      target250kb.disabled = locked;
+      if (locked) {
+        qualityPill.textContent = "PNG";
+      } else {
+        qualityPill.textContent = `${qualitySlider.value}%`;
+      }
+    }
+
+    function updateHeaderGuidePosition(){
+      if (!cropper) return;
+
+      const cropBox = cropper.getCropBoxData();
+      if (!cropBox) return;
+
+      headerGuide.style.left = `${cropBox.left}px`;
+      headerGuide.style.top = `${cropBox.top}px`;
+      headerGuide.style.width = `${cropBox.width}px`;
+      headerGuide.style.height = `${cropBox.height}px`;
+
+      const title = headerGuide.querySelector(".headerGuide-title");
+      const button = headerGuide.querySelector(".headerGuide-button");
+      const panel = headerGuide.querySelector(".headerGuide-panel");
+      const lines = headerGuide.querySelectorAll(".headerGuide-line");
+
+      const scale = cropBox.width / 1630;
+
+      if (panel){
+        panel.style.padding = `${Math.max(8, 24 * scale)}px ${Math.max(8, 26 * scale)}px ${Math.max(8, 22 * scale)}px`;
+      }
+      if (title){
+        title.style.fontSize = `${Math.max(9, 19 * scale)}px`;
+        title.style.marginBottom = `${Math.max(6, 18 * scale)}px`;
+      }
+      if (button){
+        button.style.width = `${Math.max(60, 128 * scale)}px`;
+        button.style.height = `${Math.max(20, 36 * scale)}px`;
+        button.style.fontSize = `${Math.max(8, 13 * scale)}px`;
+        button.style.marginTop = `${Math.max(8, 18 * scale)}px`;
+      }
+      lines.forEach(line => {
+        line.style.height = `${Math.max(4, 10 * scale)}px`;
+        line.style.marginBottom = `${Math.max(4, 10 * scale)}px`;
+      });
+    }
+
+    function updateHeaderGuideVisibility(){
+      const showRow = isHeaderPreset();
+      headerGuideRow.style.display = showRow ? "flex" : "none";
+
+      const shouldShow = showRow && headerGuideToggle.checked;
+      headerGuide.classList.toggle("visible", shouldShow);
+
+      if (shouldShow) {
+        updateHeaderGuidePosition();
+      }
+    }
+
     function humanFileSize(bytes){
       if (!bytes && bytes !== 0) return "—";
       const kb = bytes/1024;
@@ -813,8 +1022,18 @@
         : `Original: ${originalDims.w}×${originalDims.h} · ${humanFileSize(originalBytes)}`;
     }
 
-    function getMime(){ return formatSelect.value === "webp" ? "image/webp" : "image/jpeg"; }
-    function getExt(){ return formatSelect.value === "webp" ? "webp" : "jpg"; }
+    function getMime(){
+      return currentPresetGroup === PRESET_GROUP.NEWSLETTER
+        ? "image/png"
+        : (formatSelect.value === "webp" ? "image/webp" : "image/jpeg");
+    }
+
+    function getExt(){
+      return currentPresetGroup === PRESET_GROUP.NEWSLETTER
+        ? "png"
+        : (formatSelect.value === "webp" ? "webp" : "jpg");
+    }
+
     function getQualityFloat(){ return parseInt(qualitySlider.value,10) / 100; }
     function filenameFor(base){ return `${base}_${targetWidth}x${targetHeight}.${getExt()}`; }
     function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
@@ -829,7 +1048,11 @@
 
     function canvasToBlob(canvas, mime, quality){
       return new Promise((resolve, reject) => {
-        canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("blob")), mime, quality);
+        if (mime === "image/png") {
+          canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("blob")), mime);
+        } else {
+          canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("blob")), mime, quality);
+        }
       });
     }
 
@@ -860,14 +1083,12 @@
       const out = ctx.createImageData(w, h);
       const s = src.data;
       const d = out.data;
-
       const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
 
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
           let r = 0, g = 0, b = 0;
           const a = s[(y * w + x) * 4 + 3];
-
           for (let ky = -1; ky <= 1; ky++) {
             for (let kx = -1; kx <= 1; kx++) {
               const px = Math.min(w - 1, Math.max(0, x + kx));
@@ -879,7 +1100,6 @@
               b += s[i + 2] * k;
             }
           }
-
           const o = (y * w + x) * 4;
           d[o] = Math.max(0, Math.min(255, r));
           d[o + 1] = Math.max(0, Math.min(255, g));
@@ -956,6 +1176,7 @@
         currentZoomRatio = snap.zoomRatio;
       }
       updateTransformUI();
+      updateHeaderGuideVisibility();
     }
 
     function captureBaseZoomRatio(){
@@ -981,6 +1202,7 @@
       currentZoomRatio = getActualZoomRatio();
       updateTransformUI();
       scheduleEstimate();
+      updateHeaderGuideVisibility();
     }
 
     function applyRotationDeg(deg){
@@ -989,6 +1211,7 @@
       currentRotation = deg;
       updateTransformUI();
       scheduleEstimate();
+      updateHeaderGuideVisibility();
     }
 
     function resetZoom(){
@@ -997,6 +1220,7 @@
       currentZoomRatio = baseZoomRatio;
       updateTransformUI();
       scheduleEstimate();
+      updateHeaderGuideVisibility();
       setStatus("Zoom reset.");
       pushHistory();
     }
@@ -1007,6 +1231,7 @@
       currentRotation = 0;
       updateTransformUI();
       scheduleEstimate();
+      updateHeaderGuideVisibility();
       setStatus("Rotation reset.");
       pushHistory();
     }
@@ -1034,6 +1259,13 @@
           updateTransformUI();
           pushHistory();
           scheduleEstimate();
+          updateHeaderGuideVisibility();
+        },
+        crop(){
+          updateHeaderGuideVisibility();
+        },
+        cropmove(){
+          updateHeaderGuideVisibility();
         },
         cropend(){
           if (!isApplyingUndo){
@@ -1044,6 +1276,7 @@
             pushHistory();
             scheduleEstimate();
           }
+          updateHeaderGuideVisibility();
         },
         zoom(){
           if (!isApplyingUndo){
@@ -1051,14 +1284,23 @@
             updateTransformUI();
             scheduleEstimate();
           }
+          updateHeaderGuideVisibility();
         }
       });
     }
 
-    function setPreset(w,h){
+    function setPreset(w,h, group = PRESET_GROUP.STANDARD){
       targetWidth = w;
       targetHeight = h;
+      currentPresetGroup = group;
+
+      const header = (w === 1630 && h === 580);
+      headerGuideToggle.checked = header;
+
       updateDimsPill();
+      updateFormatLockUI();
+      updateHeaderGuideVisibility();
+
       if (cropper){
         cropper.setAspectRatio(w/h);
         cropper.reset();
@@ -1070,6 +1312,7 @@
         history = [];
         pushHistory();
         scheduleEstimate();
+        updateHeaderGuideVisibility();
       }
     }
 
@@ -1080,7 +1323,7 @@
         alert("Please enter a valid width and height.");
         return;
       }
-      setPreset(w,h);
+      setPreset(w,h, PRESET_GROUP.STANDARD);
     }
 
     function resetCrop(){
@@ -1095,6 +1338,7 @@
       history = [];
       pushHistory();
       scheduleEstimate();
+      updateHeaderGuideVisibility();
       setStatus("Crop reset.");
     }
 
@@ -1108,6 +1352,7 @@
       history = [];
       pushHistory();
       scheduleEstimate();
+      updateHeaderGuideVisibility();
       setStatus("View reset.");
     }
 
@@ -1274,6 +1519,7 @@
         currentZoomRatio = getActualZoomRatio();
         pushHistory();
         scheduleEstimate();
+        updateHeaderGuideVisibility();
         setStatus("Face-focused crop applied.");
       }catch(e){
         console.error(e);
@@ -1333,6 +1579,7 @@
       showDropUI(true);
       clearEstimate();
       origPill.textContent = "Original: —";
+      updateHeaderGuideVisibility();
     };
 
     imgEl.onload = () => {
@@ -1341,6 +1588,7 @@
       setOrigPill();
       updateDimsPill();
       initCropper();
+      updateHeaderGuideVisibility();
     };
 
     async function downloadCurrent(){
@@ -1374,7 +1622,8 @@
     }
 
     async function setQualityForTargetBytes(targetBytes){
-      if (!cropper) return;
+      if (!cropper || currentPresetGroup === PRESET_GROUP.NEWSLETTER) return;
+
       let lo = 0.60, hi = 0.95;
       let bestQ = hi;
       let bestSize = Infinity;
@@ -1670,6 +1919,8 @@
       setSkinUI();
     });
 
+    headerGuideToggle.addEventListener("change", updateHeaderGuideVisibility);
+
     selectImagesBtn.addEventListener("click", () => fileInput.click());
     browseLink.addEventListener("click", () => fileInput.click());
     browseLink.addEventListener("keydown", (e) => {
@@ -1685,11 +1936,17 @@
       fileInput.value = "";
     });
 
-    presetArticle.addEventListener("click", () => setPreset(400,250));
-    presetHeader.addEventListener("click", () => setPreset(1630,580));
-    preset916.addEventListener("click", () => setPreset(1080,1920));
-    preset54.addEventListener("click", () => setPreset(1080,1350));
-    preset11.addEventListener("click", () => setPreset(1080,1080));
+    presetArticle.addEventListener("click", () => setPreset(400,250, PRESET_GROUP.STANDARD));
+    presetHeader.addEventListener("click", () => setPreset(1630,580, PRESET_GROUP.STANDARD));
+    preset916.addEventListener("click", () => setPreset(1080,1920, PRESET_GROUP.STANDARD));
+    preset54.addEventListener("click", () => setPreset(1080,1350, PRESET_GROUP.STANDARD));
+    preset11.addEventListener("click", () => setPreset(1080,1080, PRESET_GROUP.STANDARD));
+
+    presetNewsBanner.addEventListener("click", () => setPreset(2400,600, PRESET_GROUP.NEWSLETTER));
+    presetNewsFeatured.addEventListener("click", () => setPreset(1000,600, PRESET_GROUP.NEWSLETTER));
+    presetNewsCollageSide.addEventListener("click", () => setPreset(1200,1200, PRESET_GROUP.NEWSLETTER));
+    presetNewsCollageGrid.addEventListener("click", () => setPreset(1400,800, PRESET_GROUP.NEWSLETTER));
+    presetNewsInline.addEventListener("click", () => setPreset(1200,800, PRESET_GROUP.NEWSLETTER));
 
     applyCustomBtn.addEventListener("click", applyCustom);
     undoBtn.addEventListener("click", undo);
@@ -1729,6 +1986,7 @@
     resetRotBtn.addEventListener("click", resetRotation);
 
     qualitySlider.addEventListener("input", () => {
+      if (currentPresetGroup === PRESET_GROUP.NEWSLETTER) return;
       qualityPill.textContent = `${qualitySlider.value}%`;
       scheduleEstimate();
     });
@@ -1736,6 +1994,7 @@
     sharpenToggle.addEventListener("change", scheduleEstimate);
 
     formatSelect.addEventListener("change", () => {
+      if (currentPresetGroup === PRESET_GROUP.NEWSLETTER) return;
       scheduleEstimate();
       setStatus(`Format: ${formatSelect.value.toUpperCase()}`);
     });
@@ -1759,7 +2018,7 @@
     });
 
     updateDimsPill();
-    qualityPill.textContent = `${qualitySlider.value}%`;
+    updateFormatLockUI();
     zoomPill.textContent = "100%";
     rotPill.textContent = "0°";
     clearEstimate();
@@ -1767,6 +2026,7 @@
     showDropUI(true);
     undoBtn.disabled = true;
     setSkinUI();
+    updateHeaderGuideVisibility();
     setStatus("");
   </script>
 </body>
