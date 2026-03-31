@@ -37,45 +37,126 @@
     }
 
     body.mac9{
-      background:#bdbdbd;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 100%),
+        linear-gradient(rgba(255,255,255,0.12) 0 1px, transparent 1px 100%),
+        #bdbdbd;
+      background-size: 3px 3px, 3px 3px, auto;
       font-family:"Chicago", "Geneva", Arial, sans-serif;
+      color:#000;
     }
     body.mac9 .app{
       border-radius:0;
-      box-shadow:none;
-      border:2px solid #808080;
+      box-shadow:6px 6px 0 rgba(0,0,0,0.18);
+      border-top:2px solid #ffffff;
+      border-left:2px solid #ffffff;
+      border-right:2px solid #4f4f4f;
+      border-bottom:2px solid #4f4f4f;
+      background:#d4d0c8;
+    }
+    body.mac9 .appHeader{
+      position:relative;
+      margin:-16px -16px 14px -16px;
+      padding:8px 170px 10px 14px;
+      background:linear-gradient(90deg, #0a246a 0%, #2f6fd6 100%);
+      color:#fff;
+      border-bottom:1px solid #4f4f4f;
+    }
+    body.mac9 h1{
+      color:#fff;
+      font-size:18px;
+      letter-spacing:0;
+      text-shadow:1px 1px 0 rgba(0,0,0,0.25);
+    }
+    body.mac9 .sub{
+      color:rgba(255,255,255,0.92);
+      font-size:12px;
+    }
+    body.mac9 .appearanceToggle .togglePill{
+      border-radius:0;
+      background:#d4d0c8;
+      border-top:1px solid #fff;
+      border-left:1px solid #fff;
+      border-right:1px solid #4f4f4f;
+      border-bottom:1px solid #4f4f4f;
+      backdrop-filter:none;
     }
     body.mac9 .preview,
-    body.mac9 .side{
+    body.mac9 .side,
+    body.mac9 .modal{
       border-radius:0;
-      border:2px solid #808080;
+      background:#d4d0c8;
+      border-top:2px solid #ffffff;
+      border-left:2px solid #ffffff;
+      border-right:2px solid #4f4f4f;
+      border-bottom:2px solid #4f4f4f;
+      box-shadow:none;
     }
     body.mac9 .previewHeader{
-      background:#d6d6d6 !important;
-      border-bottom:2px solid #808080;
+      background:#c0c0c0 !important;
+      border-bottom:1px solid #808080;
+    }
+    body.mac9 .previewTitle,
+    body.mac9 .sideTitle,
+    body.mac9 .section h3,
+    body.mac9 label.lbl,
+    body.mac9 .hint,
+    body.mac9 .statusLine,
+    body.mac9 .tiny{
+      color:#000;
     }
     body.mac9 .btn,
-    body.mac9 .btn.primary{
-      border:2px outset #d0d0d0;
-      background:#c0c0c0;
+    body.mac9 .btn.primary,
+    body.mac9 .btn.ghost,
+    body.mac9 details.advanced > summary{
+      border-radius:0;
+      background:#d4d0c8;
       color:#000;
+      border-top:2px solid #fff;
+      border-left:2px solid #fff;
+      border-right:2px solid #4f4f4f;
+      border-bottom:2px solid #4f4f4f;
+      box-shadow:none;
+    }
+    body.mac9 .btn:active,
+    body.mac9 details.advanced > summary:active{
+      border-top:2px solid #4f4f4f;
+      border-left:2px solid #4f4f4f;
+      border-right:2px solid #fff;
+      border-bottom:2px solid #fff;
+      transform:none;
     }
     body.mac9 .pill{
       border-radius:0;
-      background:#e0e0e0;
-      border:1px solid #a0a0a0;
+      background:#efefef;
+      border:1px solid #7f7f7f;
       color:#000;
+      font-weight:700;
     }
-    body.mac9 details.advanced > summary{
-      background:#c0c0c0;
-      border:2px outset #d0d0d0;
-      color:#000;
+    body.mac9 input[type="number"],
+    body.mac9 select,
+    body.mac9 .slider{
+      border-radius:0;
     }
     body.mac9 .dropZoneUI{
       border-radius:0;
-      background:#e6e6e6;
-      border:2px dashed #a0a0a0;
+      background:#efefef;
+      border:2px dashed #8f8f8f;
     }
+    body.mac9 .dropIcon{
+      border-radius:0;
+      background:#d9d9d9;
+    }
+    body.mac9 .dropCTA{
+      border-radius:0;
+      background:#d4d0c8;
+      color:#000;
+      border-top:2px solid #fff;
+      border-left:2px solid #fff;
+      border-right:2px solid #4f4f4f;
+      border-bottom:2px solid #4f4f4f;
+    }
+    body.mac9 .dropCTA:hover{ background:#d4d0c8; }
 
     .app{
       max-width:1120px;
@@ -259,7 +340,23 @@
     }
 
     .pageFooter{
-      max-width:1120px; margin:10px auto 0 auto; text-align:center; font-size:12px; color:rgba(0,0,0,0.45);
+      max-width:1120px;
+      margin:10px auto 0 auto;
+      text-align:center;
+      font-size:12px;
+      color:rgba(0,0,0,0.45);
+      line-height:1.45;
+    }
+    .pageFooter a{
+      color:var(--blue);
+      text-decoration:underline;
+    }
+    body.mac9 .pageFooter{
+      color:#222;
+      font-family:"Chicago", "Geneva", Arial, sans-serif;
+    }
+    body.mac9 .pageFooter a{
+      color:#0000cc;
     }
   </style>
 </head>
@@ -278,7 +375,7 @@
       <h1>SSEN Distribution image resizer</h1>
       <p class="sub">
         Upload an image, choose a preset (or custom size), adjust the crop, then export.
-        Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V).
+        Drag &amp; drop onto the crop area, or paste from clipboard (Ctrl/Cmd + V). HEIC uploads are converted in-browser.
       </p>
     </div>
 
@@ -300,7 +397,6 @@
             <div class="dropSub">You can also paste an image (Ctrl/Cmd + V). Multiple selection enables batch export.</div>
             <div class="dropCTA" id="selectImagesBtn">Select images</div>
           </div>
-
           <img id="image" alt="Image to crop" />
         </div>
       </div>
@@ -346,13 +442,11 @@
             <button class="btn ghost" type="button" id="resetViewBtn">Reset view</button>
           </div>
           <div class="row">
+            <button class="btn ghost" type="button" id="autoFaceBtn">Auto-focus face</button>
             <button class="btn" type="button" id="copyBtn">Copy image</button>
           </div>
 
-          <div class="hint">
-            Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.
-          </div>
-
+          <div class="hint">Tip: Drag image to reposition. Use trackpad/wheel to zoom. Undo tracks crop moves.</div>
           <div class="statusLine" id="statusLine"></div>
         </div>
 
@@ -385,27 +479,19 @@
 
             <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
               <h3>Transform</h3>
-
               <div class="row">
                 <label class="lbl" for="zoomSlider">Zoom</label>
                 <input type="range" id="zoomSlider" class="slider" min="50" max="200" value="100" />
                 <span class="pill" id="zoomPill">100%</span>
                 <button class="btn ghost" type="button" id="resetZoomBtn" title="Reset zoom to 100%">Reset</button>
               </div>
-
               <div class="row">
                 <label class="lbl" for="rotSlider">Rotate</label>
                 <input type="range" id="rotSlider" class="slider" min="-15" max="15" step="0.1" value="0" />
                 <span class="pill" id="rotPill">0°</span>
                 <button class="btn ghost" type="button" id="resetRotBtn" title="Reset rotation to 0°">Reset</button>
               </div>
-
-              <div class="row">
-                <button class="btn" type="button" id="autoFaceBtn">Auto-focus face</button>
-                <div class="tiny">Detects the most prominent face and recentres the crop box around it.</div>
-              </div>
-
-              <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°.</div>
+              <div class="tiny">Zoom is relative to the default fitted view (100%). Rotation is ±15°. Auto-focus face uses on-device face detection when available and recentres the crop around the most prominent face.</div>
             </div>
 
             <div class="section" style="border-top:1px solid var(--border); padding-top:10px;">
@@ -414,7 +500,6 @@
                 <button class="btn" type="button" id="batchFastBtn">Batch ZIP (fast)</button>
                 <button class="btn" type="button" id="batchManualBtn">Batch ZIP (manual)</button>
               </div>
-
               <div class="progressWrap" id="batchProgWrap">
                 <progress id="batchProg" value="0" max="100"></progress>
                 <span class="tiny" id="batchProgText"></span>
@@ -432,7 +517,8 @@
   </div>
 
   <div class="pageFooter">
-    SSEN Image Resizer Beta v1.0 — HEIC + face detect
+    <div>SSEN Image Resizer Beta v1.0 — HEIC + face detect</div>
+    <div>bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
   </div>
 
   <div class="modal-backdrop" id="batchModal">
@@ -443,12 +529,8 @@
       </header>
       <div class="body">
         <div><strong id="batchFileName">—</strong></div>
-        <div style="margin-top:8px;">
-          Adjust the crop for this image, then choose <strong>Add &amp; Next</strong> or <strong>Skip &amp; Next</strong>.
-        </div>
-        <div style="margin-top:8px;">
-          <strong>Tip:</strong> You can still drag and zoom the image behind this panel.
-        </div>
+        <div style="margin-top:8px;">Adjust the crop for this image, then choose <strong>Add &amp; Next</strong> or <strong>Skip &amp; Next</strong>.</div>
+        <div style="margin-top:8px;"><strong>Tip:</strong> You can still drag and zoom the image behind this panel.</div>
       </div>
       <footer>
         <button class="btn ghost" type="button" id="batchCancel">Cancel</button>
@@ -462,11 +544,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 
-  <script type="module">
-    import { FilesetResolver, FaceDetector } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm";
-
+  <script>
     const macToggle = document.getElementById("macToggle");
     macToggle.addEventListener("change", () => {
       document.body.classList.toggle("mac9", macToggle.checked);
@@ -552,7 +631,6 @@
     let baseZoomRatio = 1;
     let currentZoomRatio = 1;
     let currentRotation = 0;
-
     let zoomRafPending = false;
     let rotRafPending = false;
     let pendingZoomValue = 100;
@@ -567,40 +645,30 @@
     let manualFailed = [];
 
     let faceDetector = null;
-    let faceDetectorPromise = null;
+    let faceDetectorInitPromise = null;
+    let heic2anyReadyPromise = null;
 
     function setStatus(text){ statusLine.textContent = text || ""; }
-
-    function humanFileSize(bytes){
-      if (!bytes && bytes !== 0) return "—";
-      const kb = bytes / 1024;
-      if (kb < 1024) return `${Math.round(kb)}KB`;
-      return `${(kb/1024).toFixed(2)}MB`;
-    }
-
-    function updateDimsPill(){
-      dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`;
-    }
-
-    function setOrigPill(){
-      if (!originalBytes || !originalDims.w){
-        origPill.textContent = "Original: —";
-        return;
-      }
-      origPill.textContent = `Original: ${originalDims.w}×${originalDims.h} · ${humanFileSize(originalBytes)}`;
-    }
-
+    function humanFileSize(bytes){ if (!bytes && bytes !== 0) return "—"; const kb = bytes/1024; return kb < 1024 ? `${Math.round(kb)}KB` : `${(kb/1024).toFixed(2)}MB`; }
+    function updateDimsPill(){ dimsPill.textContent = `Output: ${targetWidth} × ${targetHeight}`; }
+    function setOrigPill(){ origPill.textContent = (!originalBytes || !originalDims.w) ? "Original: —" : `Original: ${originalDims.w}×${originalDims.h} · ${humanFileSize(originalBytes)}`; }
     function getMime(){ return formatSelect.value === "webp" ? "image/webp" : "image/jpeg"; }
     function getExt(){ return formatSelect.value === "webp" ? "webp" : "jpg"; }
-    function getQualityFloat(){ return parseInt(qualitySlider.value, 10) / 100; }
+    function getQualityFloat(){ return parseInt(qualitySlider.value,10) / 100; }
     function filenameFor(base){ return `${base}_${targetWidth}x${targetHeight}.${getExt()}`; }
+    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+    function showDropUI(show){ dropZoneUI.classList.toggle("hidden", !show); }
+
+    function getActualZoomRatio(){
+      if (!cropper) return 1;
+      const imageData = cropper.getImageData();
+      if (!imageData || !imageData.naturalWidth) return 1;
+      return imageData.width / imageData.naturalWidth;
+    }
 
     function canvasToBlob(canvas, mime, quality){
       return new Promise((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error("Could not encode canvas."));
-        }, mime, quality);
+        canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("blob")), mime, quality);
       });
     }
 
@@ -636,10 +704,7 @@
     }
 
     function safeDestroyCropper(){
-      if (cropper){
-        cropper.destroy();
-        cropper = null;
-      }
+      if (cropper){ cropper.destroy(); cropper = null; }
     }
 
     function uniqueZipName(seen, name){
@@ -649,18 +714,9 @@
       const ext = dot >= 0 ? name.slice(dot) : "";
       let n = 2;
       let candidate = `${base}_${n}${ext}`;
-      while (seen.has(candidate)){
-        n++;
-        candidate = `${base}_${n}${ext}`;
-      }
+      while (seen.has(candidate)){ n++; candidate = `${base}_${n}${ext}`; }
       seen.add(candidate);
       return candidate;
-    }
-
-    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-    function showDropUI(show){
-      if (show) dropZoneUI.classList.remove("hidden");
-      else dropZoneUI.classList.add("hidden");
     }
 
     function pushHistory(){
@@ -698,8 +754,7 @@
 
     function captureBaseZoomRatio(){
       if (!cropper) return;
-      const imgData = cropper.getImageData();
-      baseZoomRatio = (imgData && typeof imgData.ratio === "number" && imgData.ratio > 0) ? imgData.ratio : 1;
+      baseZoomRatio = getActualZoomRatio();
       currentZoomRatio = baseZoomRatio;
     }
 
@@ -750,92 +805,6 @@
       pushHistory();
     }
 
-    async function getFaceDetector(){
-      if (faceDetector) return faceDetector;
-      if (!faceDetectorPromise){
-        faceDetectorPromise = (async () => {
-          const vision = await FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-          );
-          faceDetector = await FaceDetector.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite"
-            },
-            runningMode: "IMAGE",
-            minDetectionConfidence: 0.5
-          });
-          return faceDetector;
-        })();
-      }
-      return await faceDetectorPromise;
-    }
-
-    async function autoFocusFace(){
-      if (!cropper || !imgEl.naturalWidth || !imgEl.naturalHeight){
-        alert("Please choose an image first.");
-        return;
-      }
-
-      try{
-        autoFaceBtn.disabled = true;
-        setStatus("Detecting face…");
-        const detector = await getFaceDetector();
-        const result = detector.detect(imgEl);
-        const detections = result?.detections || [];
-
-        if (!detections.length){
-          setStatus("No face detected.");
-          return;
-        }
-
-        const best = detections
-          .map(d => ({
-            d,
-            box: d.boundingBox,
-            area: (d.boundingBox?.width || 0) * (d.boundingBox?.height || 0)
-          }))
-          .sort((a,b) => b.area - a.area)[0];
-
-        const box = best.box;
-        if (!box){
-          setStatus("Face detected, but bounding box unavailable.");
-          return;
-        }
-
-        const imageData = cropper.getImageData();
-        const canvasData = cropper.getCanvasData();
-        const cropBoxData = cropper.getCropBoxData();
-
-        const scaleX = imageData.width / imgEl.naturalWidth;
-        const scaleY = imageData.height / imgEl.naturalHeight;
-
-        const faceCenterX = imageData.left + (box.originX + box.width / 2) * scaleX;
-        const faceCenterY = imageData.top + (box.originY + box.height / 2) * scaleY;
-
-        const desiredLeft = faceCenterX - cropBoxData.width / 2;
-        const desiredTop = faceCenterY - cropBoxData.height / 2;
-
-        const minLeft = canvasData.left;
-        const minTop = canvasData.top;
-        const maxLeft = canvasData.left + canvasData.width - cropBoxData.width;
-        const maxTop = canvasData.top + canvasData.height - cropBoxData.height;
-
-        cropper.setCropBoxData({
-          left: clamp(desiredLeft, minLeft, maxLeft),
-          top: clamp(desiredTop, minTop, maxTop)
-        });
-
-        pushHistory();
-        scheduleEstimate();
-        setStatus("Face detected and crop recentred.");
-      }catch(err){
-        console.error(err);
-        setStatus("Face detection failed.");
-      }finally{
-        autoFaceBtn.disabled = false;
-      }
-    }
-
     function initCropper(){
       safeDestroyCropper();
       if (typeof Cropper === "undefined"){
@@ -862,8 +831,7 @@
         },
         cropend(){
           if (!isApplyingUndo){
-            const imgData = cropper.getImageData();
-            if (imgData && typeof imgData.ratio === "number") currentZoomRatio = imgData.ratio;
+            currentZoomRatio = getActualZoomRatio();
             const d = cropper.getData(true);
             if (d && typeof d.rotate === "number") currentRotation = d.rotate;
             updateTransformUI();
@@ -873,8 +841,7 @@
         },
         zoom(){
           if (!isApplyingUndo){
-            const imgData = cropper.getImageData();
-            if (imgData && typeof imgData.ratio === "number") currentZoomRatio = imgData.ratio;
+            currentZoomRatio = getActualZoomRatio();
             updateTransformUI();
             scheduleEstimate();
           }
@@ -929,6 +896,7 @@
       if (!cropper) return;
       cropper.reset();
       cropper.crop();
+      currentRotation = 0;
       captureBaseZoomRatio();
       updateTransformUI();
       history = [];
@@ -947,41 +915,153 @@
       undoBtn.disabled = history.length < 2;
     }
 
-    function isHeicFile(file){
-      const name = (file?.name || "").toLowerCase();
-      const type = (file?.type || "").toLowerCase();
-      return name.endsWith(".heic") || name.endsWith(".heif") || type === "image/heic" || type === "image/heif";
+    function isHeicLike(file){
+      const name = (file && file.name ? file.name : "").toLowerCase();
+      const type = (file && file.type ? file.type : "").toLowerCase();
+      return type === "image/heic" || type === "image/heif" || name.endsWith(".heic") || name.endsWith(".heif");
     }
 
-    async function maybeConvertHeic(file){
-      if (!isHeicFile(file)) return file;
-      if (typeof heic2any === "undefined"){
-        throw new Error("HEIC converter failed to load.");
+    function loadScript(src){
+      return new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = src;
+        s.async = true;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function ensureHeic2AnyLoaded(){
+      if (window.heic2any) return;
+      if (!heic2anyReadyPromise){
+        heic2anyReadyPromise = loadScript("https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js");
       }
+      await heic2anyReadyPromise;
+      if (!window.heic2any) throw new Error("HEIC converter unavailable");
+    }
+
+    async function normaliseIncomingFile(file){
+      if (!file) return null;
+      if (!isHeicLike(file)) return file;
 
       setStatus(`Converting HEIC: ${file.name}`);
-      const converted = await heic2any({
-        blob: file,
-        toType: "image/jpeg",
-        quality: 0.92
-      });
+      await ensureHeic2AnyLoaded();
+      const converted = await window.heic2any({ blob: file, toType: "image/jpeg", quality: 0.92 });
+      const blob = Array.isArray(converted) ? converted[0] : converted;
+      const safeName = (file.name || "image.heic").replace(/\.(heic|heif)$/i, ".jpg");
+      return new File([blob], safeName, { type: "image/jpeg", lastModified: Date.now() });
+    }
 
-      const outBlob = Array.isArray(converted) ? converted[0] : converted;
-      const newName = file.name.replace(/\.(heic|heif)$/i, ".jpg");
-      return new File([outBlob], newName, { type: "image/jpeg" });
+    async function ensureFaceDetector(){
+      if (faceDetector) return faceDetector;
+      if (!faceDetectorInitPromise){
+        faceDetectorInitPromise = (async () => {
+          const visionModule = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm");
+          const vision = await visionModule.FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+          );
+          faceDetector = await visionModule.FaceDetector.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite"
+            },
+            runningMode: "IMAGE",
+            minDetectionConfidence: 0.35
+          });
+          return faceDetector;
+        })();
+      }
+      return await faceDetectorInitPromise;
+    }
+
+    function pickBestDetection(detections){
+      if (!detections || !detections.length) return null;
+      return detections
+        .map(d => {
+          const box = d.boundingBox || {};
+          const score = d.categories && d.categories[0] ? d.categories[0].score || 0 : 0;
+          const area = (box.width || 0) * (box.height || 0);
+          return { detection: d, rank: area * (0.7 + score) };
+        })
+        .sort((a,b) => b.rank - a.rank)[0].detection;
+    }
+
+    async function autoFocusFace(){
+      if (!cropper || !imgEl.src){
+        alert("Please choose an image first.");
+        return;
+      }
+
+      try{
+        setStatus("Detecting face…");
+        autoFaceBtn.disabled = true;
+        const detector = await ensureFaceDetector();
+        const result = await detector.detect(imgEl);
+        const best = pickBestDetection(result && result.detections ? result.detections : []);
+        if (!best || !best.boundingBox){
+          setStatus("No face found in this image.");
+          return;
+        }
+
+        const imgW = imgEl.naturalWidth || 0;
+        const imgH = imgEl.naturalHeight || 0;
+        const box = best.boundingBox;
+        const cx = (box.originX || 0) + (box.width || 0) / 2;
+        const cy = (box.originY || 0) + (box.height || 0) / 2;
+        const targetAR = targetWidth / targetHeight;
+
+        let cropW = Math.max((box.width || 0) * 2.4, imgW * 0.22);
+        let cropH = Math.max((box.height || 0) * 3.0, imgH * 0.22);
+
+        if ((cropW / cropH) > targetAR) cropH = cropW / targetAR;
+        else cropW = cropH * targetAR;
+
+        cropW = Math.min(cropW, imgW);
+        cropH = Math.min(cropH, imgH);
+
+        let x = cx - cropW / 2;
+        let y = cy - cropH * 0.38;
+
+        x = clamp(x, 0, Math.max(0, imgW - cropW));
+        y = clamp(y, 0, Math.max(0, imgH - cropH));
+
+        cropper.setData({
+          x,
+          y,
+          width: cropW,
+          height: cropH,
+          rotate: currentRotation,
+          scaleX: 1,
+          scaleY: 1
+        });
+        cropper.crop();
+        currentZoomRatio = getActualZoomRatio();
+        pushHistory();
+        scheduleEstimate();
+        setStatus("Face-focused crop applied.");
+      }catch(e){
+        console.error(e);
+        setStatus("Face detection couldn't be initialised in this browser/environment.");
+      }finally{
+        autoFaceBtn.disabled = false;
+      }
     }
 
     async function loadFile(file){
       if (!file) return;
-      const prepared = await maybeConvertHeic(file);
-      originalBytes = prepared.size || 0;
-      originalBaseName = (prepared.name || "image").replace(/\.[^/.]+$/, "");
-      setStatus(`Loaded: ${prepared.name}`);
-
-      const reader = new FileReader();
-      reader.onerror = () => setStatus(`Could not read: ${prepared.name}`);
-      reader.onload = () => { imgEl.src = reader.result; };
-      reader.readAsDataURL(prepared);
+      try{
+        const readyFile = await normaliseIncomingFile(file);
+        originalBytes = readyFile.size || 0;
+        originalBaseName = (readyFile.name || "image").replace(/\.[^/.]+$/, "");
+        setStatus(`Loaded: ${readyFile.name}`);
+        const reader = new FileReader();
+        reader.onerror = () => setStatus(`Could not read: ${readyFile.name}`);
+        reader.onload = () => { imgEl.src = reader.result; };
+        reader.readAsDataURL(readyFile);
+      }catch(e){
+        console.error(e);
+        setStatus(`Could not process: ${file.name}`);
+      }
     }
 
     imgEl.onerror = () => {
@@ -1039,7 +1119,7 @@
       const mime = getMime();
 
       for (let i=0;i<8;i++){
-        const mid = (lo+hi)/2;
+        const mid = (lo + hi) / 2;
         const blob = await canvasToBlob(canvas, mime, mid);
         const size = blob ? blob.size : Infinity;
         if (Math.abs(size-targetBytes) < Math.abs(bestSize-targetBytes)){
@@ -1057,12 +1137,29 @@
     }
 
     async function handleFiles(files){
-      selectedFiles = Array.from(files || []).filter(f => {
+      const rawFiles = Array.from(files || []);
+      if (!rawFiles.length) return;
+      const accepted = rawFiles.filter(f => {
         const type = (f.type || "").toLowerCase();
-        const name = (f.name || "").toLowerCase();
-        return type.startsWith("image/") || name.endsWith(".heic") || name.endsWith(".heif");
+        return type.startsWith("image/") || isHeicLike(f);
       });
-      if (!selectedFiles.length) return;
+      if (!accepted.length) return;
+
+      selectedFiles = [];
+      for (const file of accepted){
+        try{
+          const ready = await normaliseIncomingFile(file);
+          selectedFiles.push(ready);
+        }catch(e){
+          console.error(e);
+        }
+      }
+
+      if (!selectedFiles.length){
+        setStatus("No supported image files were ready to load.");
+        return;
+      }
+
       await loadFile(selectedFiles[0]);
       if (selectedFiles.length > 1) setStatus(`Loaded ${selectedFiles.length} images.`);
     }
@@ -1136,8 +1233,7 @@
         const file = selectedFiles[i];
         const base = file.name.replace(/\.[^/.]+$/, "");
         try{
-          const prepared = await maybeConvertHeic(file);
-          const dataURL = await readFileAsDataURL(prepared);
+          const dataURL = await readFileAsDataURL(file);
           const tmpImg = await imageFromDataURL(dataURL);
           const srcW = tmpImg.naturalWidth;
           const srcH = tmpImg.naturalHeight;
