@@ -328,6 +328,18 @@
             <div class="statusLine" id="statusLine" role="status" aria-live="polite"></div>
           </div>
 
+          <div class="section" id="altTextSection" style="display:none;">
+            <h3>Alt text</h3>
+            <div class="row">
+              <textarea id="altTextInput" placeholder="Describe the image for screen readers…" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--fg);"></textarea>
+            </div>
+            <div class="row">
+              <button class="btn ai" type="button" id="generateAltBtn">Generate with AI</button>
+              <button class="btn ghost" type="button" id="copyAltBtn">Copy text</button>
+            </div>
+            <div class="tiny" id="altStatusLine"></div>
+          </div>
+
           <details class="advanced section" id="advanced">
             <summary aria-label="Advanced options">
               <span>Advanced</span>

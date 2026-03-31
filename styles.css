@@ -217,7 +217,7 @@ body.mac9 .presetTab.active{
   background:var(--card);
   border:1px solid var(--border);
   border-top:none;
-  border-radius:20px 0 20px 20px;
+  border-radius:20px 0 0 0;
   padding:16px;
   box-shadow:var(--shadow);
   position:relative;
