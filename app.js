@@ -1642,91 +1642,120 @@ updateHeaderGuideVisibility();
 setStatus("");
 
 // ===== ALT TEXT =====
-const altTextSection = document.getElementById("altTextSection");
-const altTextInput = document.getElementById("altTextInput");
-const generateAltBtn = document.getElementById("generateAltBtn");
-const copyAltBtn = document.getElementById("copyAltBtn");
-const altStatusLine = document.getElementById("altStatusLine");
+function initAltText() {
+  const altTextSection = document.getElementById("altTextSection");
+  const altTextInput = document.getElementById("altTextInput");
+  const generateAltBtn = document.getElementById("generateAltBtn");
+  const copyAltBtn = document.getElementById("copyAltBtn");
+  const altStatusLine = document.getElementById("altStatusLine");
 
-function setAltStatus(msg) {
-  if (altStatusLine) altStatusLine.textContent = msg || "";
-}
+  function setAltStatus(msg) {
+    if (altStatusLine) altStatusLine.textContent = msg || "";
+  }
 
-function showAltTextSection(show) {
-  if (altTextSection) altTextSection.style.display = show ? "" : "none";
-}
+  function showAltTextSection(show) {
+    if (altTextSection) altTextSection.style.display = show ? "" : "none";
+  }
 
-function getAltPreviewBase64() {
-  if (!cropper) return null;
-  const MAX = 512;
-  let sourceCanvas;
-  if (cropRemoved || !cropper.cropped) {
-    const iw = imageEl.naturalWidth || 0;
-    const ih = imageEl.naturalHeight || 0;
-    if (!iw || !ih) return null;
-    const scale = Math.min(1, MAX / Math.max(iw, ih));
-    sourceCanvas = getFullFrameCanvas(Math.round(iw * scale), Math.round(ih * scale));
-  } else {
-    const scale = Math.min(1, MAX / Math.max(targetWidth, targetHeight));
-    sourceCanvas = cropper.getCroppedCanvas({
-      width: Math.round(targetWidth * scale),
-      height: Math.round(targetHeight * scale)
+  function getAltPreviewBase64() {
+    if (!cropper) return null;
+
+    const MAX = 512;
+    let sourceCanvas;
+
+    if (cropRemoved || !cropper.cropped) {
+      const iw = imageEl.naturalWidth || 0;
+      const ih = imageEl.naturalHeight || 0;
+      if (!iw || !ih) return null;
+
+      const scale = Math.min(1, MAX / Math.max(iw, ih));
+      sourceCanvas = getFullFrameCanvas(
+        Math.max(1, Math.round(iw * scale)),
+        Math.max(1, Math.round(ih * scale))
+      );
+    } else {
+      const scale = Math.min(1, MAX / Math.max(targetWidth, targetHeight));
+      sourceCanvas = cropper.getCroppedCanvas({
+        width: Math.max(1, Math.round(targetWidth * scale)),
+        height: Math.max(1, Math.round(targetHeight * scale))
+      });
+    }
+
+    if (!sourceCanvas) return null;
+
+    return sourceCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
+  }
+
+  if (generateAltBtn) {
+    generateAltBtn.addEventListener("click", async () => {
+      if (!cropper) {
+        setAltStatus("Please load an image first.");
+        return;
+      }
+
+      generateAltBtn.disabled = true;
+      setAltStatus("Generating…");
+
+      try {
+        const imageData = getAltPreviewBase64();
+
+        if (!imageData) {
+          setAltStatus("Could not process image.");
+          return;
+        }
+
+        const response = await fetch("/api/alt-text", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imageData,
+            mimeType: "image/jpeg"
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          setAltStatus(err.error || "Generation failed. Check your Vercel setup.");
+          return;
+        }
+
+        const data = await response.json();
+        if (altTextInput) altTextInput.value = data.altText || "";
+        setAltStatus("Generated. Review and edit before use.");
+      } catch (e) {
+        console.error(e);
+        setAltStatus("Could not reach the AI service.");
+      } finally {
+        generateAltBtn.disabled = false;
+      }
     });
   }
-  if (!sourceCanvas) return null;
-  return sourceCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
+
+  if (copyAltBtn) {
+    copyAltBtn.addEventListener("click", async () => {
+      const text = altTextInput ? altTextInput.value.trim() : "";
+
+      if (!text) {
+        setAltStatus("Nothing to copy.");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        setAltStatus("Copied to clipboard.");
+      } catch (e) {
+        setAltStatus("Could not copy — please select and copy manually.");
+      }
+    });
+  }
+
+  if (imageEl) {
+    imageEl.addEventListener("load", () => {
+      showAltTextSection(true);
+      if (altTextInput) altTextInput.value = "";
+      setAltStatus("");
+    });
+  }
 }
 
-generateAltBtn.addEventListener("click", async () => {
-  if (!cropper) {
-    setAltStatus("Please load an image first.");
-    return;
-  }
-  generateAltBtn.disabled = true;
-  setAltStatus("Generating…");
-  try {
-    const imageData = getAltPreviewBase64();
-    if (!imageData) {
-      setAltStatus("Could not process image.");
-      return;
-    }
-    const response = await fetch("https://image-resizer-tool-pi.vercel.app/api/alt-text", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageData, mimeType: "image/jpeg" })
-    });
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      setAltStatus(err.error || "Generation failed. Check your Vercel setup.");
-      return;
-    }
-    const { altText } = await response.json();
-    if (altTextInput) altTextInput.value = altText || "";
-    setAltStatus("Generated. Review and edit before use.");
-  } catch (e) {
-    console.error(e);
-    setAltStatus("Could not reach the AI service.");
-  } finally {
-    generateAltBtn.disabled = false;
-  }
-});
-
-copyAltBtn.addEventListener("click", async () => {
-  const text = altTextInput ? altTextInput.value.trim() : "";
-  if (!text) {
-    setAltStatus("Nothing to copy.");
-    return;
-  }
-  try {
-    await navigator.clipboard.writeText(text);
-    setAltStatus("Copied to clipboard.");
-  } catch (e) {
-    setAltStatus("Could not copy — please select and copy manually.");
-  }
-});
-
-imageEl.addEventListener("load", () => {
-  showAltTextSection(true);
-  if (altTextInput) altTextInput.value = "";
-  setAltStatus("");
-});
+initAltText();
