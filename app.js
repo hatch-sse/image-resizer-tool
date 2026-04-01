@@ -1690,7 +1690,7 @@ generateAltBtn.addEventListener("click", async () => {
       setAltStatus("Could not process image.");
       return;
     }
-    const response = await fetch("https://image-resizer-tool-3n2supkya-hatch-sses-projects.vercel.app/api/alt-text", {
+    const response = await fetch("https://image-resizer-tool-pi.vercel.app/api/alt-text", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ imageData, mimeType: "image/jpeg" })
