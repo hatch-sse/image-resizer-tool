@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   let geminiRes;
   try {
     geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,20 +53,20 @@ export default async function handler(req, res) {
   }
 
   if (!geminiRes.ok) {
-  let details = "";
-  try {
-    details = await geminiRes.text();
-  } catch (e) {
-    details = "Could not read Gemini error response.";
+    let details = "";
+    try {
+      details = await geminiRes.text();
+    } catch (e) {
+      details = "Could not read Gemini error response.";
+    }
+
+    console.error("Gemini API error:", geminiRes.status, details);
+
+    return res.status(502).json({
+      error: `Gemini error ${geminiRes.status}`,
+      details
+    });
   }
-
-  console.error("Gemini API error:", geminiRes.status, details);
-
-  return res.status(502).json({
-    error: `Gemini error ${geminiRes.status}`,
-    details
-  });
-}
 
   const data = await geminiRes.json();
   const altText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
