@@ -53,14 +53,20 @@ export default async function handler(req, res) {
   }
 
   if (!geminiRes.ok) {
-    let details = "";
-    try {
-      details = await geminiRes.json();
-    } catch (e) {
-      details = await geminiRes.text().catch(() => "");
-    }
-    return res.status(502).json({ error: `Gemini error ${geminiRes.status}`, details });
+  let details = "";
+  try {
+    details = await geminiRes.text();
+  } catch (e) {
+    details = "Could not read Gemini error response.";
   }
+
+  console.error("Gemini API error:", geminiRes.status, details);
+
+  return res.status(502).json({
+    error: `Gemini error ${geminiRes.status}`,
+    details
+  });
+}
 
   const data = await geminiRes.json();
   const altText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
