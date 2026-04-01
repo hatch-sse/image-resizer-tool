@@ -34,7 +34,7 @@ export default async function handler(req, res) {
             {
               parts: [
                 {
-                  text: "Write concise alt text for this image suitable for use on a website. Describe what is visually present in a single sentence. Do not start with 'Image of' or 'Photo of'. Be specific and descriptive. Respond with only the alt text, nothing else."
+                  text: "Write one sentence of alt text, maximum 16 words. Describe the main visible subject and action only. Be clear and factual. Do not start with 'Image of' or 'Photo of'. Do not include anything not clearly visible. Return only the alt text."
                 },
                 {
                   inline_data: {
