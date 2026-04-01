@@ -13,7 +13,7 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "API key not configured on server." });
+    return res.status(500).json({ error: "GEMINI_API_KEY is not set on the server." });
   }
 
   const { imageData, mimeType = "image/jpeg" } = req.body || {};
@@ -53,8 +53,13 @@ export default async function handler(req, res) {
   }
 
   if (!geminiRes.ok) {
-    const body = await geminiRes.text().catch(() => "");
-    return res.status(502).json({ error: "Gemini API returned an error.", details: body });
+    let details = "";
+    try {
+      details = await geminiRes.json();
+    } catch (e) {
+      details = await geminiRes.text().catch(() => "");
+    }
+    return res.status(502).json({ error: `Gemini error ${geminiRes.status}`, details });
   }
 
   const data = await geminiRes.json();
