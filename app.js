@@ -11,8 +11,10 @@ const PRESET_GROUP = {
   NEWSLETTER: "newsletter"
 };
 
-const skinToggle = document.getElementById("skinToggle");
-const skinToggleLabel = document.getElementById("skinToggleLabel");
+const sseToggle = document.getElementById("sseToggle");
+const sseToggleLabel = document.getElementById("sseToggleLabel");
+const sseTogglePill = document.getElementById("sseTogglePill");
+const brandLogo = document.getElementById("brandLogo");
 const imageStage = document.getElementById("imageStage");
 const dropZoneUI = document.getElementById("dropZoneUI");
 const selectImagesBtn = document.getElementById("selectImagesBtn");
@@ -149,7 +151,8 @@ const PRESET_DEFINITIONS = [
   { id: "presetCard360Card", w: 360, h: 240, group: PRESET_GROUP.STANDARD, tab: "website" },
   { id: "presetAuthorCardCard", w: 120, h: 150, group: PRESET_GROUP.STANDARD, tab: "website" },
   { id: "presetArticleCardWebsite", w: 280, h: 200, group: PRESET_GROUP.STANDARD, tab: "website" },
-  { id: "presetIframeCard", w: 1920, h: 1080, group: PRESET_GROUP.STANDARD, tab: "website" }
+  { id: "presetIframeCard", w: 1920, h: 1080, group: PRESET_GROUP.STANDARD, tab: "website" },
+  { id: "presetSseArticleCard", w: 790, h: 527, group: PRESET_GROUP.STANDARD, tab: "website" }
 ];
 
 function setStatus(text){
@@ -158,9 +161,27 @@ function setStatus(text){
 
 function setSkinUI(){
   const isMac = document.body.classList.contains("mac9");
-  skinToggle.checked = isMac;
-  skinToggleLabel.textContent = isMac ? "SSEN" : "MAC OS9";
-  skinToggle.setAttribute("aria-label", isMac ? "Switch to SSEN skin" : "Switch to Mac OS9 skin");
+  const isSse = document.body.classList.contains("sse");
+
+  if (sseTogglePill) sseTogglePill.style.display = isMac ? "none" : "";
+  if (sseToggle) sseToggle.checked = isSse;
+  if (sseToggleLabel) sseToggleLabel.textContent = "SSE";
+
+  const websiteTab = document.querySelector('.presetTab[data-tab="website"]');
+  if (websiteTab) {
+    websiteTab.textContent = isSse
+      ? (websiteTab.dataset.sseLabel || "News & Views")
+      : (websiteTab.dataset.defaultLabel || "Full website");
+  }
+
+  if (isSse) {
+    const activeTabEl = document.querySelector(".presetTab.active");
+    if (activeTabEl && activeTabEl.dataset.tab === "article") {
+      activateTab("social");
+    }
+  }
+
+  updateHeaderGuideVisibility();
 }
 
 function isHeaderPreset(){
@@ -1001,22 +1022,16 @@ async function inspectImageLimits(file){
 
   const dims = await new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve({
-      w: img.naturalWidth || 0,
-      h: img.naturalHeight || 0
-    });
+    img.onload = () => resolve({ w: img.naturalWidth || 0, h: img.naturalHeight || 0 });
     img.onerror = () => reject(new Error("Could not inspect image dimensions."));
     img.src = dataUrl;
   });
 
-  const isVeryLarge = (dims.w * dims.h) > SAFE_LIMITS.maxSinglePixels;
+  if ((dims.w * dims.h) > SAFE_LIMITS.maxSinglePixels){
+    throw new Error(`"${file.name}" is extremely large (${dims.w}×${dims.h}). Please use a smaller image to avoid browser issues.`);
+  }
 
-  return {
-    dims,
-    warning: isVeryLarge
-      ? `Loaded with warning: "${file.name}" is very large (${dims.w}×${dims.h}) and may be slow in the browser.`
-      : ""
-  };
+  return dims;
 }
 
 function makeSafeBaseName(file){
@@ -1028,15 +1043,10 @@ async function loadFile(file){
   if (!file) return;
   try{
     const readyFile = await normaliseIncomingFile(file);
-   const inspection = await inspectImageLimits(readyFile);
-originalBytes = readyFile.size || 0;
-originalBaseName = makeSafeBaseName(readyFile);
-
-if (inspection.warning) {
-  setStatus(inspection.warning);
-} else {
-  setStatus(`Loaded: ${readyFile.name}`);
-}
+    await inspectImageLimits(readyFile);
+    originalBytes = readyFile.size || 0;
+    originalBaseName = makeSafeBaseName(readyFile);
+    setStatus(`Loaded: ${readyFile.name}`);
     const reader = new FileReader();
     reader.onerror = () => setStatus(`Could not read: ${readyFile.name}`);
     reader.onload = () => { imageEl.src = reader.result; };
@@ -1521,10 +1531,38 @@ async function manualFinish(){
   setStatus("Manual batch complete.");
 }
 
-skinToggle.addEventListener("change", () => {
-  document.body.classList.toggle("mac9", skinToggle.checked);
-  setSkinUI();
-});
+if (sseToggle) {
+  sseToggle.addEventListener("change", () => {
+    const enableSse = sseToggle.checked;
+    document.body.classList.toggle("sse", enableSse);
+    if (enableSse) document.body.classList.remove("mac9");
+    setSkinUI();
+
+    if (enableSse) {
+      setPreset(790, 527, PRESET_GROUP.STANDARD, "presetSseArticleCard", "website");
+    } else if (document.getElementById("presetArticleCard")) {
+      setPreset(400, 250, PRESET_GROUP.STANDARD, "presetArticleCard", "article");
+    }
+  });
+}
+
+if (brandLogo) {
+  brandLogo.style.cursor = "pointer";
+  brandLogo.title = "Toggle Mac OS9 skin";
+  brandLogo.addEventListener("click", () => {
+    const makeMac = !document.body.classList.contains("mac9");
+    const wasSse = document.body.classList.contains("sse");
+    document.body.classList.toggle("mac9", makeMac);
+    if (makeMac) {
+      document.body.classList.remove("sse");
+      if (sseToggle) sseToggle.checked = false;
+      if (wasSse && document.getElementById("presetArticleCard")) {
+        setPreset(400, 250, PRESET_GROUP.STANDARD, "presetArticleCard", "article");
+      }
+    }
+    setSkinUI();
+  });
+}
 
 headerGuideToggle.addEventListener("change", updateHeaderGuideVisibility);
 
@@ -1642,120 +1680,91 @@ updateHeaderGuideVisibility();
 setStatus("");
 
 // ===== ALT TEXT =====
-function initAltText() {
-  const altTextSection = document.getElementById("altTextSection");
-  const altTextInput = document.getElementById("altTextInput");
-  const generateAltBtn = document.getElementById("generateAltBtn");
-  const copyAltBtn = document.getElementById("copyAltBtn");
-  const altStatusLine = document.getElementById("altStatusLine");
+const altTextSection = document.getElementById("altTextSection");
+const altTextInput = document.getElementById("altTextInput");
+const generateAltBtn = document.getElementById("generateAltBtn");
+const copyAltBtn = document.getElementById("copyAltBtn");
+const altStatusLine = document.getElementById("altStatusLine");
 
-  function setAltStatus(msg) {
-    if (altStatusLine) altStatusLine.textContent = msg || "";
-  }
-
-  function showAltTextSection(show) {
-    if (altTextSection) altTextSection.style.display = show ? "" : "none";
-  }
-
-  function getAltPreviewBase64() {
-    if (!cropper) return null;
-
-    const MAX = 512;
-    let sourceCanvas;
-
-    if (cropRemoved || !cropper.cropped) {
-      const iw = imageEl.naturalWidth || 0;
-      const ih = imageEl.naturalHeight || 0;
-      if (!iw || !ih) return null;
-
-      const scale = Math.min(1, MAX / Math.max(iw, ih));
-      sourceCanvas = getFullFrameCanvas(
-        Math.max(1, Math.round(iw * scale)),
-        Math.max(1, Math.round(ih * scale))
-      );
-    } else {
-      const scale = Math.min(1, MAX / Math.max(targetWidth, targetHeight));
-      sourceCanvas = cropper.getCroppedCanvas({
-        width: Math.max(1, Math.round(targetWidth * scale)),
-        height: Math.max(1, Math.round(targetHeight * scale))
-      });
-    }
-
-    if (!sourceCanvas) return null;
-
-    return sourceCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
-  }
-
-  if (generateAltBtn) {
-    generateAltBtn.addEventListener("click", async () => {
-      if (!cropper) {
-        setAltStatus("Please load an image first.");
-        return;
-      }
-
-      generateAltBtn.disabled = true;
-      setAltStatus("Generating…");
-
-      try {
-        const imageData = getAltPreviewBase64();
-
-        if (!imageData) {
-          setAltStatus("Could not process image.");
-          return;
-        }
-
-        const response = await fetch("/api/alt-text", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            imageData,
-            mimeType: "image/jpeg"
-          })
-        });
-
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          setAltStatus(err.error || "Generation failed. Check your Vercel setup.");
-          return;
-        }
-
-        const data = await response.json();
-        if (altTextInput) altTextInput.value = data.altText || "";
-        setAltStatus("Generated. Review and edit before use.");
-      } catch (e) {
-        console.error(e);
-        setAltStatus("Could not reach the AI service.");
-      } finally {
-        generateAltBtn.disabled = false;
-      }
-    });
-  }
-
-  if (copyAltBtn) {
-    copyAltBtn.addEventListener("click", async () => {
-      const text = altTextInput ? altTextInput.value.trim() : "";
-
-      if (!text) {
-        setAltStatus("Nothing to copy.");
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(text);
-        setAltStatus("Copied to clipboard.");
-      } catch (e) {
-        setAltStatus("Could not copy — please select and copy manually.");
-      }
-    });
-  }
-
-  if (imageEl) {
-    imageEl.addEventListener("load", () => {
-      showAltTextSection(true);
-      if (altTextInput) altTextInput.value = "";
-      setAltStatus("");
-    });
-  }
+function setAltStatus(msg) {
+  if (altStatusLine) altStatusLine.textContent = msg || "";
 }
 
-initAltText();
+function showAltTextSection(show) {
+  if (altTextSection) altTextSection.style.display = show ? "" : "none";
+}
+
+function getAltPreviewBase64() {
+  if (!cropper) return null;
+  const MAX = 512;
+  let sourceCanvas;
+  if (cropRemoved || !cropper.cropped) {
+    const iw = imageEl.naturalWidth || 0;
+    const ih = imageEl.naturalHeight || 0;
+    if (!iw || !ih) return null;
+    const scale = Math.min(1, MAX / Math.max(iw, ih));
+    sourceCanvas = getFullFrameCanvas(Math.round(iw * scale), Math.round(ih * scale));
+  } else {
+    const scale = Math.min(1, MAX / Math.max(targetWidth, targetHeight));
+    sourceCanvas = cropper.getCroppedCanvas({
+      width: Math.round(targetWidth * scale),
+      height: Math.round(targetHeight * scale)
+    });
+  }
+  if (!sourceCanvas) return null;
+  return sourceCanvas.toDataURL("image/jpeg", 0.8).split(",")[1];
+}
+
+generateAltBtn.addEventListener("click", async () => {
+  if (!cropper) {
+    setAltStatus("Please load an image first.");
+    return;
+  }
+  generateAltBtn.disabled = true;
+  setAltStatus("Generating…");
+  try {
+    const imageData = getAltPreviewBase64();
+    if (!imageData) {
+      setAltStatus("Could not process image.");
+      return;
+    }
+    const response = await fetch("https://image-resizer-tool-3n2supkya-hatch-sses-projects.vercel.app/api/alt-text", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageData, mimeType: "image/jpeg" })
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      setAltStatus(err.error || "Generation failed. Check your Vercel setup.");
+      return;
+    }
+    const { altText } = await response.json();
+    if (altTextInput) altTextInput.value = altText || "";
+    setAltStatus("Generated. Review and edit before use.");
+  } catch (e) {
+    console.error(e);
+    setAltStatus("Could not reach the AI service.");
+  } finally {
+    generateAltBtn.disabled = false;
+  }
+});
+
+copyAltBtn.addEventListener("click", async () => {
+  const text = altTextInput ? altTextInput.value.trim() : "";
+  if (!text) {
+    setAltStatus("Nothing to copy.");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    setAltStatus("Copied to clipboard.");
+  } catch (e) {
+    setAltStatus("Could not copy — please select and copy manually.");
+  }
+});
+
+imageEl.addEventListener("load", () => {
+  showAltTextSection(true);
+  if (altTextInput) altTextInput.value = "";
+  setAltStatus("");
+});
