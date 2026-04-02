@@ -10,6 +10,8 @@ const PRESET_GROUP = {
   STANDARD: "standard",
   NEWSLETTER: "newsletter"
 };
+const LOGO_SSEN = "./SSEN_Distribution.png";
+const LOGO_SSE = "./SSE_Logo_REVERSE.png";
 
 const sseToggle = document.getElementById("sseToggle");
 const sseToggleLabel = document.getElementById("sseToggleLabel");
@@ -172,6 +174,14 @@ function setSkinUI(){
   }
 
   if (brandLogo) {
+    if (isSse) {
+      brandLogo.src = LOGO_SSE;
+      brandLogo.alt = "SSE logo";
+    } else {
+      brandLogo.src = LOGO_SSEN;
+      brandLogo.alt = "SSEN Distribution logo";
+    }
+
     brandLogo.title = isMac ? "Switch off MAC OS9 skin" : "Switch to MAC OS9 skin";
     brandLogo.style.cursor = "pointer";
   }
