@@ -318,8 +318,9 @@ h1{
   right:14px;
   z-index:10;
   display:flex;
-  align-items:center;
-  gap:8px;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
   font-size:12px;
   color:rgba(255,255,255,0.8);
   user-select:none;
@@ -1016,3 +1017,72 @@ body.mac9 .pageFooter a{
     font-size:30px;
   }
 }
+
+/* ===== SKIN SWITCHER BUTTON ===== */
+/* ===== SSE BRAND SKIN ===== */
+body.sse{
+  /* Override brand tokens for SSE palette */
+  --blue:#002D72;
+  --blue2:#0097A9;
+  --btn-bg-hover:#0097A9;
+  --preview-bar:#0097A9;
+  font-family:"Museo Sans", Arial, sans-serif;
+}
+
+body.sse .appHeader{
+  border-bottom:4px solid #0097A9;
+}
+
+body.sse .appearanceToggle{
+  top:14px;
+  right:14px;
+  z-index:20;
+}
+
+body.sse .appearanceToggle .togglePill{
+  border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.30);
+  padding:7px 10px;
+}
+
+body.sse .appearanceToggle label{
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+}
+
+body.sse .brandLogo{
+  filter:brightness(0) invert(1);
+}
+
+body.sse .ratioBadge{
+  background:#0097A9;
+}
+
+body.sse .presetCard.activePreset{
+  outline:2px solid rgba(0,151,169,0.22);
+  border-color:rgba(0,151,169,0.45);
+  background:rgba(0,151,169,0.05);
+}
+
+body.sse .btn:focus-visible,
+body.sse input:focus-visible,
+body.sse select:focus-visible,
+body.sse summary:focus-visible,
+body.sse .dropCTA:focus-visible,
+body.sse .presetTab:focus-visible,
+body.sse .presetCard:focus-visible{
+  outline:2px solid #0097A9;
+  outline-offset:2px;
+}
+
+/* Hide Web article tab in SSE mode */
+body.sse .presetTab[data-tab="article"]{
+  display:none;
+}
+
+/* SSE / SSEN panel content visibility */
+.sse-preset-wrapper{ display:none; }
+body.sse .sse-preset-wrapper{ display:block; }
+body.sse .ssen-preset-wrapper{ display:none; }
