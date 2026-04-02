@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SSEN Image resizer beta v1.7</title>
+  <title>SSEN Image resizer beta v1.6.2</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"/>
 
@@ -16,10 +16,10 @@
 <body>
   <div class="app">
     <div class="appearanceToggle">
-      <span class="togglePill">
+      <span class="togglePill" id="sseTogglePill">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" id="skinToggle" aria-label="Toggle skin" />
-          <span id="skinToggleLabel">MAC OS9</span>
+          <input type="checkbox" id="sseToggle" aria-label="Toggle SSE.com skin" />
+          <span id="sseToggleLabel">SSE</span>
         </label>
       </span>
     </div>
@@ -27,11 +27,11 @@
 <div class="appHeader">
   <div class="brandTopRow">
     <div class="brandLogoWrap">
-      <img class="brandLogo" src="./SSEN_Distribution.png" alt="SSEN Distribution logo" />
+      <img class="brandLogo" id="brandLogo" src="./SSEN_Distribution.png" alt="SSEN Distribution logo" />
     </div>
     <div class="brandCopy">
       <div class="brandEyebrow">
-        <span class="brandChip soft">beta v1.7</span>
+        <span class="brandChip soft">beta v1.6.2</span>
       </div>
       <h1>Image resizer</h1>
     </div>
@@ -77,7 +77,7 @@
           <button class="presetTab active" type="button" data-tab="article">Web article</button>
           <button class="presetTab" type="button" data-tab="social">Social</button>
           <button class="presetTab" type="button" data-tab="newsletter">Internal newsletter</button>
-          <button class="presetTab" type="button" data-tab="website">Full website</button>
+          <button class="presetTab" type="button" data-tab="website" data-sse-label="News &amp; Views" data-default-label="Full website">Full website</button>
         </div>
 
         <div class="sideInner">
@@ -176,6 +176,21 @@
 
           <div class="tabPanel" id="panel-website">
             <p class="helperText">Cropping is enabled for these presets.</p>
+
+            <!-- SSE.com skin: single Article image preset -->
+            <div class="sse-preset-wrapper">
+              <div class="presetGrid">
+                <button class="presetCard noBadge" type="button" id="presetSseArticleCard">
+                  <div class="presetText">
+                    <div class="presetTitle">Article image</div>
+                    <div class="presetSub">790×527px</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- SSEN skin: full preset library -->
+            <div class="ssen-preset-wrapper">
 
             <div class="presetSection">
               <div class="presetSectionTitle">Icon block</div>
@@ -294,6 +309,8 @@
                 </button>
               </div>
             </div>
+
+            </div><!-- end ssen-preset-wrapper -->
           </div>
 
           <div class="section">
@@ -328,7 +345,7 @@
             <div class="statusLine" id="statusLine" role="status" aria-live="polite"></div>
           </div>
 
-          <div class="section" id="altTextSection">
+          <div class="section" id="altTextSection" style="display:none;">
             <h3>Alt text</h3>
             <div class="row">
               <textarea id="altTextInput" placeholder="Describe the image for screen readers…" rows="3" style="width:100%;box-sizing:border-box;resize:vertical;font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--fg);"></textarea>
@@ -373,7 +390,7 @@
                 <label for="sharpenToggle">Sharpen after resize</label>
               </div>
 
-              <div class="row toggleRow" id="headerGuideRow">
+              <div class="row toggleRow" id="headerGuideRow" style="display:none;">
                 <input type="checkbox" id="headerGuideToggle" />
                 <label for="headerGuideToggle">Show website header overlay</label>
               </div>
@@ -435,8 +452,8 @@
   </div>
 
   <div class="pageFooter">
-    <div>SSEN Image resizer beta v1.7</div>
-    <div>Changes: AI Alt text generator added</div>
+    <div>SSEN Image resizer beta v1.6.2</div>
+    <div>Changes: SSEN skin refresh and transform controls fixed</div>
     <div>Bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
   </div>
 
