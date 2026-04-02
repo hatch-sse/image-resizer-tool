@@ -1018,15 +1018,39 @@ body.mac9 .pageFooter a{
   }
 }
 
+
 /* ===== SKIN SWITCHER BUTTON ===== */
 /* ===== SSE BRAND SKIN ===== */
 body.sse{
-  /* Override brand tokens for SSE palette */
   --blue:#002D72;
   --blue2:#0097A9;
-  --btn-bg-hover:#0097A9;
+  --btn-bg-hover:#002D72;
   --preview-bar:#0097A9;
   font-family:"Museo Sans", Arial, sans-serif;
+}
+
+body.sse .app,
+body.sse .appHeader,
+body.sse .preview,
+body.sse .side,
+body.sse .modal,
+body.sse .pill,
+body.sse .dropCTA,
+body.sse .btn,
+body.sse .btn.primary,
+body.sse .btn.ghost,
+body.sse .btn.ai,
+body.sse .presetCard,
+body.sse .ratioBadge,
+body.sse .dropZoneUI,
+body.sse .dropIcon,
+body.sse details.advanced > summary,
+body.sse input[type="number"],
+body.sse select,
+body.sse textarea,
+body.sse .brandChip,
+body.sse .appearanceToggle .togglePill {
+  border-radius:0 !important;
 }
 
 body.sse .appHeader{
@@ -1040,7 +1064,6 @@ body.sse .appearanceToggle{
 }
 
 body.sse .appearanceToggle .togglePill{
-  border-radius:999px;
   background:rgba(255,255,255,0.12);
   border:1px solid rgba(255,255,255,0.30);
   padding:7px 10px;
@@ -1053,17 +1076,52 @@ body.sse .appearanceToggle label{
 }
 
 body.sse .brandLogo{
-  filter:brightness(0) invert(1);
+  filter:none !important;
+  max-width:180px;
+  max-height:72px;
 }
 
 body.sse .ratioBadge{
   background:#0097A9;
+  color:#000;
 }
 
 body.sse .presetCard.activePreset{
   outline:2px solid rgba(0,151,169,0.22);
   border-color:rgba(0,151,169,0.45);
   background:rgba(0,151,169,0.05);
+}
+
+body.sse .btn,
+body.sse .btn.primary,
+body.sse .btn.ghost,
+body.sse .btn.ai,
+body.sse .dropCTA,
+body.sse .presetTab,
+body.sse details.advanced > summary {
+  background:#0097A9 !important;
+  color:#000 !important;
+  border:1px solid #0097A9 !important;
+  box-shadow:none !important;
+}
+
+body.sse .btn:hover,
+body.sse .btn.primary:hover,
+body.sse .btn.ghost:hover,
+body.sse .btn.ai:hover,
+body.sse .dropCTA:hover,
+body.sse .presetTab:hover,
+body.sse details.advanced > summary:hover {
+  background:#002D72 !important;
+  color:#fff !important;
+  border-color:#002D72 !important;
+}
+
+body.sse .presetTab.active {
+  background:#002D72 !important;
+  color:#fff !important;
+  border-color:#002D72 !important;
+  box-shadow:none !important;
 }
 
 body.sse .btn:focus-visible,
@@ -1086,85 +1144,4 @@ body.sse .presetTab[data-tab="article"]{
 .sse-preset-wrapper{ display:none; }
 body.sse .sse-preset-wrapper{ display:block; }
 body.sse .ssen-preset-wrapper{ display:none; }
-/* ===== SSE.com skin tidy-up ===== */
 
-/* No curved edges anywhere */
-.app,
-.appHeader,
-.preview,
-.side,
-.pill,
-.dropCTA,
-.btn,
-.btn.primary,
-.btn.ghost,
-.btn.ai,
-.presetCard,
-.ratioBadge,
-.dropZoneUI,
-.dropIcon,
-.modal,
-details.advanced > summary,
-input[type="number"],
-select,
-textarea,
-.brandChip,
-.appearanceToggle .togglePill {
-  border-radius: 0 !important;
-}
-
-/* SSE logo */
-.brandLogo {
-  filter: none !important;
-  max-width: 180px;
-  max-height: 72px;
-}
-
-/* All buttons teal with black text */
-.btn,
-.btn.primary,
-.btn.ghost,
-.btn.ai,
-.dropCTA,
-.presetTab,
-details.advanced > summary {
-  background: #0097A9 !important;
-  color: #000 !important;
-  border: 1px solid #0097A9 !important;
-  box-shadow: none !important;
-}
-
-/* Hover state */
-.btn:hover,
-.btn.primary:hover,
-.btn.ghost:hover,
-.btn.ai:hover,
-.dropCTA:hover,
-.presetTab:hover,
-details.advanced > summary:hover {
-  background: #002D72 !important;
-  color: #fff !important;
-  border-color: #002D72 !important;
-}
-
-/* Active/current tab can stay darker */
-.presetTab.active {
-  background: #002D72 !important;
-  color: #fff !important;
-  border-color: #002D72 !important;
-  box-shadow: none !important;
-}
-
-/* Preset cards keep square corners too */
-.presetCard {
-  box-shadow: none !important;
-}
-
-/* SSE mode should also have square shell */
-body.sse .app,
-body.sse .appHeader,
-body.sse .preview,
-body.sse .side,
-body.sse .modal {
-  border-radius: 0 !important;
-}
