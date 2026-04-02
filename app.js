@@ -170,7 +170,7 @@ function setSkinUI(){
   }
 
   if (sseToggleLabel) {
-    sseToggleLabel.textContent = "SSE";
+    sseToggleLabel.textContent = isSse ? "SSEN" : "SSE";
   }
 
   if (brandLogo) {
