@@ -228,7 +228,7 @@ body.mac9 .presetTab.active{
   position:relative;
   margin:-16px -16px 14px -16px;
   padding:16px 170px 18px 16px;
-  background:var(--blue);
+  background:#14306d;
   color:#fff;
   border-bottom:3px solid var(--preview-bar);
   border-radius:20px 0 0 0;
@@ -302,7 +302,7 @@ h1{
   margin:0;
   font-size:36px;
   font-family:"Museo Sans", Arial, sans-serif;
-  font-weight:500;
+  font-weight:900;
   color:#ffffff;
   letter-spacing:0.1px;
   line-height:1.05;
@@ -1083,7 +1083,7 @@ body.sse .brandLogo{
 }
 
 body.sse .ratioBadge{
-  background:#8ec6c1;
+  background:#8bd7ca;
   color:#191935;
 }
 
@@ -1100,12 +1100,12 @@ body.sse .btn.ai,
 body.sse .dropCTA,
 body.sse .presetTab,
 body.sse details.advanced > summary {
-  background-color:#8ec6c1 !important;
-  background-image:linear-gradient(to right, #191935 0 50%, #8ec6c1 50% 100%) !important;
+  background-color:#8bd7ca !important;
+  background-image:linear-gradient(to right, #191935 0 50%, #8bd7ca 50% 100%) !important;
   background-size:200% 100% !important;
   background-position:100% 0 !important;
   color:#191935 !important;
-  border:1px solid #8ec6c1 !important;
+  border:1px solid #8bd7ca !important;
   box-shadow:none !important;
   transition:background-position .28s ease, color .28s ease, border-color .28s ease, transform .03s ease !important;
 }
