@@ -1061,6 +1061,12 @@ body.sse .appHeader{
   border-bottom:4px solid #0097A9;
 }
 
+body.sse .presetTabs{
+  background:#191935 !important;
+  border-bottom:none !important;
+  padding:0;
+}
+
 body.sse .appearanceToggle{
   top:14px;
   right:14px;
@@ -1108,8 +1114,7 @@ body.sse .btn,
 body.sse .btn.primary,
 body.sse .btn.ghost,
 body.sse .btn.ai,
-body.sse .dropCTA,
-body.sse .presetTab {
+body.sse .dropCTA {
   background-color:#8bd7ca !important;
   background-image:linear-gradient(to right, #191935 0 50%, #8bd7ca 50% 100%) !important;
   background-size:200% 100% !important;
@@ -1120,22 +1125,43 @@ body.sse .presetTab {
   transition:background-position .28s ease, color .28s ease, border-color .28s ease, transform .03s ease !important;
 }
 
+body.sse .presetTab{
+  background:#191935 !important;
+  background-image:none !important;
+  color:#d1d1d7 !important;
+  border:none !important;
+  box-shadow:none !important;
+  padding:14px 18px;
+  font-weight:900;
+  transition:background-color .2s ease, color .2s ease !important;
+}
+
+body.sse .presetTab + .presetTab{
+  border-left:1px solid rgba(255,255,255,0.08) !important;
+}
+
 body.sse .btn:hover,
 body.sse .btn.primary:hover,
 body.sse .btn.ghost:hover,
 body.sse .btn.ai:hover,
-body.sse .dropCTA:hover,
-body.sse .presetTab:hover {
+body.sse .dropCTA:hover {
   background-position:0 0 !important;
   color:#fff !important;
   border-color:#191935 !important;
 }
 
-body.sse .presetTab.active {
+body.sse .presetTab:hover {
   background:#191935 !important;
   background-image:none !important;
-  color:#fff !important;
-  border-color:#191935 !important;
+  color:#ffffff !important;
+  border-color:transparent !important;
+}
+
+body.sse .presetTab.active {
+  background:#8bd7ca !important;
+  background-image:none !important;
+  color:#191935 !important;
+  border:none !important;
   box-shadow:none !important;
 }
 
