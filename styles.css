@@ -426,6 +426,7 @@ h1{
   color:#111;
   z-index:10;
   border:2px dashed var(--drop-bd);
+  font-family:inherit;
 }
 
 .dropZoneUI.hidden{ display:none; }
@@ -460,9 +461,9 @@ h1{
   border:1px solid #d3dcff;
 }
 
-.dropHint{ font-size:16px; font-weight:900; color:#111; }
+.dropHint{ font-size:16px; font-weight:900; color:#111; font-family:inherit; }
 .dropHint span{ color:var(--blue2); text-decoration:underline; cursor:pointer; }
-.dropSub{ font-size:12px; color:rgba(0,0,0,0.6); line-height:1.35; max-width:420px; }
+.dropSub{ font-size:12px; color:rgba(0,0,0,0.6); line-height:1.35; max-width:420px; font-family:inherit; }
 
 .dropCTA{
   display:inline-flex;
@@ -1024,7 +1025,7 @@ body.mac9 .pageFooter a{
 body.sse{
   --blue:#002D72;
   --blue2:#0097A9;
-  --btn-bg-hover:#002D72;
+  --btn-bg-hover:#191935;
   --preview-bar:#0097A9;
   font-family:"Museo Sans", Arial, sans-serif;
 }
@@ -1082,8 +1083,8 @@ body.sse .brandLogo{
 }
 
 body.sse .ratioBadge{
-  background:#0097A9;
-  color:#000;
+  background:#8ec6c1;
+  color:#191935;
 }
 
 body.sse .presetCard.activePreset{
@@ -1099,10 +1100,14 @@ body.sse .btn.ai,
 body.sse .dropCTA,
 body.sse .presetTab,
 body.sse details.advanced > summary {
-  background:#0097A9 !important;
-  color:#000 !important;
-  border:1px solid #0097A9 !important;
+  background-color:#8ec6c1 !important;
+  background-image:linear-gradient(to right, #191935 0 50%, #8ec6c1 50% 100%) !important;
+  background-size:200% 100% !important;
+  background-position:100% 0 !important;
+  color:#191935 !important;
+  border:1px solid #8ec6c1 !important;
   box-shadow:none !important;
+  transition:background-position .28s ease, color .28s ease, border-color .28s ease, transform .03s ease !important;
 }
 
 body.sse .btn:hover,
@@ -1112,15 +1117,16 @@ body.sse .btn.ai:hover,
 body.sse .dropCTA:hover,
 body.sse .presetTab:hover,
 body.sse details.advanced > summary:hover {
-  background:#002D72 !important;
+  background-position:0 0 !important;
   color:#fff !important;
-  border-color:#002D72 !important;
+  border-color:#191935 !important;
 }
 
 body.sse .presetTab.active {
-  background:#002D72 !important;
+  background:#191935 !important;
+  background-image:none !important;
   color:#fff !important;
-  border-color:#002D72 !important;
+  border-color:#191935 !important;
   box-shadow:none !important;
 }
 
