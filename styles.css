@@ -478,6 +478,7 @@ h1{
   cursor:pointer;
   user-select:none;
   box-shadow:none;
+  font-family:inherit;
 }
 
 .dropCTA:hover{
@@ -1065,15 +1066,53 @@ body.sse .appearanceToggle{
 }
 
 body.sse .appearanceToggle .togglePill{
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.30);
-  padding:7px 10px;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:6px 8px;
+  background:#191935;
+  border:1px solid #191935;
 }
 
 body.sse .appearanceToggle label{
   color:#fff;
   font-size:11px;
   font-weight:700;
+}
+
+body.sse .appearanceToggle input[type="checkbox"]{
+  appearance:none;
+  -webkit-appearance:none;
+  width:74px;
+  height:28px;
+  margin:0;
+  border:1px solid #191935;
+  background:#191935;
+  position:relative;
+  cursor:pointer;
+  display:inline-block;
+  vertical-align:middle;
+}
+
+body.sse .appearanceToggle input[type="checkbox"]::before{
+  content:"";
+  position:absolute;
+  top:3px;
+  left:3px;
+  width:34px;
+  height:20px;
+  background:#ffffff;
+  transition:transform .22s ease, background-color .22s ease;
+}
+
+body.sse .appearanceToggle input[type="checkbox"]:checked::before{
+  transform:translateX(34px);
+  background:#8bd7ca;
+}
+
+body.sse .appearanceToggle input[type="checkbox"]:focus-visible{
+  outline:2px solid #8bd7ca;
+  outline-offset:2px;
 }
 
 body.sse .brandLogo{
@@ -1098,8 +1137,7 @@ body.sse .btn.primary,
 body.sse .btn.ghost,
 body.sse .btn.ai,
 body.sse .dropCTA,
-body.sse .presetTab,
-body.sse details.advanced > summary {
+body.sse .presetTab {
   background-color:#8bd7ca !important;
   background-image:linear-gradient(to right, #191935 0 50%, #8bd7ca 50% 100%) !important;
   background-size:200% 100% !important;
@@ -1115,8 +1153,7 @@ body.sse .btn.primary:hover,
 body.sse .btn.ghost:hover,
 body.sse .btn.ai:hover,
 body.sse .dropCTA:hover,
-body.sse .presetTab:hover,
-body.sse details.advanced > summary:hover {
+body.sse .presetTab:hover {
   background-position:0 0 !important;
   color:#fff !important;
   border-color:#191935 !important;
@@ -1128,6 +1165,40 @@ body.sse .presetTab.active {
   color:#fff !important;
   border-color:#191935 !important;
   box-shadow:none !important;
+}
+
+body.sse details.advanced{
+  border:none;
+  background:transparent;
+}
+
+body.sse details.advanced > summary{
+  list-style:none;
+  background:#f3f4f4 !important;
+  color:#0097A9 !important;
+  border:none !important;
+  border-top:1px solid #d9dddf !important;
+  border-bottom:1px solid #d9dddf !important;
+  box-shadow:none !important;
+  padding:14px 12px !important;
+  font-weight:900;
+  font-family:inherit;
+  transition:color .2s ease, background-color .2s ease !important;
+}
+
+body.sse details.advanced > summary:hover{
+  background:#eef3f3 !important;
+  color:#0097A9 !important;
+}
+
+body.sse details.advanced > summary .chev{
+  color:#0097A9 !important;
+  font-weight:900;
+}
+
+body.sse details.advanced[open] > summary{
+  background:#f3f4f4 !important;
+  color:#0097A9 !important;
 }
 
 body.sse .btn:focus-visible,
