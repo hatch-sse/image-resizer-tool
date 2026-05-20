@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function setStormPills(){
     if(dimsPill) dimsPill.textContent = 'Output: 1080 × 1350';
     if(origPill) origPill.textContent = 'Original: Storm template';
-    if(estimatePill) estimatePill.textContent = 'Expected: PNG';
+    if(estimatePill) estimatePill.textContent = 'Expected: JPG';
   }
 
   function restoreNormalPills(){
@@ -314,8 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const link = document.createElement('a');
       const background = document.getElementById('stormBackground').value || 'blue';
       const slugText = normaliseEditableText().join('-').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'storm-update';
-      link.download = `${slugText}-${background}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.download = `${slugText}-${background}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.92);
       link.click();
       setTimeout(() => renderStormGraphic(false), 50);
     }
