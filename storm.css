@@ -13,6 +13,22 @@ body.sse #panel-storm{
   display:block;
 }
 
+body.stormMode .sideInner > .section,
+body.stormMode .sideInner > details.advanced{
+  display:none !important;
+}
+
+body.stormMode .dropZoneUI,
+body.stormMode #image,
+body.stormMode .cropper-container,
+body.stormMode .headerGuide{
+  display:none !important;
+}
+
+body.stormMode .previewTitle::after{
+  content:' — Storm graphic';
+}
+
 .stormIntro{
   margin:0 0 14px 0;
   color:var(--muted);
@@ -66,20 +82,72 @@ body.sse #panel-storm{
 }
 
 .stormPreviewWrap{
-  border:1px solid var(--border);
+  display:none;
+}
+
+.stormStageEditor{
+  position:absolute;
+  inset:16px;
+  display:none;
+  align-items:center;
+  justify-content:center;
   background:#f7f9fb;
-  padding:12px;
+  border:1px solid var(--border);
   border-radius:8px;
+  z-index:20;
+  overflow:auto;
+  padding:16px;
+}
+
+body.stormMode .stormStageEditor{
+  display:flex;
+}
+
+.stormCanvasWrap{
+  position:relative;
+  width:min(100%, 480px);
+  aspect-ratio:4/5;
+  box-shadow:0 8px 24px rgba(0,0,0,0.16);
+  background:#aa2428;
 }
 
 .stormCanvas{
   display:block;
   width:100%;
-  max-width:360px;
-  height:auto;
-  margin:0 auto;
+  height:100%;
   background:#aa2428;
-  box-shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+
+.stormEditableText{
+  position:absolute;
+  left:7.5%;
+  right:7.5%;
+  top:36%;
+  min-height:28%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-family:Arial Black, Arial, sans-serif;
+  font-weight:900;
+  line-height:.95;
+  color:#fff;
+  text-transform:uppercase;
+  outline:2px dashed transparent;
+  outline-offset:10px;
+  cursor:text;
+  white-space:pre-line;
+  user-select:text;
+}
+
+.stormEditableText:hover,
+.stormEditableText:focus{
+  outline-color:rgba(255,255,255,.75);
+}
+
+.stormEditableText[data-contrast="dark"]:hover,
+.stormEditableText[data-contrast="dark"]:focus{
+  outline-color:rgba(0,0,0,.55);
 }
 
 .stormActions{
@@ -105,12 +173,18 @@ body.mac9 .stormNote{
 body.mac9 .stormField input,
 body.mac9 .stormField textarea,
 body.mac9 .stormField select,
-body.mac9 .stormPreviewWrap{
+body.mac9 .stormPreviewWrap,
+body.mac9 .stormStageEditor{
   border-radius:0;
 }
 
 @media (max-width:760px){
   .stormControlGrid{
     grid-template-columns:1fr;
+  }
+
+  .stormStageEditor{
+    inset:10px;
+    padding:10px;
   }
 }
