@@ -117,6 +117,7 @@ body.stormMode .stormStageEditor{
   aspect-ratio:4/5;
   box-shadow:0 8px 24px rgba(0,0,0,0.16);
   background:#003e66;
+  overflow:hidden;
 }
 
 .stormCanvas{
@@ -124,6 +125,16 @@ body.stormMode .stormStageEditor{
   width:100%;
   height:100%;
   background:#003e66;
+}
+
+.stormBadgeOverlay{
+  position:absolute;
+  top:6%;
+  right:8%;
+  width:22%;
+  height:auto;
+  z-index:3;
+  pointer-events:none;
 }
 
 .stormEditableText{
@@ -143,9 +154,15 @@ body.stormMode .stormStageEditor{
   text-transform:uppercase;
   outline:2px dashed transparent;
   outline-offset:10px;
-  cursor:text;
+  cursor:grab;
   white-space:pre-line;
   user-select:text;
+  z-index:4;
+  touch-action:none;
+}
+
+.stormEditableText:active{
+  cursor:grabbing;
 }
 
 .stormEditableText:hover,
