@@ -13,6 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     blue: { label: 'Blue', background: '#003E66', text: '#FFFFFF', contrast: 'light' }
   };
 
+  const powerCutBadge = new Image();
+  let powerCutBadgeReady = false;
+  powerCutBadge.onload = () => {
+    powerCutBadgeReady = true;
+    renderStormGraphic(false);
+  };
+  powerCutBadge.src = './powercut-105.png';
+
   const stormTab = document.createElement('button');
   stormTab.className = 'presetTab stormOnly';
   stormTab.type = 'button';
@@ -124,8 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.closePath();
   }
 
-  function drawPowerCutBadge(ctx){
-    // Canvas recreation of the supplied POWER CUT? CALL 105 badge.
+  function drawFallbackPowerCutBadge(ctx){
     const yellow = '#FFD400';
     const black = '#000000';
     const x = 642;
@@ -159,6 +166,17 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.closePath();
     ctx.fill();
     ctx.restore();
+  }
+
+  function drawPowerCutBadge(ctx){
+    if(powerCutBadgeReady && powerCutBadge.naturalWidth){
+      const w = 370;
+      const h = Math.round(w * (powerCutBadge.naturalHeight / powerCutBadge.naturalWidth));
+      ctx.drawImage(powerCutBadge, 642, 74, w, h);
+      return;
+    }
+
+    drawFallbackPowerCutBadge(ctx);
   }
 
   function drawFixedAssets(ctx, palette){
