@@ -5,6 +5,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!tabBar || !sideInner || !sseToggle) return;
 
+  const stormPalettes = {
+    red: {
+      label: 'Red',
+      background: '#A81E23',
+      text: '#FFFFFF'
+    },
+    amber: {
+      label: 'Amber',
+      background: '#F6A400',
+      text: '#000000'
+    },
+    yellow: {
+      label: 'Yellow',
+      background: '#FFD400',
+      text: '#000000'
+    },
+    blue: {
+      label: 'Blue',
+      background: '#003E66',
+      text: '#FFFFFF'
+    }
+  };
+
   const stormTab = document.createElement('button');
   stormTab.className = 'presetTab stormOnly';
   stormTab.type = 'button';
@@ -18,46 +41,31 @@ document.addEventListener('DOMContentLoaded', () => {
   panel.id = 'panel-storm';
 
   panel.innerHTML = `
-    <p class="stormIntro">Create a ready-to-post 1080×1350 storm update graphic for social media.</p>
+    <p class="stormIntro">Create a 1080×1350 storm update graphic based on the SSEN storm PSD template.</p>
 
     <div class="stormBuilder">
       <div class="stormControls">
+        <div class="stormField">
+          <label for="stormName">Storm name</label>
+          <input id="stormName" value="XXX" aria-describedby="stormNameHelp" />
+          <div class="stormNote" id="stormNameHelp">This creates the text: STORM XXX UPDATE</div>
+        </div>
 
         <div class="stormControlGrid">
           <div class="stormField">
-            <label>Storm name</label>
-            <input id="stormName" value="Storm Floris" />
-          </div>
-
-          <div class="stormField">
-            <label>Status</label>
-            <select id="stormStatus">
-              <option>Red weather warning</option>
-              <option selected>Amber weather warning</option>
-              <option>Yellow weather warning</option>
+            <label for="stormBackground">Background</label>
+            <select id="stormBackground">
+              <option value="red" selected>Red</option>
+              <option value="amber">Amber</option>
+              <option value="yellow">Yellow</option>
+              <option value="blue">Blue</option>
             </select>
           </div>
-        </div>
-
-        <div class="stormField">
-          <label>Headline</label>
-          <input id="stormHeadline" value="We're preparing for Storm Floris" />
-        </div>
-
-        <div class="stormField">
-          <label>Body copy</label>
-          <textarea id="stormBody">Strong winds are forecast across our network area. Our teams are preparing and ready to respond if power cuts occur. Keep updated through Power Track and save 105 in case you need us.</textarea>
-        </div>
-
-        <div class="stormControlGrid">
-          <div class="stormField">
-            <label>Footer line 1</label>
-            <input id="stormFooter1" value="Power cuts & updates: ssen.co.uk/powertrack" />
-          </div>
 
           <div class="stormField">
-            <label>Footer line 2</label>
-            <input id="stormFooter2" value="Call 105 in an emergency" />
+            <label for="stormFontSize">Font size</label>
+            <input id="stormFontSize" type="range" min="90" max="170" value="136" />
+            <div class="stormNote"><span id="stormFontSizeValue">136</span>px</div>
           </div>
         </div>
       </div>
@@ -66,25 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
         <canvas id="stormCanvas" class="stormCanvas" width="1080" height="1350"></canvas>
 
         <div class="stormActions">
-          <button class="btn primary" type="button" id="downloadStormGraphic">Download graphic</button>
+          <button class="btn primary" type="button" id="downloadStormGraphic">Download storm graphic</button>
           <button class="btn ghost" type="button" id="refreshStormGraphic">Refresh preview</button>
         </div>
 
-        <div class="stormNote">The preview uses the current SSEN branding colours and exports at full social resolution.</div>
+        <div class="stormNote">Text colour is automatic: white on red/blue, black on amber/yellow.</div>
       </div>
     </div>
   `;
 
   sideInner.appendChild(panel);
-
-  const stormInputs = [
-    'stormName',
-    'stormStatus',
-    'stormHeadline',
-    'stormBody',
-    'stormFooter1',
-    'stormFooter2'
-  ];
 
   function activateStormTab(){
     document.querySelectorAll('.presetTab').forEach(t => t.classList.remove('active'));
@@ -98,86 +97,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
   stormTab.addEventListener('click', activateStormTab);
 
+  function drawLightning(ctx, colour){
+    ctx.fillStyle = colour;
+    ctx.beginPath();
+    ctx.moveTo(642, 218);
+    ctx.lineTo(565, 538);
+    ctx.lineTo(658, 538);
+    ctx.lineTo(585, 860);
+    ctx.lineTo(790, 458);
+    ctx.lineTo(685, 458);
+    ctx.closePath();
+    ctx.fill();
+  }
+
   function renderStormGraphic(){
     const canvas = document.getElementById('stormCanvas');
     if(!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    const stormNameField = document.getElementById('stormName');
+    const backgroundField = document.getElementById('stormBackground');
+    const fontSizeField = document.getElementById('stormFontSize');
+    const fontSizeValue = document.getElementById('stormFontSizeValue');
 
-    const stormName = document.getElementById('stormName').value;
-    const status = document.getElementById('stormStatus').value;
-    const headline = document.getElementById('stormHeadline').value;
-    const body = document.getElementById('stormBody').value;
-    const footer1 = document.getElementById('stormFooter1').value;
-    const footer2 = document.getElementById('stormFooter2').value;
+    const palette = stormPalettes[backgroundField.value] || stormPalettes.red;
+    const stormName = (stormNameField.value || 'XXX').trim().toUpperCase();
+    const fontSize = Number(fontSizeField.value) || 136;
 
-    ctx.clearRect(0,0,1080,1350);
+    if(fontSizeValue) fontSizeValue.textContent = String(fontSize);
 
-    ctx.fillStyle = '#13294B';
-    ctx.fillRect(0,0,1080,1350);
+    ctx.clearRect(0, 0, 1080, 1350);
+    ctx.fillStyle = palette.background;
+    ctx.fillRect(0, 0, 1080, 1350);
 
-    ctx.fillStyle = '#F37021';
-    ctx.fillRect(0,0,1080,26);
+    ctx.save();
+    ctx.globalAlpha = 0.16;
+    drawLightning(ctx, palette.text);
+    ctx.restore();
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 44px Arial';
-    ctx.fillText('SSEN Distribution', 72, 100);
+    ctx.fillStyle = palette.text;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `900 ${fontSize}px Arial Black, Arial, sans-serif`;
 
-    ctx.fillStyle = '#F37021';
-    ctx.fillRect(72,150,420,64);
+    const lines = ['STORM', stormName, 'UPDATE'];
+    const lineGap = fontSize * 1.06;
+    const startY = 675 - lineGap;
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 34px Arial';
-    ctx.fillText(status.toUpperCase(), 96, 192);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 72px Arial';
-    wrapText(ctx, stormName, 72, 330, 920, 82);
-
-    ctx.font = '700 56px Arial';
-    wrapText(ctx, headline, 72, 500, 920, 66);
-
-    ctx.fillStyle = 'rgba(255,255,255,0.08)';
-    ctx.fillRect(72,620,936,360);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '400 38px Arial';
-    wrapText(ctx, body, 108, 700, 860, 54);
-
-    ctx.fillStyle = '#F37021';
-    ctx.fillRect(0,1160,1080,190);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 34px Arial';
-    ctx.fillText(footer1,72,1238);
-
-    ctx.font = '700 44px Arial';
-    ctx.fillText(footer2,72,1300);
+    lines.forEach((line, index) => {
+      fitAndFillText(ctx, line, 540, startY + (index * lineGap), 920, fontSize);
+    });
   }
 
-  function wrapText(ctx, text, x, y, maxWidth, lineHeight){
-    const words = text.split(' ');
-    let line = '';
+  function fitAndFillText(ctx, text, x, y, maxWidth, baseFontSize){
+    let size = baseFontSize;
 
-    for(let n = 0; n < words.length; n++){
-      const testLine = line + words[n] + ' ';
-      const metrics = ctx.measureText(testLine);
-      const testWidth = metrics.width;
-
-      if(testWidth > maxWidth && n > 0){
-        ctx.fillText(line, x, y);
-        line = words[n] + ' ';
-        y += lineHeight;
-      } else {
-        line = testLine;
-      }
+    while(size > 48){
+      ctx.font = `900 ${size}px Arial Black, Arial, sans-serif`;
+      if(ctx.measureText(text).width <= maxWidth) break;
+      size -= 2;
     }
 
-    ctx.fillText(line, x, y);
+    ctx.fillText(text, x, y);
   }
 
-  stormInputs.forEach(id => {
+  ['stormName', 'stormBackground', 'stormFontSize'].forEach(id => {
     document.addEventListener('input', (e) => {
+      if(e.target && e.target.id === id){
+        renderStormGraphic();
+      }
+    });
+
+    document.addEventListener('change', (e) => {
       if(e.target && e.target.id === id){
         renderStormGraphic();
       }
@@ -194,19 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const canvas = document.getElementById('stormCanvas');
       const link = document.createElement('a');
-      const stormName = document.getElementById('stormName').value || 'storm-update';
+      const stormName = (document.getElementById('stormName').value || 'xxx').trim().toLowerCase();
+      const background = document.getElementById('stormBackground').value || 'red';
 
-      link.download = `${stormName.toLowerCase().replace(/[^a-z0-9]+/g,'-')}-graphic.png`;
+      link.download = `storm-${stormName.replace(/[^a-z0-9]+/g,'-')}-update-${background}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
   });
 
   function updateStormVisibility(){
-    const isSSEN = sseToggle.checked;
-    stormTab.style.display = isSSEN ? 'none' : 'inline-flex';
+    const isSseSkin = sseToggle.checked;
+    stormTab.style.display = isSseSkin ? 'none' : 'inline-flex';
 
-    if(!isSSEN && stormTab.classList.contains('active')){
+    if(isSseSkin && stormTab.classList.contains('active')){
       document.querySelector('.presetTab[data-tab="article"]')?.click();
     }
   }
