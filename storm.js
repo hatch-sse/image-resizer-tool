@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!tabBar || !sideInner || !sseToggle || !imageStage) return;
 
   const stormPalettes = {
-    red: { label: 'Red', background: '#A42828', text: '#FFFFFF', contrast: 'light' },
-    amber: { label: 'Amber', background: '#FF9700', text: '#000000', contrast: 'dark' },
+    blue: { label: 'Blue', background: '#003E66', text: '#FFFFFF', contrast: 'light' },
     yellow: { label: 'Yellow', background: '#FFE816', text: '#000000', contrast: 'dark' },
-    blue: { label: 'Blue', background: '#003E66', text: '#FFFFFF', contrast: 'light' }
+    amber: { label: 'Amber', background: '#FF9700', text: '#000000', contrast: 'dark' },
+    red: { label: 'Red', background: '#A42828', text: '#FFFFFF', contrast: 'light' }
   };
 
   const powerCutBadge = new Image();
@@ -49,10 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="stormField">
           <label for="stormBackground">Background</label>
           <select id="stormBackground">
-            <option value="red" selected>Red</option>
-            <option value="amber">Amber</option>
+            <option value="blue" selected>Blue</option>
             <option value="yellow">Yellow</option>
-            <option value="blue">Blue</option>
+            <option value="amber">Amber</option>
+            <option value="red">Red</option>
           </select>
         </div>
 
@@ -74,6 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
   sideInner.appendChild(panel);
 
   const stormEditableText = document.getElementById('stormEditableText');
+
+  const outputPill = document.querySelector('.metaPill.output');
+  if(outputPill){
+    outputPill.textContent = 'Output: 1080 × 1350';
+  }
 
   function activateStormTab(){
     document.querySelectorAll('.presetTab').forEach(t => t.classList.remove('active'));
@@ -185,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = palette.text;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.font = '400 38px Arial, Helvetica, sans-serif';
+    ctx.font = '300 54px "Museo Sans", Arial, Helvetica, sans-serif';
     ctx.fillText('ssen.co.uk/storm', 540, 1228);
   }
 
@@ -197,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!canvas || !backgroundField || !fontSizeField || !stormEditableText) return;
 
     const ctx = canvas.getContext('2d');
-    const palette = stormPalettes[backgroundField.value] || stormPalettes.red;
+    const palette = stormPalettes[backgroundField.value] || stormPalettes.blue;
     const fontSize = Number(fontSizeField.value) || 122;
     const lines = normaliseEditableText();
 
@@ -273,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderStormGraphic(true);
       const canvas = document.getElementById('stormCanvas');
       const link = document.createElement('a');
-      const background = document.getElementById('stormBackground').value || 'red';
+      const background = document.getElementById('stormBackground').value || 'blue';
       const slugText = normaliseEditableText().join('-').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'storm-update';
       link.download = `${slugText}-${background}.png`;
       link.href = canvas.toDataURL('image/png');
