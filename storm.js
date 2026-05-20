@@ -13,10 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     blue: { label: 'Blue', background: '#003E66', text: '#FFFFFF', contrast: 'light' }
   };
 
-  const logo = new Image();
-  logo.onload = () => renderStormGraphic();
-  logo.src = './SSEN_Distribution.png';
-
   const stormTab = document.createElement('button');
   stormTab.className = 'presetTab stormOnly';
   stormTab.type = 'button';
@@ -54,8 +50,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <div class="stormField">
           <label for="stormFontSize">Font size</label>
-          <input id="stormFontSize" type="range" min="80" max="180" value="136" />
-          <div class="stormNote"><span id="stormFontSizeValue">136</span>px</div>
+          <input id="stormFontSize" type="range" min="70" max="170" value="122" />
+          <div class="stormNote"><span id="stormFontSizeValue">122</span>px</div>
         </div>
 
         <div class="stormActions">
@@ -77,13 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
     stormTab.classList.add('active');
     panel.classList.add('active');
     document.body.classList.add('stormMode');
-    renderStormGraphic();
+    renderStormGraphic(false);
   }
 
   function deactivateStormModeIfNeeded(tabKey){
-    if(tabKey !== 'storm'){
-      document.body.classList.remove('stormMode');
-    }
+    if(tabKey !== 'storm') document.body.classList.remove('stormMode');
   }
 
   tabBar.addEventListener('click', (e) => {
@@ -116,39 +110,64 @@ document.addEventListener('DOMContentLoaded', () => {
     return String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[char]));
   }
 
-  function drawLightning(ctx, colour){
-    ctx.fillStyle = colour;
+  function roundedRect(ctx, x, y, w, h, r){
     ctx.beginPath();
-    ctx.moveTo(628, 205);
-    ctx.lineTo(545, 560);
-    ctx.lineTo(653, 560);
-    ctx.lineTo(575, 906);
-    ctx.lineTo(805, 452);
-    ctx.lineTo(686, 452);
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function drawPowerCutBadge(ctx){
+    const x = 690;
+    const y = 86;
+    const w = 300;
+    const h = 156;
+    const yellow = '#FFD400';
+    const black = '#111111';
+
+    ctx.save();
+    ctx.fillStyle = yellow;
+    roundedRect(ctx, x, y, w, h, 18);
+    ctx.fill();
+
+    ctx.fillStyle = black;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '900 43px Arial Black, Arial, sans-serif';
+    ctx.fillText('POWER CUT?', x + w / 2, y + 48);
+    ctx.font = '900 62px Arial Black, Arial, sans-serif';
+    ctx.fillText('CALL 105', x + w / 2, y + 111);
+
+    ctx.fillStyle = yellow;
+    ctx.beginPath();
+    ctx.moveTo(x + 154, y + h - 2);
+    ctx.lineTo(x + 122, y + h + 116);
+    ctx.lineTo(x + 190, y + h + 48);
+    ctx.lineTo(x + 154, y + h + 48);
+    ctx.lineTo(x + 182, y + h - 2);
     ctx.closePath();
     ctx.fill();
+    ctx.restore();
   }
 
   function drawFixedAssets(ctx, palette){
-    if(logo.complete && logo.naturalWidth){
-      const logoW = 315;
-      const logoH = logoW * (logo.naturalHeight / logo.naturalWidth);
-      ctx.drawImage(logo, 700, 70, logoW, logoH);
-    } else {
-      ctx.fillStyle = palette.text;
-      ctx.font = '700 34px Arial, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText('SSEN Distribution', 1010, 118);
-    }
+    drawPowerCutBadge(ctx);
 
     ctx.fillStyle = palette.text;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.font = '700 54px Arial, sans-serif';
-    ctx.fillText('ssen.co.uk/storm', 540, 1244);
+    ctx.font = '400 42px Arial, Helvetica, sans-serif';
+    ctx.fillText('ssen.co.uk/storm', 540, 1228);
   }
 
-  function renderStormGraphic(){
+  function renderStormGraphic(includeText = false){
     const canvas = document.getElementById('stormCanvas');
     const backgroundField = document.getElementById('stormBackground');
     const fontSizeField = document.getElementById('stormFontSize');
@@ -157,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ctx = canvas.getContext('2d');
     const palette = stormPalettes[backgroundField.value] || stormPalettes.red;
-    const fontSize = Number(fontSizeField.value) || 136;
+    const fontSize = Number(fontSizeField.value) || 122;
     const lines = normaliseEditableText();
 
     if(fontSizeValue) fontSizeValue.textContent = String(fontSize);
@@ -169,18 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = palette.background;
     ctx.fillRect(0, 0, 1080, 1350);
 
-    ctx.save();
-    ctx.globalAlpha = 0.16;
-    drawLightning(ctx, palette.text);
-    ctx.restore();
-
     drawFixedAssets(ctx, palette);
 
+    if(includeText){
+      drawMainText(ctx, palette, lines, fontSize);
+    }
+  }
+
+  function drawMainText(ctx, palette, lines, fontSize){
     ctx.fillStyle = palette.text;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    const lineGap = fontSize * 1.06;
+    const lineGap = fontSize * 1.02;
     const totalHeight = (lines.length - 1) * lineGap;
     const startY = 675 - (totalHeight / 2);
 
@@ -191,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function fitAndFillText(ctx, text, x, y, maxWidth, baseFontSize){
     let size = baseFontSize;
-    while(size > 48){
+    while(size > 42){
       ctx.font = `900 ${size}px Arial Black, Arial, sans-serif`;
       if(ctx.measureText(text).width <= maxWidth) break;
       size -= 2;
@@ -200,24 +220,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('input', (e) => {
-    if(e.target && ['stormBackground', 'stormFontSize'].includes(e.target.id)){
-      renderStormGraphic();
-    }
+    if(e.target && ['stormBackground', 'stormFontSize'].includes(e.target.id)) renderStormGraphic(false);
   });
 
   document.addEventListener('change', (e) => {
-    if(e.target && ['stormBackground', 'stormFontSize'].includes(e.target.id)){
-      renderStormGraphic();
-    }
+    if(e.target && ['stormBackground', 'stormFontSize'].includes(e.target.id)) renderStormGraphic(false);
   });
 
-  stormEditableText.addEventListener('input', () => {
-    renderStormGraphic();
-  });
+  stormEditableText.addEventListener('input', () => renderStormGraphic(false));
 
   stormEditableText.addEventListener('blur', () => {
     setEditableTextLines(normaliseEditableText());
-    renderStormGraphic();
+    renderStormGraphic(false);
   });
 
   stormEditableText.addEventListener('keydown', (e) => {
@@ -230,11 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     if(e.target && e.target.id === 'resetStormGraphic'){
       setEditableTextLines(['STORM', 'XXX', 'UPDATE']);
-      renderStormGraphic();
+      renderStormGraphic(false);
     }
 
     if(e.target && e.target.id === 'downloadStormGraphic'){
-      renderStormGraphic();
+      renderStormGraphic(true);
       const canvas = document.getElementById('stormCanvas');
       const link = document.createElement('a');
       const background = document.getElementById('stormBackground').value || 'red';
@@ -242,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
       link.download = `${slugText}-${background}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
+      setTimeout(() => renderStormGraphic(false), 50);
     }
   });
 
@@ -257,5 +272,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   sseToggle.addEventListener('change', updateStormVisibility);
   updateStormVisibility();
-  renderStormGraphic();
+  renderStormGraphic(false);
 });
