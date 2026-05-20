@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const dimsPill = document.getElementById('dimsPill');
   const origPill = document.getElementById('origPill');
   const estimatePill = document.getElementById('estimatePill');
-
   if (!tabBar || !sideInner || !sseToggle || !imageStage) return;
 
   const normalPillState = {
@@ -16,11 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const stormPalettes = {
-    blue: { label: 'Blue', background: '#003E66', text: '#FFFFFF', contrast: 'light' },
-    yellow: { label: 'Yellow', background: '#FFE816', text: '#000000', contrast: 'dark' },
-    amber: { label: 'Amber', background: '#FF9700', text: '#000000', contrast: 'dark' },
-    red: { label: 'Red', background: '#A42828', text: '#FFFFFF', contrast: 'light' }
+    blue: { background: '#003E66', text: '#FFFFFF', contrast: 'light' },
+    yellow: { background: '#FFE816', text: '#000000', contrast: 'dark' },
+    amber: { background: '#FF9700', text: '#000000', contrast: 'dark' },
+    red: { background: '#A42828', text: '#FFFFFF', contrast: 'light' }
   };
+
+  let stormTextTopRatio = 0.36;
+  let isDraggingStormText = false;
+  let dragStartY = 0;
+  let dragStartTop = stormTextTopRatio;
+  let suppressEditClick = false;
 
   const stormTab = document.createElement('button');
   stormTab.className = 'presetTab stormOnly';
@@ -42,8 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="stormBadgeBolt"></div>
       </div>
       <div id="stormEditableText" class="stormEditableText" contenteditable="true" spellcheck="false" aria-label="Edit storm update text">STORM<br>XXX<br>UPDATE</div>
-    </div>
-  `;
+    </div>`;
   imageStage.appendChild(stageEditor);
 
   const panel = document.createElement('div');
@@ -51,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
   panel.id = 'panel-storm';
   panel.innerHTML = `
     <p class="stormIntro">Create a 1080×1350 storm update graphic based on the SSEN storm PSD template.</p>
-
     <div class="stormBuilder">
       <div class="stormControls">
         <div class="stormField">
@@ -63,22 +66,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <option value="red">Red</option>
           </select>
         </div>
-
         <div class="stormField">
           <label for="stormFontSize">Font size</label>
-          <input id="stormFontSize" type="range" min="70" max="170" value="122" />
-          <div class="stormNote"><span id="stormFontSizeValue">122</span>px</div>
+          <input id="stormFontSize" type="range" min="70" max="170" value="138" />
+          <div class="stormNote"><span id="stormFontSizeValue">138</span>px</div>
         </div>
-
         <div class="stormActions">
           <button class="btn primary" type="button" id="downloadStormGraphic">Download storm graphic</button>
           <button class="btn ghost" type="button" id="resetStormGraphic">Reset text</button>
         </div>
-
-        <div class="stormNote">Click the text on the graphic to edit it. Text colour is automatic: white on red/blue, black on amber/yellow.</div>
+        <div class="stormNote">Click the text to edit it. Drag it up or down to reposition it.</div>
       </div>
-    </div>
-  `;
+    </div>`;
   sideInner.appendChild(panel);
 
   const stormEditableText = document.getElementById('stormEditableText');
@@ -114,35 +113,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  tabBar.addEventListener('click', (e) => {
+  tabBar.addEventListener('click', e => {
     const tab = e.target.closest('.presetTab');
-    if(!tab) return;
-    deactivateStormModeIfNeeded(tab.dataset.tab);
+    if(tab) deactivateStormModeIfNeeded(tab.dataset.tab);
   });
 
-  stormTab.addEventListener('click', (e) => {
+  stormTab.addEventListener('click', e => {
     e.preventDefault();
     e.stopPropagation();
     activateStormTab();
   });
 
   function normaliseEditableText(){
-    const plain = stormEditableText.innerText
-      .replace(/\r/g, '')
-      .split('\n')
-      .map(line => line.trim().toUpperCase())
-      .filter(Boolean)
-      .slice(0, 5);
-
-    return plain.length ? plain : ['STORM', 'XXX', 'UPDATE'];
+    const lines = stormEditableText.innerText.replace(/\r/g, '').split('\n')
+      .map(line => line.trim().toUpperCase()).filter(Boolean).slice(0, 5);
+    return lines.length ? lines : ['STORM', 'XXX', 'UPDATE'];
   }
 
   function setEditableTextLines(lines){
-    stormEditableText.innerHTML = lines.map(line => escapeHtml(line)).join('<br>');
-  }
-
-  function escapeHtml(value){
-    return String(value).replace(/[&<>"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[char]));
+    stormEditableText.innerHTML = lines.map(line => String(line).replace(/[&<>"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]))).join('<br>');
   }
 
   function roundedRect(ctx, x, y, w, h, r){
@@ -160,28 +149,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function drawPowerCutBadge(ctx){
-    const yellow = '#FFD400';
-    const black = '#000000';
-    const x = 690;
-    const y = 115;
-    const w = 250;
-    const h = 155;
-    const r = 12;
-
+    const x = 690, y = 115, w = 250, h = 155;
     ctx.save();
-    ctx.fillStyle = yellow;
-    roundedRect(ctx, x, y, w, h, r);
+    ctx.fillStyle = '#FFD400';
+    roundedRect(ctx, x, y, w, h, 12);
     ctx.fill();
-
-    ctx.fillStyle = black;
+    ctx.fillStyle = '#000';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.font = '900 41px Impact, Arial Black, Arial, sans-serif';
     ctx.fillText('POWER CUT?', x + w / 2, y + 52);
     ctx.font = '900 61px Impact, Arial Black, Arial, sans-serif';
     ctx.fillText('CALL 105', x + w / 2, y + 118);
-
-    ctx.fillStyle = yellow;
+    ctx.fillStyle = '#FFD400';
     ctx.beginPath();
     ctx.moveTo(x + 106, y + h - 1);
     ctx.lineTo(x + 82, y + h + 58);
@@ -195,9 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-  function drawFixedAssets(ctx, palette){
-    drawPowerCutBadge(ctx);
-
+  function drawUrl(ctx, palette){
     ctx.fillStyle = palette.text;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
@@ -211,24 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const fontSizeField = document.getElementById('stormFontSize');
     const fontSizeValue = document.getElementById('stormFontSizeValue');
     if(!canvas || !backgroundField || !fontSizeField || !stormEditableText) return;
-
     const ctx = canvas.getContext('2d');
     const palette = stormPalettes[backgroundField.value] || stormPalettes.blue;
-    const fontSize = Number(fontSizeField.value) || 122;
+    const fontSize = Number(fontSizeField.value) || 138;
     const lines = normaliseEditableText();
-
     if(fontSizeValue) fontSizeValue.textContent = String(fontSize);
     stormEditableText.style.color = palette.text;
     stormEditableText.dataset.contrast = palette.contrast;
     stormEditableText.style.fontSize = `${Math.round(fontSize * 0.44)}px`;
-
+    stormEditableText.style.top = `${stormTextTopRatio * 100}%`;
     ctx.clearRect(0, 0, 1080, 1350);
     ctx.fillStyle = palette.background;
     ctx.fillRect(0, 0, 1080, 1350);
-
-    drawFixedAssets(ctx, palette);
-
+    drawUrl(ctx, palette);
     if(includeText){
+      drawPowerCutBadge(ctx);
       drawMainText(ctx, palette, lines, fontSize);
     }
   }
@@ -237,14 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = palette.text;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-
     const lineGap = fontSize * 1.02;
     const totalHeight = (lines.length - 1) * lineGap;
-    const startY = 675 - (totalHeight / 2);
-
-    lines.forEach((line, index) => {
-      fitAndFillText(ctx, line, 540, startY + (index * lineGap), 920, fontSize);
-    });
+    const startY = (stormTextTopRatio * 1350) + 180 - (totalHeight / 2);
+    lines.forEach((line, index) => fitAndFillText(ctx, line, 540, startY + (index * lineGap), 920, fontSize));
   }
 
   function fitAndFillText(ctx, text, x, y, maxWidth, baseFontSize){
@@ -257,34 +228,68 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillText(text, x, y);
   }
 
-  document.addEventListener('input', (e) => {
+  function clamp(value, min, max){
+    return Math.min(max, Math.max(min, value));
+  }
+
+  stormEditableText.addEventListener('pointerdown', e => {
+    if(!document.body.classList.contains('stormMode')) return;
+    isDraggingStormText = true;
+    suppressEditClick = false;
+    dragStartY = e.clientY;
+    dragStartTop = stormTextTopRatio;
+    stormEditableText.setPointerCapture?.(e.pointerId);
+  });
+
+  stormEditableText.addEventListener('pointermove', e => {
+    if(!isDraggingStormText) return;
+    const wrap = stormEditableText.closest('.stormCanvasWrap');
+    if(!wrap) return;
+    const delta = (e.clientY - dragStartY) / wrap.getBoundingClientRect().height;
+    if(Math.abs(delta) > 0.004) suppressEditClick = true;
+    stormTextTopRatio = clamp(dragStartTop + delta, 0.18, 0.58);
+    renderStormGraphic(false);
+  });
+
+  stormEditableText.addEventListener('pointerup', e => {
+    isDraggingStormText = false;
+    stormEditableText.releasePointerCapture?.(e.pointerId);
+  });
+
+  stormEditableText.addEventListener('click', e => {
+    if(suppressEditClick){
+      e.preventDefault();
+      suppressEditClick = false;
+      stormEditableText.blur();
+    }
+  });
+
+  document.addEventListener('input', e => {
     if(e.target && ['stormBackground', 'stormFontSize'].includes(e.target.id)) renderStormGraphic(false);
   });
 
-  document.addEventListener('change', (e) => {
+  document.addEventListener('change', e => {
     if(e.target && ['stormBackground', 'stormFontSize'].includes(e.target.id)) renderStormGraphic(false);
   });
 
   stormEditableText.addEventListener('input', () => renderStormGraphic(false));
-
   stormEditableText.addEventListener('blur', () => {
     setEditableTextLines(normaliseEditableText());
     renderStormGraphic(false);
   });
 
-  stormEditableText.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){
-      const lines = normaliseEditableText();
-      if(lines.length >= 5) e.preventDefault();
-    }
+  stormEditableText.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && normaliseEditableText().length >= 5) e.preventDefault();
   });
 
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', e => {
     if(e.target && e.target.id === 'resetStormGraphic'){
       setEditableTextLines(['STORM', 'XXX', 'UPDATE']);
+      stormTextTopRatio = 0.36;
+      const fontSizeField = document.getElementById('stormFontSize');
+      if(fontSizeField) fontSizeField.value = '138';
       renderStormGraphic(false);
     }
-
     if(e.target && e.target.id === 'downloadStormGraphic'){
       renderStormGraphic(true);
       const canvas = document.getElementById('stormCanvas');
@@ -301,7 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateStormVisibility(){
     const isSseSkin = sseToggle.checked;
     stormTab.style.display = isSseSkin ? 'none' : 'inline-flex';
-
     if(isSseSkin && stormTab.classList.contains('active')){
       stormTab.classList.remove('active');
       panel.classList.remove('active');
