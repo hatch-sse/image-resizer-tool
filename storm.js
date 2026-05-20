@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let customBackground = null;
   let customBackgroundReady = false;
+  let customBackgroundUrl = null;
   let bgOffsetX = 0;
   let bgOffsetY = 0;
   let bgDragActive = false;
@@ -258,6 +259,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function revokeCustomBackgroundUrl(){
+    if(customBackgroundUrl){
+      URL.revokeObjectURL(customBackgroundUrl);
+      customBackgroundUrl = null;
+    }
+  }
+
   function drawMainText(ctx, palette, lines, fontSize){
     ctx.fillStyle = palette.text;
     ctx.textAlign = 'center';
@@ -353,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.target && e.target.id === 'stormCustomBackground'){
       const file = e.target.files?.[0];
       if(!file) return;
+      revokeCustomBackgroundUrl();
       const img = new Image();
       img.onload = () => {
         customBackground = img;
@@ -362,7 +371,14 @@ document.addEventListener('DOMContentLoaded', () => {
         getCoverRect(customBackground);
         renderStormGraphic(false);
       };
-      img.src = URL.createObjectURL(file);
+      img.onerror = () => {
+        customBackground = null;
+        customBackgroundReady = false;
+        revokeCustomBackgroundUrl();
+        renderStormGraphic(false);
+      };
+      customBackgroundUrl = URL.createObjectURL(file);
+      img.src = customBackgroundUrl;
     }
   });
 
@@ -380,6 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.target && e.target.id === 'stormRemoveBackground'){
       customBackground = null;
       customBackgroundReady = false;
+      revokeCustomBackgroundUrl();
       bgOffsetX = 0;
       bgOffsetY = 0;
       const fileInput = document.getElementById('stormCustomBackground');
