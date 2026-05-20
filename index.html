@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SSEN Image resizer beta v1.8.1</title>
+  <title>SSEN Image resizer beta v1.9.0</title>
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css"/>
 
@@ -12,6 +12,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/upscaler@latest/dist/browser/umd/upscaler.min.js"></script>
 
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./storm.css" />
 </head>
 <body>
   <div class="app">
@@ -31,7 +32,7 @@
     </div>
     <div class="brandCopy">
       <div class="brandEyebrow">
-        <span class="brandChip soft">beta v1.8.1</span>
+        <span class="brandChip soft">beta v1.9.0</span>
       </div>
       <h1>Image resizer</h1>
     </div>
@@ -177,7 +178,6 @@
           <div class="tabPanel" id="panel-website">
             <p class="helperText">Cropping is enabled for these presets.</p>
 
-            <!-- SSE.com skin: single Article image preset -->
             <div class="sse-preset-wrapper">
               <div class="presetGrid">
                 <button class="presetCard noBadge" type="button" id="presetSseArticleCard">
@@ -189,7 +189,6 @@
               </div>
             </div>
 
-            <!-- SSEN skin: full preset library -->
             <div class="ssen-preset-wrapper">
 
             <div class="presetSection">
@@ -310,7 +309,7 @@
               </div>
             </div>
 
-            </div><!-- end ssen-preset-wrapper -->
+            </div>
           </div>
 
           <div class="section">
@@ -452,8 +451,8 @@
   </div>
 
   <div class="pageFooter">
-   <div>SSEN Image resizer beta v1.8.1</div>
-<div>Changes: sse.com presets added</div>
+   <div>SSEN Image resizer beta v1.9.0</div>
+<div>Changes: Storm graphic generator added</div>
     <div>Bugs? - <a href="mailto:stuart.hatch@sse.com">stuart.hatch@sse.com</a></div>
   </div>
 
@@ -481,5 +480,6 @@
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="./app.js"></script>
+  <script src="./storm.js"></script>
 </body>
 </html>
