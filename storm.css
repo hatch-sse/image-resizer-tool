@@ -1,0 +1,116 @@
+/* Storm graphic generator — visible on SSEN skin only */
+
+body.sse .stormOnly,
+body.sse #panel-storm{
+  display:none !important;
+}
+
+#panel-storm{
+  display:none;
+}
+
+#panel-storm.active{
+  display:block;
+}
+
+.stormIntro{
+  margin:0 0 14px 0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.4;
+}
+
+.stormBuilder{
+  display:grid;
+  gap:16px;
+}
+
+.stormControls{
+  display:grid;
+  gap:12px;
+}
+
+.stormControlGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.stormField{
+  display:grid;
+  gap:6px;
+}
+
+.stormField label{
+  font-size:12px;
+  font-weight:900;
+  color:var(--grey);
+}
+
+.stormField input,
+.stormField textarea,
+.stormField select{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:8px 10px;
+  font:inherit;
+  font-size:13px;
+  background:#fff;
+  color:#111;
+}
+
+.stormField textarea{
+  resize:vertical;
+  min-height:92px;
+}
+
+.stormPreviewWrap{
+  border:1px solid var(--border);
+  background:#f7f9fb;
+  padding:12px;
+  border-radius:8px;
+}
+
+.stormCanvas{
+  display:block;
+  width:100%;
+  max-width:360px;
+  height:auto;
+  margin:0 auto;
+  background:#aa2428;
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+
+.stormActions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.stormNote{
+  margin-top:10px;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.35;
+}
+
+body.mac9 .stormField label,
+body.mac9 .stormIntro,
+body.mac9 .stormNote{
+  color:#000;
+}
+
+body.mac9 .stormField input,
+body.mac9 .stormField textarea,
+body.mac9 .stormField select,
+body.mac9 .stormPreviewWrap{
+  border-radius:0;
+}
+
+@media (max-width:760px){
+  .stormControlGrid{
+    grid-template-columns:1fr;
+  }
+}
