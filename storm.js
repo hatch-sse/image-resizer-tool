@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     powerCutBadgeReady = false;
     renderStormGraphic(false);
   };
-  powerCutBadge.src = './powercut-105.png';
+  powerCutBadge.src = './powercut-105.png?v=4';
 
   const stormTab = document.createElement('button');
   stormTab.className = 'presetTab stormOnly';
@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   stageEditor.innerHTML = `
     <div class="stormCanvasWrap">
       <canvas id="stormCanvas" class="stormCanvas" width="1080" height="1350"></canvas>
+      <img id="stormBadgeOverlay" class="stormBadgeOverlay" src="./powercut-105.png?v=4" alt="Power cut? Call 105" aria-hidden="true" />
       <div id="stormEditableText" class="stormEditableText" contenteditable="true" spellcheck="false" aria-label="Edit storm update text">STORM<br>XXX<br>UPDATE</div>
     </div>
   `;
@@ -87,6 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
   sideInner.appendChild(panel);
 
   const stormEditableText = document.getElementById('stormEditableText');
+  const stormBadgeOverlay = document.getElementById('stormBadgeOverlay');
+  if(stormBadgeOverlay){
+    stormBadgeOverlay.onerror = () => {
+      stormBadgeOverlay.style.display = 'none';
+    };
+  }
 
   function setStormPills(){
     if(dimsPill) dimsPill.textContent = 'Output: 1080 × 1350';
@@ -112,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function deactivateStormModeIfNeeded(tabKey){
     if(tabKey !== 'storm'){
+      stormTab.classList.remove('active');
+      panel.classList.remove('active');
       document.body.classList.remove('stormMode');
       restoreNormalPills();
     }
@@ -125,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   stormTab.addEventListener('click', (e) => {
     e.preventDefault();
+    e.stopPropagation();
     activateStormTab();
   });
 
@@ -316,6 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
     stormTab.style.display = isSseSkin ? 'none' : 'inline-flex';
 
     if(isSseSkin && stormTab.classList.contains('active')){
+      stormTab.classList.remove('active');
+      panel.classList.remove('active');
       document.body.classList.remove('stormMode');
       restoreNormalPills();
       document.querySelector('.presetTab[data-tab="article"]')?.click();
