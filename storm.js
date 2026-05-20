@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!tabBar || !sideInner || !sseToggle || !imageStage) return;
 
   const stormPalettes = {
-    red: { label: 'Red', background: '#A81E23', text: '#FFFFFF', contrast: 'light' },
-    amber: { label: 'Amber', background: '#F6A400', text: '#000000', contrast: 'dark' },
-    yellow: { label: 'Yellow', background: '#FFD400', text: '#000000', contrast: 'dark' },
+    red: { label: 'Red', background: '#A42828', text: '#FFFFFF', contrast: 'light' },
+    amber: { label: 'Amber', background: '#FF9700', text: '#000000', contrast: 'dark' },
+    yellow: { label: 'Yellow', background: '#FFE816', text: '#000000', contrast: 'dark' },
     blue: { label: 'Blue', background: '#003E66', text: '#FFFFFF', contrast: 'light' }
   };
 
@@ -125,33 +125,37 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function drawPowerCutBadge(ctx){
-    const x = 690;
-    const y = 86;
-    const w = 300;
-    const h = 156;
+    // Canvas recreation of the supplied POWER CUT? CALL 105 badge.
     const yellow = '#FFD400';
-    const black = '#111111';
+    const black = '#000000';
+    const x = 642;
+    const y = 74;
+    const w = 370;
+    const h = 250;
+    const r = 18;
 
     ctx.save();
     ctx.fillStyle = yellow;
-    roundedRect(ctx, x, y, w, h, 18);
+    roundedRect(ctx, x, y, w, h, r);
     ctx.fill();
 
     ctx.fillStyle = black;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = '900 43px Arial Black, Arial, sans-serif';
-    ctx.fillText('POWER CUT?', x + w / 2, y + 48);
-    ctx.font = '900 62px Arial Black, Arial, sans-serif';
-    ctx.fillText('CALL 105', x + w / 2, y + 111);
+    ctx.font = '900 60px Impact, Arial Black, Arial, sans-serif';
+    ctx.fillText('POWER CUT?', x + w / 2, y + 70);
+    ctx.font = '900 92px Impact, Arial Black, Arial, sans-serif';
+    ctx.fillText('CALL 105', x + w / 2, y + 170);
 
     ctx.fillStyle = yellow;
     ctx.beginPath();
-    ctx.moveTo(x + 154, y + h - 2);
-    ctx.lineTo(x + 122, y + h + 116);
-    ctx.lineTo(x + 190, y + h + 48);
-    ctx.lineTo(x + 154, y + h + 48);
-    ctx.lineTo(x + 182, y + h - 2);
+    ctx.moveTo(x + 168, y + h - 1);
+    ctx.lineTo(x + 128, y + h + 118);
+    ctx.lineTo(x + 190, y + h + 118);
+    ctx.lineTo(x + 148, y + h + 250);
+    ctx.lineTo(x + 274, y + h + 46);
+    ctx.lineTo(x + 214, y + h + 46);
+    ctx.lineTo(x + 238, y + h - 1);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -163,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = palette.text;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.font = '400 42px Arial, Helvetica, sans-serif';
+    ctx.font = '400 38px Arial, Helvetica, sans-serif';
     ctx.fillText('ssen.co.uk/storm', 540, 1228);
   }
 
