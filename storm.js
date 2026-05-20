@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   stormLogo.src = stormLogoSrc;
 
+  let customBackground = null;
+  let customBackgroundReady = false;
+
   const normalPillState = {
     dims: dimsPill ? dimsPill.textContent : '',
     orig: origPill ? origPill.textContent : '',
@@ -65,12 +68,30 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="stormBuilder">
       <div class="stormControls">
         <div class="stormField">
-          <label for="stormBackground">Background</label>
+          <label for="stormBackground">Background colour</label>
           <select id="stormBackground">
             <option value="blue" selected>Blue</option>
             <option value="yellow">Yellow</option>
             <option value="amber">Amber</option>
             <option value="red">Red</option>
+          </select>
+        </div>
+        <div class="stormField">
+          <label for="stormCustomBackground">Custom background image</label>
+          <input id="stormCustomBackground" type="file" accept="image/*" />
+          <button class="btn ghost" type="button" id="stormRemoveBackground">Remove custom background</button>
+        </div>
+        <div class="stormField">
+          <label for="stormOverlayOpacity">Tint overlay</label>
+          <input id="stormOverlayOpacity" type="range" min="0" max="90" value="35" />
+          <div class="stormNote"><span id="stormOverlayValue">35</span>% opacity</div>
+        </div>
+        <div class="stormField">
+          <label for="stormTextColour">Text colour</label>
+          <select id="stormTextColour">
+            <option value="auto" selected>Automatic</option>
+            <option value="white">White</option>
+            <option value="black">Black</option>
           </select>
         </div>
         <div class="stormField">
@@ -148,32 +169,74 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.drawImage(stormLogo, 690, 115, w, h);
   }
 
+  function drawCoverImage(ctx, image){
+    const canvasRatio = 1080 / 1350;
+    const imageRatio = image.naturalWidth / image.naturalHeight;
+    let sx = 0, sy = 0, sw = image.naturalWidth, sh = image.naturalHeight;
+    if(imageRatio > canvasRatio){
+      sw = image.naturalHeight * canvasRatio;
+      sx = (image.naturalWidth - sw) / 2;
+    } else {
+      sh = image.naturalWidth / canvasRatio;
+      sy = (image.naturalHeight - sh) / 2;
+    }
+    ctx.drawImage(image, sx, sy, sw, sh, 0, 0, 1080, 1350);
+  }
+
+  function getPaletteAndText(){
+    const backgroundField = document.getElementById('stormBackground');
+    const textColourField = document.getElementById('stormTextColour');
+    const palette = stormPalettes[backgroundField?.value || 'blue'] || stormPalettes.blue;
+    let text = palette.text;
+    let contrast = palette.contrast;
+    if(textColourField?.value === 'white'){
+      text = '#FFFFFF';
+      contrast = 'light';
+    }
+    if(textColourField?.value === 'black'){
+      text = '#000000';
+      contrast = 'dark';
+    }
+    return { ...palette, text, contrast };
+  }
+
   function drawUrl(ctx, palette){
     ctx.fillStyle = palette.text;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
-    ctx.font = '300 54px "Museo Sans", Arial, Helvetica, sans-serif';
-    ctx.fillText('ssen.co.uk/storm', 540, 1228);
+    ctx.font = '300 68px "Museo Sans", Arial, Helvetica, sans-serif';
+    ctx.fillText('ssen.co.uk/storm', 540, 1188);
   }
 
   function renderStormGraphic(includeText = false){
     const canvas = document.getElementById('stormCanvas');
-    const backgroundField = document.getElementById('stormBackground');
     const fontSizeField = document.getElementById('stormFontSize');
     const fontSizeValue = document.getElementById('stormFontSizeValue');
-    if(!canvas || !backgroundField || !fontSizeField || !stormEditableText) return;
+    const overlayField = document.getElementById('stormOverlayOpacity');
+    const overlayValue = document.getElementById('stormOverlayValue');
+    if(!canvas || !fontSizeField || !stormEditableText) return;
     const ctx = canvas.getContext('2d');
-    const palette = stormPalettes[backgroundField.value] || stormPalettes.blue;
+    const palette = getPaletteAndText();
     const fontSize = Number(fontSizeField.value) || 138;
+    const overlayOpacity = Number(overlayField?.value || 0) / 100;
     const lines = normaliseEditableText();
     if(fontSizeValue) fontSizeValue.textContent = String(fontSize);
+    if(overlayValue) overlayValue.textContent = String(Math.round(overlayOpacity * 100));
     stormEditableText.style.color = palette.text;
     stormEditableText.dataset.contrast = palette.contrast;
     stormEditableText.style.fontSize = `${Math.round(fontSize * 0.44)}px`;
     stormEditableText.style.top = `${stormTextTopRatio * 100}%`;
     ctx.clearRect(0, 0, 1080, 1350);
-    ctx.fillStyle = palette.background;
-    ctx.fillRect(0, 0, 1080, 1350);
+    if(customBackgroundReady && customBackground){
+      drawCoverImage(ctx, customBackground);
+      if(overlayOpacity > 0){
+        ctx.fillStyle = palette.text === '#000000' ? `rgba(255,255,255,${overlayOpacity})` : `rgba(0,0,0,${overlayOpacity})`;
+        ctx.fillRect(0, 0, 1080, 1350);
+      }
+    } else {
+      ctx.fillStyle = palette.background;
+      ctx.fillRect(0, 0, 1080, 1350);
+    }
     drawUrl(ctx, palette);
     if(includeText){
       drawStormLogo(ctx);
@@ -238,11 +301,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('input', e => {
-    if(e.target && ['stormBackground', 'stormFontSize'].includes(e.target.id)) renderStormGraphic(false);
+    if(e.target && ['stormBackground', 'stormFontSize', 'stormOverlayOpacity', 'stormTextColour'].includes(e.target.id)) renderStormGraphic(false);
   });
 
   document.addEventListener('change', e => {
-    if(e.target && ['stormBackground', 'stormFontSize'].includes(e.target.id)) renderStormGraphic(false);
+    if(e.target && ['stormBackground', 'stormFontSize', 'stormOverlayOpacity', 'stormTextColour'].includes(e.target.id)) renderStormGraphic(false);
+    if(e.target && e.target.id === 'stormCustomBackground'){
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const img = new Image();
+      img.onload = () => {
+        customBackground = img;
+        customBackgroundReady = true;
+        renderStormGraphic(false);
+      };
+      img.src = URL.createObjectURL(file);
+    }
   });
 
   stormEditableText.addEventListener('input', () => renderStormGraphic(false));
@@ -256,6 +330,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('click', e => {
+    if(e.target && e.target.id === 'stormRemoveBackground'){
+      customBackground = null;
+      customBackgroundReady = false;
+      const fileInput = document.getElementById('stormCustomBackground');
+      if(fileInput) fileInput.value = '';
+      renderStormGraphic(false);
+    }
     if(e.target && e.target.id === 'resetStormGraphic'){
       setEditableTextLines(['STORM', 'XXX', 'UPDATE']);
       stormTextTopRatio = 0.36;
