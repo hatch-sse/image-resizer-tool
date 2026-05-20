@@ -22,18 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     red: { label: 'Red', background: '#A42828', text: '#FFFFFF', contrast: 'light' }
   };
 
-  const powerCutBadge = new Image();
-  let powerCutBadgeReady = false;
-  powerCutBadge.onload = () => {
-    powerCutBadgeReady = true;
-    renderStormGraphic(false);
-  };
-  powerCutBadge.onerror = () => {
-    powerCutBadgeReady = false;
-    renderStormGraphic(false);
-  };
-  powerCutBadge.src = './powercut-105.png?v=4';
-
   const stormTab = document.createElement('button');
   stormTab.className = 'presetTab stormOnly';
   stormTab.type = 'button';
@@ -46,7 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
   stageEditor.innerHTML = `
     <div class="stormCanvasWrap">
       <canvas id="stormCanvas" class="stormCanvas" width="1080" height="1350"></canvas>
-      <img id="stormBadgeOverlay" class="stormBadgeOverlay" src="./powercut-105.png?v=4" alt="Power cut? Call 105" aria-hidden="true" />
+      <div id="stormBadgeOverlay" class="stormBadgeOverlay" aria-hidden="true">
+        <div class="stormBadgeBox">
+          <div class="stormBadgeTop">POWER CUT?</div>
+          <div class="stormBadgeBottom">CALL 105</div>
+        </div>
+        <div class="stormBadgeBolt"></div>
+      </div>
       <div id="stormEditableText" class="stormEditableText" contenteditable="true" spellcheck="false" aria-label="Edit storm update text">STORM<br>XXX<br>UPDATE</div>
     </div>
   `;
@@ -88,12 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
   sideInner.appendChild(panel);
 
   const stormEditableText = document.getElementById('stormEditableText');
-  const stormBadgeOverlay = document.getElementById('stormBadgeOverlay');
-  if(stormBadgeOverlay){
-    stormBadgeOverlay.onerror = () => {
-      stormBadgeOverlay.style.display = 'none';
-    };
-  }
 
   function setStormPills(){
     if(dimsPill) dimsPill.textContent = 'Output: 1080 × 1350';
@@ -171,14 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.closePath();
   }
 
-  function drawFallbackPowerCutBadge(ctx){
+  function drawPowerCutBadge(ctx){
     const yellow = '#FFD400';
     const black = '#000000';
-    const x = 642;
-    const y = 74;
-    const w = 370;
-    const h = 250;
-    const r = 18;
+    const x = 690;
+    const y = 115;
+    const w = 250;
+    const h = 155;
+    const r = 12;
 
     ctx.save();
     ctx.fillStyle = yellow;
@@ -188,34 +176,23 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = black;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = '900 60px Impact, Arial Black, Arial, sans-serif';
-    ctx.fillText('POWER CUT?', x + w / 2, y + 70);
-    ctx.font = '900 92px Impact, Arial Black, Arial, sans-serif';
-    ctx.fillText('CALL 105', x + w / 2, y + 170);
+    ctx.font = '900 41px Impact, Arial Black, Arial, sans-serif';
+    ctx.fillText('POWER CUT?', x + w / 2, y + 52);
+    ctx.font = '900 61px Impact, Arial Black, Arial, sans-serif';
+    ctx.fillText('CALL 105', x + w / 2, y + 118);
 
     ctx.fillStyle = yellow;
     ctx.beginPath();
-    ctx.moveTo(x + 168, y + h - 1);
-    ctx.lineTo(x + 128, y + h + 118);
-    ctx.lineTo(x + 190, y + h + 118);
-    ctx.lineTo(x + 148, y + h + 250);
-    ctx.lineTo(x + 274, y + h + 46);
-    ctx.lineTo(x + 214, y + h + 46);
-    ctx.lineTo(x + 238, y + h - 1);
+    ctx.moveTo(x + 106, y + h - 1);
+    ctx.lineTo(x + 82, y + h + 58);
+    ctx.lineTo(x + 120, y + h + 58);
+    ctx.lineTo(x + 92, y + h + 118);
+    ctx.lineTo(x + 178, y + h + 26);
+    ctx.lineTo(x + 140, y + h + 26);
+    ctx.lineTo(x + 154, y + h - 1);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
-  }
-
-  function drawPowerCutBadge(ctx){
-    if(powerCutBadgeReady && powerCutBadge.naturalWidth){
-      const w = 370;
-      const h = Math.round(w * (powerCutBadge.naturalHeight / powerCutBadge.naturalWidth));
-      ctx.drawImage(powerCutBadge, 642, 74, w, h);
-      return;
-    }
-
-    drawFallbackPowerCutBadge(ctx);
   }
 
   function drawFixedAssets(ctx, palette){
