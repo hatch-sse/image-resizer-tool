@@ -3,8 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const sideInner = document.querySelector('.sideInner');
   const sseToggle = document.getElementById('sseToggle');
   const imageStage = document.getElementById('imageStage');
+  const dimsPill = document.getElementById('dimsPill');
+  const origPill = document.getElementById('origPill');
+  const estimatePill = document.getElementById('estimatePill');
 
   if (!tabBar || !sideInner || !sseToggle || !imageStage) return;
+
+  const normalPillState = {
+    dims: dimsPill ? dimsPill.textContent : '',
+    orig: origPill ? origPill.textContent : '',
+    estimate: estimatePill ? estimatePill.textContent : ''
+  };
 
   const stormPalettes = {
     blue: { label: 'Blue', background: '#003E66', text: '#FFFFFF', contrast: 'light' },
@@ -17,6 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let powerCutBadgeReady = false;
   powerCutBadge.onload = () => {
     powerCutBadgeReady = true;
+    renderStormGraphic(false);
+  };
+  powerCutBadge.onerror = () => {
+    powerCutBadgeReady = false;
     renderStormGraphic(false);
   };
   powerCutBadge.src = './powercut-105.png';
@@ -75,9 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const stormEditableText = document.getElementById('stormEditableText');
 
-  const outputPill = document.querySelector('.metaPill.output');
-  if(outputPill){
-    outputPill.textContent = 'Output: 1080 × 1350';
+  function setStormPills(){
+    if(dimsPill) dimsPill.textContent = 'Output: 1080 × 1350';
+    if(origPill) origPill.textContent = 'Original: Storm template';
+    if(estimatePill) estimatePill.textContent = 'Expected: PNG';
+  }
+
+  function restoreNormalPills(){
+    if(dimsPill && normalPillState.dims) dimsPill.textContent = normalPillState.dims;
+    if(origPill && normalPillState.orig) origPill.textContent = normalPillState.orig;
+    if(estimatePill && normalPillState.estimate) estimatePill.textContent = normalPillState.estimate;
   }
 
   function activateStormTab(){
@@ -86,11 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
     stormTab.classList.add('active');
     panel.classList.add('active');
     document.body.classList.add('stormMode');
+    setStormPills();
     renderStormGraphic(false);
   }
 
   function deactivateStormModeIfNeeded(tabKey){
-    if(tabKey !== 'storm') document.body.classList.remove('stormMode');
+    if(tabKey !== 'storm'){
+      document.body.classList.remove('stormMode');
+      restoreNormalPills();
+    }
   }
 
   tabBar.addEventListener('click', (e) => {
@@ -293,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(isSseSkin && stormTab.classList.contains('active')){
       document.body.classList.remove('stormMode');
+      restoreNormalPills();
       document.querySelector('.presetTab[data-tab="article"]')?.click();
     }
   }
