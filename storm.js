@@ -8,6 +8,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const estimatePill = document.getElementById('estimatePill');
   if (!tabBar || !sideInner || !sseToggle || !imageStage) return;
 
+  const stormLogoSrc = './105%20min.png?v=1';
+  const stormLogo = new Image();
+  let stormLogoReady = false;
+  stormLogo.onload = () => {
+    stormLogoReady = true;
+    renderStormGraphic(false);
+  };
+  stormLogo.onerror = () => {
+    stormLogoReady = false;
+    renderStormGraphic(false);
+  };
+  stormLogo.src = stormLogoSrc;
+
   const normalPillState = {
     dims: dimsPill ? dimsPill.textContent : '',
     orig: origPill ? origPill.textContent : '',
@@ -39,13 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   stageEditor.innerHTML = `
     <div class="stormCanvasWrap">
       <canvas id="stormCanvas" class="stormCanvas" width="1080" height="1350"></canvas>
-      <div id="stormBadgeOverlay" class="stormBadgeOverlay" aria-hidden="true">
-        <div class="stormBadgeBox">
-          <div class="stormBadgeTop">POWER CUT?</div>
-          <div class="stormBadgeBottom">CALL 105</div>
-        </div>
-        <div class="stormBadgeBolt"></div>
-      </div>
+      <img id="stormBadgeOverlay" class="stormBadgeOverlay" src="${stormLogoSrc}" alt="Power cut? Call 105" aria-hidden="true" />
       <div id="stormEditableText" class="stormEditableText" contenteditable="true" spellcheck="false" aria-label="Edit storm update text">STORM<br>XXX<br>UPDATE</div>
     </div>`;
   imageStage.appendChild(stageEditor);
@@ -134,45 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
     stormEditableText.innerHTML = lines.map(line => String(line).replace(/[&<>"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]))).join('<br>');
   }
 
-  function roundedRect(ctx, x, y, w, h, r){
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
-
-  function drawPowerCutBadge(ctx){
-    const x = 690, y = 115, w = 250, h = 155;
-    ctx.save();
-    ctx.fillStyle = '#FFD400';
-    roundedRect(ctx, x, y, w, h, 12);
-    ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = '900 41px Impact, Arial Black, Arial, sans-serif';
-    ctx.fillText('POWER CUT?', x + w / 2, y + 52);
-    ctx.font = '900 61px Impact, Arial Black, Arial, sans-serif';
-    ctx.fillText('CALL 105', x + w / 2, y + 118);
-    ctx.fillStyle = '#FFD400';
-    ctx.beginPath();
-    ctx.moveTo(x + 106, y + h - 1);
-    ctx.lineTo(x + 82, y + h + 58);
-    ctx.lineTo(x + 120, y + h + 58);
-    ctx.lineTo(x + 92, y + h + 118);
-    ctx.lineTo(x + 178, y + h + 26);
-    ctx.lineTo(x + 140, y + h + 26);
-    ctx.lineTo(x + 154, y + h - 1);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
+  function drawStormLogo(ctx){
+    if(!stormLogoReady || !stormLogo.naturalWidth) return;
+    const w = 250;
+    const h = Math.round(w * (stormLogo.naturalHeight / stormLogo.naturalWidth));
+    ctx.drawImage(stormLogo, 690, 115, w, h);
   }
 
   function drawUrl(ctx, palette){
@@ -203,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillRect(0, 0, 1080, 1350);
     drawUrl(ctx, palette);
     if(includeText){
-      drawPowerCutBadge(ctx);
+      drawStormLogo(ctx);
       drawMainText(ctx, palette, lines, fontSize);
     }
   }
